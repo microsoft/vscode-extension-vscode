@@ -1,0 +1,11 @@
+{
+	"name": "vscode",
+	"version": "0.9.0-pre.1",
+	"typings": "vscode.d.ts",
+	"bin": {
+		"compile": "./bin/compile"
+	},
+	"dependencies": {
+		"typescript": "^1.6.2"
+	}
+}
