@@ -14,7 +14,7 @@ export interface CommandCallback {
 	/**
 	*
 	*/
-	<T>(...args:any[]):T | Thenable<T>;
+	<T>(...args: any[]): T | Thenable<T>;
 }
 
 // TODO@api
@@ -117,7 +117,7 @@ export class TextEditor {
 
 	createEdit(): TextEditorEdit;
 
-	applyEdit(edit:TextEditorEdit): Thenable<boolean>;
+	applyEdit(edit: TextEditorEdit): Thenable<boolean>;
 }
 
 export interface TextEditorEdit {
@@ -200,10 +200,10 @@ export namespace workspace {
 	// TODO@api - justify this being here
 	export function getPath(): string;
 
-	export function getRelativePath(pathOrUri: string|Uri): string;
+	export function getRelativePath(pathOrUri: string | Uri): string;
 
 	// TODO@api - justify this being here
-	export function findFiles(include: string, exclude: string, maxResults?:number): Thenable<Uri[]>;
+	export function findFiles(include: string, exclude: string, maxResults?: number): Thenable<Uri[]>;
 
 	/**
 		* save all dirty files
@@ -224,13 +224,13 @@ export namespace languages {
 		pattern?: string;
 	}
 
-	type LanguageSelector = string|LanguageFilter|Uri|(string|LanguageFilter|Uri)[];
+	type LanguageSelector = string | LanguageFilter | Uri | (string | LanguageFilter | Uri)[];
 
 	export interface LanguageStatusFunction {
-		(language: LanguageSelector, message: string | { octicon: string; message: string;}, command: string | CommandCallback): Disposable
+		(language: LanguageSelector, message: string | { octicon: string; message: string; }, command: string | CommandCallback): Disposable
 	}
 
-	export const addInformationLanguageStatus:LanguageStatusFunction;
+	export const addInformationLanguageStatus: LanguageStatusFunction;
 	export const addWarningLanguageStatus: LanguageStatusFunction;
 	export const addErrorLanguageStatus: LanguageStatusFunction;
 }
@@ -339,11 +339,11 @@ export interface IPosition {
 	/**
 		* line number (starts at 1)
 		*/
-	lineNumber:number;
+	lineNumber: number;
 	/**
 		* column (the first character in a line is between column 1 and column 2)
 		*/
-	column:number;
+	column: number;
 }
 
 /**
@@ -353,19 +353,19 @@ interface IRange {
 	/**
 		* Line number on which the range starts (starts at 1).
 		*/
-	startLineNumber:number;
+	startLineNumber: number;
 	/**
 		* Column on which the range starts in line `startLineNumber` (starts at 1).
 		*/
-	startColumn:number;
+	startColumn: number;
 	/**
 		* Line number on which the range ends.
 		*/
-	endLineNumber:number;
+	endLineNumber: number;
 	/**
 		* Column on which the range ends in line `endLineNumber`.
 		*/
-	endColumn:number;
+	endColumn: number;
 }
 
 // var Range: {
@@ -373,7 +373,7 @@ interface IRange {
 // };
 
 export interface IHTMLContentElement {
-	formattedText?:string;
+	formattedText?: string;
 	text?: string;
 	className?: string;
 	style?: string;
@@ -417,7 +417,7 @@ declare module Services {
 
 	export interface IResourceMarker {
 		resource: Uri;
-		marker:IMarkerData;
+		marker: IMarkerData;
 	}
 
 	export interface IMarker {
@@ -588,7 +588,7 @@ export interface IModel {
 		* @param preserverBOM Preserve a BOM character if it was detected when the model was constructed.
 		* @return The text.
 		*/
-	getValue(eol?:Models.EndOfLinePreference, preserveBOM?:boolean): string;
+	getValue(eol?: Models.EndOfLinePreference, preserveBOM?: boolean): string;
 
 	/**
 		* Get the text in a certain range.
@@ -606,13 +606,13 @@ export interface IModel {
 	/**
 		* Get the maximum legal column for line at `lineNumber`
 		*/
-	getLineMaxColumn(lineNumber:number): number;
+	getLineMaxColumn(lineNumber: number): number;
 
 	/**
 		* Get the word under or besides `position`.
 		* @return The word under or besides `position`. Might be null.
 		*/
-	getWordAtPosition(position:IPosition): Models.IWordAtPosition;
+	getWordAtPosition(position: IPosition): Models.IWordAtPosition;
 
 	getModeId(): string;
 
@@ -668,10 +668,10 @@ declare module Modes {
 		* Standard brackets used for auto indentation
 		*/
 	export interface IBracketPair {
-		tokenType:string;
-		open:string;
-		close:string;
-		isElectric:boolean;
+		tokenType: string;
+		open: string;
+		close: string;
+		isElectric: boolean;
 	}
 
 	/**
@@ -682,16 +682,16 @@ declare module Modes {
 		open: RegExp; // The definition of when an opening brace is detected. This regex is matched against the entire line upto, and including the last typed character (the trigger character).
 		closeComplete?: string; // How to complete a matching open brace. Matches from 'open' will be expanded, e.g. '</$1>'
 		matchCase?: boolean; // If set to true, the case of the string captured in 'open' will be detected an applied also to 'closeComplete'.
-							// This is useful for cases like BEGIN/END or begin/end where the opening and closing phrases are unrelated.
-							// For identical phrases, use the $1 replacement syntax above directly in closeComplete, as it will
-							// include the proper casing from the captured string in 'open'.
-							// Upper/Lower/Camel cases are detected. Camel case dection uses only the first two characters and assumes
-							// that 'closeComplete' contains wors separated by spaces (e.g. 'End Loop')
+		// This is useful for cases like BEGIN/END or begin/end where the opening and closing phrases are unrelated.
+		// For identical phrases, use the $1 replacement syntax above directly in closeComplete, as it will
+		// include the proper casing from the captured string in 'open'.
+		// Upper/Lower/Camel cases are detected. Camel case dection uses only the first two characters and assumes
+		// that 'closeComplete' contains wors separated by spaces (e.g. 'End Loop')
 
 		closeTrigger?: string; // The character that will trigger the evaluation of 'close'.
 		close?: RegExp; // The definition of when a closing brace is detected. This regex is matched against the entire line upto, and including the last typed character (the trigger character).
 		tokenType?: string; // The type of the token. Matches from 'open' or 'close' will be expanded, e.g. 'keyword.$1'.
-							// Only used to auto-(un)indent a closing bracket.
+		// Only used to auto-(un)indent a closing bracket.
 	}
 
 	/**
@@ -707,13 +707,13 @@ declare module Modes {
 	// --- Begin InplaceReplaceSupport
 	interface IInplaceReplaceSupportResult {
 		value: string;
-		range:IRange;
+		range: IRange;
 	}
 	/**
 		* Interface used to navigate with a value-set.
 		*/
 	interface IInplaceReplaceSupport {
-		navigateValueSet(resource:Uri, range:IRange, up:boolean, token: CancellationToken):Thenable<IInplaceReplaceSupportResult>;
+		navigateValueSet(resource: Uri, range: IRange, up: boolean, token: CancellationToken): Thenable<IInplaceReplaceSupportResult>;
 	}
 	interface IInplaceReplaceSupportCustomization {
 		textReplace?: (value: string, up: boolean) => string;
@@ -727,31 +727,31 @@ declare module Modes {
 		/**
 			* Returns the current character position of the stream on the line.
 			*/
-		pos():number;
+		pos(): number;
 		/**
 			* Returns true iff the stream is at the end of the line.
 			*/
-		eos():boolean;
+		eos(): boolean;
 		/**
 			* Returns the next character in the stream.
 			*/
-		peek():string;
+		peek(): string;
 		/**
 			* Returns the next character in the stream, and advances it by one character.
 			*/
-		next():string;
+		next(): string;
 		/**
 			* Advances the stream by `n` characters.
 			*/
-		advance(n:number):string;
+		advance(n: number): string;
 		/**
 			* Advances the stream until the end of the line.
 			*/
-		advanceToEOS():string;
+		advanceToEOS(): string;
 		/**
 			* Brings the stream back `n` characters.
 			*/
-		goBack(n:number):void;
+		goBack(n: number): void;
 		/**
 			*  Advances the stream if the next characters validate a condition. A condition can be
 			*
@@ -761,23 +761,23 @@ declare module Modes {
 			*  	- a string
 			* 			EXAMPLES: "1954", "albert"
 			*/
-		advanceIfCharCode(charCode:number): string;
-		advanceIfString(condition:string):string;
-		advanceIfStringCaseInsensitive(condition:string):string;
-		advanceIfRegExp(condition:RegExp):string;
+		advanceIfCharCode(charCode: number): string;
+		advanceIfString(condition: string): string;
+		advanceIfStringCaseInsensitive(condition: string): string;
+		advanceIfRegExp(condition: RegExp): string;
 		/**
 			* Advances the stream while the next characters validate a condition. Check #advanceIf for
 			* details on the possible types for condition.
 			*/
-		advanceWhile(condition:string):string;
-		advanceWhile(condition:RegExp):string;
+		advanceWhile(condition: string): string;
+		advanceWhile(condition: RegExp): string;
 		/**
 			* Advances the stream until the some characters validate a condition. Check #advanceIf for
 			* details on the possible types for condition. The `including` boolean value indicates
 			* whether the stream will advance the characters that matched the condition as well, or not.
 			*/
-		advanceUntil(condition:string, including:boolean):string;
-		advanceUntil(condition:RegExp, including:boolean):string;
+		advanceUntil(condition: string, including: boolean): string;
+		advanceUntil(condition: RegExp, including: boolean): string;
 		/**
 			* The token rules define how consecutive characters should be put together as a token,
 			* or separated into two different tokens. They are given through a separator characters
@@ -788,25 +788,25 @@ declare module Modes {
 			* 	Setting these token rules defines the tokens for the string "123+456 -    7" as being
 			* 		["123", "+", "456", " ", "-", "    ", "7"]
 			*/
-		setTokenRules(separators:string, whitespace:string):void;
+		setTokenRules(separators: string, whitespace: string): void;
 		/**
 			* Returns the next token, given that the stream was configured with token rules.
 			*/
-		peekToken():string;
+		peekToken(): string;
 		/**
 			* Returns the next token, given that the stream was configured with token rules, and advances the
 			* stream by the exact length of the found token.
 			*/
-		nextToken():string;
+		nextToken(): string;
 		/**
 			* Returns the next whitespace, if found. Returns an empty string otherwise.
 			*/
-		peekWhitespace():string;
+		peekWhitespace(): string;
 		/**
 			* Returns the next whitespace, if found, and advances the stream by the exact length of the found
 			* whitespace. Returns an empty string otherwise.
 			*/
-		skipWhitespace():string;
+		skipWhitespace(): string;
 	}
 
 	enum Bracket {
@@ -816,15 +816,15 @@ declare module Modes {
 	}
 
 	interface ITokenizationResult {
-		type?:string;
-		bracket?:Bracket;
-		nextState?:IState;
+		type?: string;
+		bracket?: Bracket;
+		nextState?: IState;
 	}
 
 	interface IToken {
-		startIndex:number;
-		type:string;
-		bracket:Bracket;
+		startIndex: number;
+		type: string;
+		bracket: Bracket;
 	}
 
 	interface IModeTransition {
@@ -841,23 +841,23 @@ declare module Modes {
 	}
 
 	interface IState {
-		clone():IState;
-		equals(other:IState):boolean;
-		getMode():IMode;
-		tokenize(stream:IStream):ITokenizationResult;
+		clone(): IState;
+		equals(other: IState): boolean;
+		getMode(): IMode;
+		tokenize(stream: IStream): ITokenizationResult;
 		getStateData(): IState;
-		setStateData(state:IState):void;
+		setStateData(state: IState): void;
 	}
 
 	export interface ITokenizationSupport {
 
 		shouldGenerateEmbeddedModels: boolean;
 
-		getInitialState():IState;
+		getInitialState(): IState;
 
 		// add offsetDelta to each of the returned indices
 		// stop tokenizing at absolute value stopAtOffset (i.e. stream.pos() + offsetDelta > stopAtOffset)
-		tokenize(line:string, state:IState, offsetDelta?:number, stopAtOffset?:number):ILineTokens;
+		tokenize(line: string, state: IState, offsetDelta?: number, stopAtOffset?: number): ILineTokens;
 	}
 	// --- End TokenizationSupport
 
@@ -873,35 +873,35 @@ declare module Modes {
 
 	// --- Begin ICodeLensSupport
 	export interface ICodeLensSupport {
-		findCodeLensSymbols(resource:Uri, token:CancellationToken): Thenable<ICodeLensSymbol[]>;
-		findCodeLensReferences(resource:Uri, requests: ICodeLensSymbolRequest[], token:CancellationToken): Thenable<ICodeLensReferences>;
+		findCodeLensSymbols(resource: Uri, token: CancellationToken): Thenable<ICodeLensSymbol[]>;
+		findCodeLensReferences(resource: Uri, requests: ICodeLensSymbolRequest[], token: CancellationToken): Thenable<ICodeLensReferences>;
 	}
 	export interface ICodeLensSymbolRequest {
-		position:IPosition;
+		position: IPosition;
 		languageModeStateId?: number;
 	}
 	export interface ICodeLensSymbol {
-		range:IRange;
+		range: IRange;
 	}
 	export interface ICodeLensReferences {
 		references: IReference[][];
 		languageModeStateId?: number;
 	}
 	var CodeLensSupport: {
-		register(modeId: string, codeLensSupport:ICodeLensSupport): void;
+		register(modeId: string, codeLensSupport: ICodeLensSupport): void;
 	};
 	// --- End ICodeLensSupport
 
 	// --- Begin IOccurrencesSupport
 	export interface IOccurrence {
-		kind?:string;
-		range:IRange;
+		kind?: string;
+		range: IRange;
 	}
 	export interface IOccurrencesSupport {
 		findOccurrences(resource: Uri, position: IPosition, token: CancellationToken): Thenable<IOccurrence[]>;
 	}
 	var OccurrencesSupport: {
-		register(modeId: string, occurrencesSupport:IOccurrencesSupport): void;
+		register(modeId: string, occurrencesSupport: IOccurrencesSupport): void;
 	};
 	// --- End IOccurrencesSupport
 
@@ -918,7 +918,7 @@ declare module Modes {
 		outlineGroupLabel?: { [name: string]: string; };
 	}
 	var OutlineSupport: {
-		register(modeId: string, outlineSupport:IOutlineSupport): void;
+		register(modeId: string, outlineSupport: IOutlineSupport): void;
 	};
 	// --- End IOutlineSupport
 
@@ -934,12 +934,12 @@ declare module Modes {
 		edits: IResourceEdit[];
 	}
 
-		export interface IQuickFixSupport {
+	export interface IQuickFixSupport {
 		getQuickFixes(resource: Uri, marker: Services.IMarker | IRange, token: CancellationToken): Thenable<IQuickFix[]>;
 		runQuickFixAction(resource: Uri, range: IRange, id: any, token: CancellationToken): Thenable<IQuickFixResult>;
 	}
 	var QuickFixSupport: {
-		register(modeId: string, quickFixSupport:IQuickFixSupport): void
+		register(modeId: string, quickFixSupport: IQuickFixSupport): void
 	};
 	// --- End IOutlineSupport
 
@@ -954,28 +954,28 @@ declare module Modes {
 		findReferences(resource: Uri, position: IPosition, includeDeclaration: boolean, token: CancellationToken): Thenable<IReference[]>;
 	}
 	var ReferenceSupport: {
-		register(modeId: string, quickFixSupport:IReferenceSupport): void;
+		register(modeId: string, quickFixSupport: IReferenceSupport): void;
 	};
 	// --- End IReferenceSupport
 
 	// --- Begin IParameterHintsSupport
 	export interface IParameter {
-		label:string;
-		documentation?:string;
-		signatureLabelOffset?:number;
-		signatureLabelEnd?:number;
+		label: string;
+		documentation?: string;
+		signatureLabelOffset?: number;
+		signatureLabelEnd?: number;
 	}
 
 	export interface ISignature {
-		label:string;
-		documentation?:string;
-		parameters:IParameter[];
+		label: string;
+		documentation?: string;
+		parameters: IParameter[];
 	}
 
 	export interface IParameterHints {
-		currentSignature:number;
-		currentParameter:number;
-		signatures:ISignature[];
+		currentSignature: number;
+		currentParameter: number;
+		signatures: ISignature[];
 	}
 
 	export interface IParameterHintsSupport {
@@ -994,7 +994,7 @@ declare module Modes {
 		getParameterHints(resource: Uri, position: IPosition, token: CancellationToken): Thenable<IParameterHints>;
 	}
 	var ParameterHintsSupport: {
-		register(modeId: string, parameterHintsSupport:IParameterHintsSupport): void;
+		register(modeId: string, parameterHintsSupport: IParameterHintsSupport): void;
 	};
 	// --- End IParameterHintsSupport
 
@@ -1009,7 +1009,7 @@ declare module Modes {
 		computeInfo(resource: Uri, position: IPosition, token: CancellationToken): Thenable<IComputeExtraInfoResult>;
 	}
 	var ExtraInfoSupport: {
-		register(modeId: string, extraInfoSupport:IExtraInfoSupport): void;
+		register(modeId: string, extraInfoSupport: IExtraInfoSupport): void;
 	};
 	// --- End IExtraInfoSupport
 
@@ -1024,7 +1024,7 @@ declare module Modes {
 		rename(resource: Uri, position: IPosition, newName: string, token: CancellationToken): Thenable<IRenameResult>;
 	}
 	var RenameSupport: {
-		register(modeId: string, renameSupport:IRenameSupport): void;
+		register(modeId: string, renameSupport: IRenameSupport): void;
 	};
 	// --- End IRenameSupport
 
@@ -1033,8 +1033,8 @@ declare module Modes {
 		* Interface used to format a model
 		*/
 	export interface IFormattingOptions {
-		tabSize:number;
-		insertSpaces:boolean;
+		tabSize: number;
+		insertSpaces: boolean;
 	}
 	/**
 		* Supports to format source code. There are three levels
@@ -1050,7 +1050,7 @@ declare module Modes {
 		formatAfterKeystroke?: (resource: Uri, position: IPosition, ch: string, options: IFormattingOptions, token: CancellationToken) => Thenable<Models.ISingleEditOperation[]>;
 	}
 	var FormattingSupport: {
-		register(modeId: string, formattingSupport:IFormattingSupport): void;
+		register(modeId: string, formattingSupport: IFormattingSupport): void;
 	};
 	// --- End IRenameSupport
 
@@ -1060,8 +1060,8 @@ declare module Modes {
 		partSeparator?: string;
 	}
 	export interface IHighlight {
-		start:number;
-		end:number;
+		start: number;
+		end: number;
 	}
 	export interface ISuggestion {
 		label: string;
@@ -1072,8 +1072,8 @@ declare module Modes {
 		documentationLabel?: string;
 	}
 	export interface ISuggestions {
-		currentWord:string;
-		suggestions:ISuggestion[];
+		currentWord: string;
+		suggestions: ISuggestion[];
 		incomplete?: boolean;
 		overwriteBefore?: number;
 		overwriteAfter?: number;
@@ -1085,10 +1085,10 @@ declare module Modes {
 		sortBy?: ISortingTypeAndSeparator[];
 
 		suggest: (resource: Uri, position: IPosition, token: CancellationToken) => Thenable<ISuggestions[]>;
-		getSuggestionDetails? : (resource:Uri, position:IPosition, suggestion:ISuggestion, token: CancellationToken) => Thenable<ISuggestion>;
+		getSuggestionDetails?: (resource: Uri, position: IPosition, suggestion: ISuggestion, token: CancellationToken) => Thenable<ISuggestion>;
 	}
 	var SuggestSupport: {
-		register(modeId:string, suggestSupport:ISuggestSupport): void;
+		register(modeId: string, suggestSupport: ISuggestSupport): void;
 	};
 	// --- End ISuggestSupport
 
@@ -1104,10 +1104,10 @@ declare module Modes {
 	}
 
 	export interface INavigateTypesSupport {
-		getNavigateToItems:(search: string, resource: Uri, token: CancellationToken) => Thenable<ITypeBearing[]>;
+		getNavigateToItems: (search: string, resource: Uri, token: CancellationToken) => Thenable<ITypeBearing[]>;
 	}
 	var NavigateTypesSupport: {
-		register(modeId:string, navigateTypeSupport:INavigateTypesSupport): void;
+		register(modeId: string, navigateTypeSupport: INavigateTypesSupport): void;
 	};
 
 	// --- End INavigateTypesSupport
@@ -1117,12 +1117,12 @@ declare module Modes {
 		commentsConfiguration: ICommentsConfiguration;
 	}
 	export interface ICommentsConfiguration {
-		lineCommentTokens?:string[];
-		blockCommentStartToken?:string;
-		blockCommentEndToken?:string;
+		lineCommentTokens?: string[];
+		blockCommentStartToken?: string;
+		blockCommentEndToken?: string;
 	}
 	var CommentsSupport: {
-		register(modeId:string, commentsSupport:ICommentsSupport): void;
+		register(modeId: string, commentsSupport: ICommentsSupport): void;
 	};
 	// --- End ICommentsSupport
 
@@ -1131,7 +1131,7 @@ declare module Modes {
 		wordDefinition?: RegExp;
 	}
 	var TokenTypeClassificationSupport: {
-		register(modeId:string, tokenTypeClassificationSupport:ITokenTypeClassificationSupport): void;
+		register(modeId: string, tokenTypeClassificationSupport: ITokenTypeClassificationSupport): void;
 	};
 	// --- End ITokenTypeClassificationSupport
 
@@ -1144,7 +1144,7 @@ declare module Modes {
 		embeddedElectricCharacters?: string[];
 	}
 	var ElectricCharacterSupport: {
-		register(modeId:string, electricCharacterSupport:IElectricCharacterSupport): void;
+		register(modeId: string, electricCharacterSupport: IElectricCharacterSupport): void;
 	};
 	// --- End IElectricCharacterSupport
 
@@ -1157,14 +1157,14 @@ declare module Modes {
 		* Interface used to support insertion of matching characters like brackets and qoutes.
 		*/
 	export interface IAutoClosingPair {
-		open:string;
-		close:string;
+		open: string;
+		close: string;
 	}
 	export interface IAutoClosingPairConditional extends IAutoClosingPair {
 		notIn?: string[];
 	}
 	var CharacterPairSupport: {
-		register(modeId:string, characterPairSupport:ICharacterPairSupport): void;
+		register(modeId: string, characterPairSupport: ICharacterPairSupport): void;
 	};
 	// --- End ICharacterPairSupport
 
@@ -1186,9 +1186,9 @@ declare module Modes {
 		Outdent
 	}
 	export interface IEnterAction {
-		indentAction:IndentAction;
-		appendText?:string;
-		removeText?:number;
+		indentAction: IndentAction;
+		appendText?: string;
+		removeText?: number;
 	}
 	export interface IOnEnterRegExpRules {
 		beforeText: RegExp;
@@ -1201,7 +1201,7 @@ declare module Modes {
 		regExpRules?: IOnEnterRegExpRules[];
 	}
 	var OnEnterSupport: {
-		register(modeId:string, opts:IOnEnterSupportOptions): void;
+		register(modeId: string, opts: IOnEnterSupportOptions): void;
 	};
 	// --- End IOnEnterSupport
 
@@ -1211,12 +1211,12 @@ declare module Modes {
 		modeTransitions: IModeTransition[];
 
 		getTokenCount(): number;
-		getTokenStartIndex(tokenIndex:number): number;
-		getTokenType(tokenIndex:number): string;
-		getTokenBracket(tokenIndex:number): Bracket;
-		getTokenText(tokenIndex:number): string;
-		getTokenEndIndex(tokenIndex:number): number;
-		findIndexOfOffset(offset:number): number;
+		getTokenStartIndex(tokenIndex: number): number;
+		getTokenType(tokenIndex: number): string;
+		getTokenBracket(tokenIndex: number): Bracket;
+		getTokenText(tokenIndex: number): string;
+		getTokenEndIndex(tokenIndex: number): number;
+		findIndexOfOffset(offset: number): number;
 	}
 
 	export interface IResourceEdit {
@@ -1245,7 +1245,7 @@ declare module Modes {
 }
 
 declare module Plugins {
-	function get(pluginId:string): any;
+	function get(pluginId: string): any;
 }
 
 /**
@@ -1256,7 +1256,7 @@ export namespace _internal {
 	/**
 		* DO NOT USE.
 		*/
-	export function sendTelemetryEvent(event:string, data:any):void;
+	export function sendTelemetryEvent(event: string, data: any): void;
 }
 
 /**
