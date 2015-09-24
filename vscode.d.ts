@@ -7,13 +7,13 @@
 // Naming: Command, Action, ...
 
 /**
-	* The command callback.
-	*/
+ * The command callback.
+ */
 export interface CommandCallback {
 
 	/**
-	*
-	*/
+		 *
+		 */
 	<T>(...args: any[]): T | Thenable<T>;
 }
 
@@ -22,23 +22,23 @@ export interface CommandCallback {
 export const commands: {
 
 	/**
-		* Registers a command that can be invoked via a keyboard shortcut,
-		* an menu item, an action, or directly.
-		*
-		* @param commandId - The unique identifier of this command
-		* @param callback - The command callback
-		* @param thisArgs - (optional) The this context used when invoking {{callback}}
-		* @return Disposable which unregisters this command on disposal
-		*/
+		 * Registers a command that can be invoked via a keyboard shortcut,
+		 * an menu item, an action, or directly.
+		 *
+		 * @param commandId - The unique identifier of this command
+		 * @param callback - The command callback
+		 * @param thisArgs - (optional) The this context used when invoking {{callback}}
+		 * @return Disposable which unregisters this command on disposal
+		 */
 	registerCommand(commandId: string, callback: CommandCallback, thisArg?: any): Disposable;
 
 	/**
-		* Executes a command
-		*
-		* @param commandId - An identifier of a command
-		* @param ...rest - Parameter passed to the command function
-		* @return
-		*/
+		 * Executes a command
+		 *
+		 * @param commandId - An identifier of a command
+		 * @param ...rest - Parameter passed to the command function
+		 * @return
+		 */
 	executeCommand<T>(commandId: string, ...rest: any[]): Thenable<T>;
 };
 
@@ -49,11 +49,29 @@ export interface EditorOptions {
 
 export class Document {
 
-	constructor(uri: Uri, text: string);
+	constructor(uri: Uri, lines: string[], eol: string, languageId: string, versionId: number);
 
 	getUri(): Uri;
 
+	getLanguageId(): string;
+
+	getVersionId(): number;
+
 	getText(): string;
+
+	getTextInRange(range: Range): string;
+
+	getTextOnLine(line: number): string;
+
+	validateRange(range: Range): Range;
+
+	validatePosition(position: Position): Position;
+
+	getLineCount(): number;
+
+	getLineMaxColumn(line: number): number;
+
+	getWordRangeAtPosition(position: Position): Range;
 }
 
 export class Position {
@@ -76,8 +94,10 @@ export class Range {
 	end: Position;
 
 	constructor(start: Position, end: Position);
+	constructor(startLine: number, startColumn: number, endLine: number, endColumn: number);
 
 	contains(positionOrRange: Position | Range): boolean;
+	isEmpty(): boolean;
 }
 
 export class Selection {
@@ -132,7 +152,7 @@ export interface TextEditorEdit {
 
 
 // TODO@api, TODO@Joh,Ben
-// output channels need to be known upfront (contributes in ticino.plugin.json)
+// output channels need to be known upfront (contributes in package.json)
 export interface OutputChannel extends Disposable {
 	append(value: string): void;
 	appendLine(value: string): void;
@@ -149,7 +169,7 @@ export namespace shell {
 
 	export function getActiveTextEditor(): TextEditor;
 
-	export const onActiveTextEditorChange: Event<TextEditor>;
+	export const onDidChangeActiveTextEditor: Event<TextEditor>;
 
 	export interface MessageFunction {
 		(message: string): Thenable<void>;
@@ -206,13 +226,13 @@ export namespace workspace {
 	export function findFiles(include: string, exclude: string, maxResults?: number): Thenable<Uri[]>;
 
 	/**
-		* save all dirty files
-		*/
+		 * save all dirty files
+		 */
 	export function saveAll(includeUntitled?: boolean): Thenable<boolean>;
 
 	/**
-		* are there any dirty files
-		*/
+		 * are there any dirty files
+		 */
 	export function anyDirty(): Thenable<boolean>;
 }
 
@@ -253,32 +273,32 @@ declare class Uri {
 	static create(path: string): Uri;
 
 	/**
-		* scheme is the 'http' part of 'http://www.msft.com/some/path?query#fragment'.
-		* The part before the first colon.
-		*/
+		 * scheme is the 'http' part of 'http://www.msft.com/some/path?query#fragment'.
+		 * The part before the first colon.
+		 */
 	scheme: string;
 
 
 	/**
-		* authority is the 'www.msft.com' part of 'http://www.msft.com/some/path?query#fragment'.
-		* The part between the first double slashes and the next slash.
-		*/
+		 * authority is the 'www.msft.com' part of 'http://www.msft.com/some/path?query#fragment'.
+		 * The part between the first double slashes and the next slash.
+		 */
 	authority: string;
 
 
 	/**
-		* path is the '/some/path' part of 'http://www.msft.com/some/path?query#fragment'.
-		*/
+		 * path is the '/some/path' part of 'http://www.msft.com/some/path?query#fragment'.
+		 */
 	path: string;
 
 	/**
-		* query is the 'query' part of 'http://www.msft.com/some/path?query#fragment'.
-		*/
+		 * query is the 'query' part of 'http://www.msft.com/some/path?query#fragment'.
+		 */
 	query: string;
 
 	/**
-		* fragment is the 'fragment' part of 'http://www.msft.com/some/path?query#fragment'.
-		*/
+		 * fragment is the 'fragment' part of 'http://www.msft.com/some/path?query#fragment'.
+		 */
 	fragment: string;
 
 	withScheme(value: string): Uri;
@@ -289,17 +309,17 @@ declare class Uri {
 	with(scheme: string, authority: string, path: string, query: string, fragment: string): Uri;
 
 	/**
-		* Retuns a string representing the corresponding file system path of this URI.
-		* Will handle UNC paths and normalize windows drive letters to lower-case. Also
-		* uses the platform specific path separator. Will *not* validate the path for
-		* invalid characters and semantics. Will *not* look at the scheme of this URI.
-		*/
+		 * Retuns a string representing the corresponding file system path of this URI.
+		 * Will handle UNC paths and normalize windows drive letters to lower-case. Also
+		 * uses the platform specific path separator. Will *not* validate the path for
+		 * invalid characters and semantics. Will *not* look at the scheme of this URI.
+		 */
 	fsPath: string;
 
 	/**
-		* Returns a canonical representation of this URI. The representation and normalization
-		* of a URI depends on the scheme.
-		*/
+		 * Returns a canonical representation of this URI. The representation and normalization
+		 * of a URI depends on the scheme.
+		 */
 	toString(): string;
 
 	toJSON(): any;
@@ -318,59 +338,41 @@ declare class Disposable {
 }
 
 /**
-	* Represents a typed event.
-	*/
+ * Represents a typed event.
+ */
 interface Event<T> {
 
 	/**
-		*
-		* @param listener The listener function will be call when the event happens.
-		* @param thisArgs The 'this' which will be used when calling the event listener.
-		* @param disposables An array to which a {{IDisposable}} will be added. The
-		* @return
-		*/
+		 *
+		 * @param listener The listener function will be call when the event happens.
+		 * @param thisArgs The 'this' which will be used when calling the event listener.
+		 * @param disposables An array to which a {{IDisposable}} will be added. The
+		 * @return
+		 */
 	(listener: (e: T) => any, thisArgs?: any, disposables?: Disposable[]): Disposable;
 }
 
 /**
-	* A position in the editor. This interface is suitable for serialization.
-	*/
-export interface IPosition {
-	/**
-		* line number (starts at 1)
-		*/
-	lineNumber: number;
-	/**
-		* column (the first character in a line is between column 1 and column 2)
-		*/
-	column: number;
-}
-
-/**
-	* A range in the editor. This interface is suitable for serialization.
-	*/
+ * A range in the editor. This interface is suitable for serialization.
+ */
 interface IRange {
 	/**
-		* Line number on which the range starts (starts at 1).
-		*/
+		 * Line number on which the range starts (starts at 1).
+		 */
 	startLineNumber: number;
 	/**
-		* Column on which the range starts in line `startLineNumber` (starts at 1).
-		*/
+		 * Column on which the range starts in line `startLineNumber` (starts at 1).
+		 */
 	startColumn: number;
 	/**
-		* Line number on which the range ends.
-		*/
+		 * Line number on which the range ends.
+		 */
 	endLineNumber: number;
 	/**
-		* Column on which the range ends in line `endLineNumber`.
-		*/
+		 * Column on which the range ends in line `endLineNumber`.
+		 */
 	endColumn: number;
 }
-
-// var Range: {
-// 	containsPosition(range:IRange, position:IPosition): boolean;
-// };
 
 export interface IHTMLContentElement {
 	formattedText?: string;
@@ -398,7 +400,6 @@ declare module Services {
 	export interface IModelService {
 		onModelAdd: Event<IModel>;
 		onModelRemove: Event<IModel>;
-		addModel(model: IModel): void;
 		removeModel(model: IModel): void;
 		getModels(): IModel[];
 		getModel(resource: Uri): IModel;
@@ -485,83 +486,65 @@ declare module Services {
 
 declare module Models {
 	/**
-		* A single edit operation, that acts as a simple replace.
-		* i.e. Replace text at `range` with `text` in model.
-		*/
+		 * A single edit operation, that acts as a simple replace.
+		 * i.e. Replace text at `range` with `text` in model.
+		 */
 	export interface ISingleEditOperation {
 		/**
-			* The range to replace. This can be empty to emulate a simple insert.
-			*/
+		 * The range to replace. This can be empty to emulate a simple insert.
+		 */
 		range: IRange;
 		/**
-			* The text to replace with. This can be null to emulate a simple delete.
-			*/
+		 * The text to replace with. This can be null to emulate a simple delete.
+		 */
 		text: string;
 	}
 
 	/**
-		* Word inside a model.
-		*/
-	export interface IWordAtPosition {
-		/**
-			* The word.
-			*/
-		word: string;
-		/**
-			* The column where the word starts.
-			*/
-		startColumn: number;
-		/**
-			* The column where the word ends.
-			*/
-		endColumn: number;
-	}
-
-	/**
-		* End of line character preference.
-		*/
+		 * End of line character preference.
+		 */
 	export enum EndOfLinePreference {
 		/**
-			* Use the end of line character identified in the text buffer.
-			*/
+		 * Use the end of line character identified in the text buffer.
+		 */
 		TextDefined = 0,
 		/**
-			* Use line feed (\n) as the end of line character.
-			*/
+		 * Use line feed (\n) as the end of line character.
+		 */
 		LF = 1,
 		/**
-			* Use carriage return and line feed (\r\n) as the end of line character.
-			*/
+		 * Use carriage return and line feed (\r\n) as the end of line character.
+		 */
 		CRLF = 2
 	}
 
 	/**
-		* An event describing a change in the text of a model.
-		*/
+		 * An event describing a change in the text of a model.
+		 */
 	export interface IContentChangedEvent {
 		/**
-			* The range that got replaced.
-			*/
+		 * The range that got replaced.
+		 */
 		range: IRange;
 		/**
-			* The length of the range that got replaced.
-			*/
+		 * The length of the range that got replaced.
+		 */
 		rangeLength: number;
 		/**
-			* The new text for the range.
-			*/
+		 * The new text for the range.
+		 */
 		text: string;
 		/**
-			* The new version id the model has transitioned to.
-			*/
+		 * The new version id the model has transitioned to.
+		 */
 		versionId: number;
 		/**
-			* Flag that indicates that this event was generated while undoing.
-			*/
+		 * Flag that indicates that this event was generated while undoing.
+		 */
 		isUndoing: boolean;
 		/**
-			* Flag that indicates that this event was generated while redoing.
-			*/
+		 * Flag that indicates that this event was generated while redoing.
+		 */
 		isRedoing: boolean;
 	}
 }
@@ -570,49 +553,27 @@ export interface IModel {
 
 	getUri(): Uri;
 
-	/**
-		* @review
-		*/
-	isUntitled(): boolean;
+	toRawText(): {
+		BOM: string;
+		EOL: string;
+		lines: string[];
+		length: number;
+	};
 
-	/**
-		* Get the current version id of the model.
-		* Anytime a change happens to the model (even undo/redo),
-		* the version id is incremented.
-		*/
 	getVersionId(): number;
 
 	/**
-		* Get the text stored in this model.
-		* @param eol The end of line character preference. Defaults to `EndOfLinePreference.TextDefined`.
-		* @param preserverBOM Preserve a BOM character if it was detected when the model was constructed.
-		* @return The text.
-		*/
+		 * @review
+		 */
+	isUntitled(): boolean;
+
+	/**
+		 * Get the text stored in this model.
+		 * @param eol The end of line character preference. Defaults to `EndOfLinePreference.TextDefined`.
+		 * @param preserverBOM Preserve a BOM character if it was detected when the model was constructed.
+		 * @return The text.
+		 */
 	getValue(eol?: Models.EndOfLinePreference, preserveBOM?: boolean): string;
-
-	/**
-		* Get the text in a certain range.
-		* @param range The range describing what text to get.
-		* @param eol The end of line character preference. This will only be used for multiline ranges. Defaults to `EndOfLinePreference.TextDefined`.
-		* @return The text.
-		*/
-	getValueInRange(range: IRange, eol?: Models.EndOfLinePreference): string;
-
-	/**
-		* Get the number of lines in the model.
-		*/
-	getLineCount(): number;
-
-	/**
-		* Get the maximum legal column for line at `lineNumber`
-		*/
-	getLineMaxColumn(lineNumber: number): number;
-
-	/**
-		* Get the word under or besides `position`.
-		* @return The word under or besides `position`. Might be null.
-		*/
-	getWordAtPosition(position: IPosition): Models.IWordAtPosition;
 
 	getModeId(): string;
 
@@ -645,8 +606,8 @@ declare module Modes {
 	}
 
 	/**
-		* This interface can be shortened as an array, ie. ['{','}','delimiter.curly']
-		*/
+		 * This interface can be shortened as an array, ie. ['{','}','delimiter.curly']
+		 */
 	interface ILanguageBracket {
 		open: string;	// open bracket
 		close: string;	// closeing bracket
@@ -665,8 +626,8 @@ declare module Modes {
 	}
 
 	/**
-		* Standard brackets used for auto indentation
-		*/
+		 * Standard brackets used for auto indentation
+		 */
 	export interface IBracketPair {
 		tokenType: string;
 		open: string;
@@ -675,18 +636,18 @@ declare module Modes {
 	}
 
 	/**
-		* Regular expression based brackets. These are always electric.
-		*/
+		 * Regular expression based brackets. These are always electric.
+		 */
 	export interface IRegexBracketPair {
 		openTrigger?: string; // The character that will trigger the evaluation of 'open'.
 		open: RegExp; // The definition of when an opening brace is detected. This regex is matched against the entire line upto, and including the last typed character (the trigger character).
 		closeComplete?: string; // How to complete a matching open brace. Matches from 'open' will be expanded, e.g. '</$1>'
 		matchCase?: boolean; // If set to true, the case of the string captured in 'open' will be detected an applied also to 'closeComplete'.
-		// This is useful for cases like BEGIN/END or begin/end where the opening and closing phrases are unrelated.
-		// For identical phrases, use the $1 replacement syntax above directly in closeComplete, as it will
-		// include the proper casing from the captured string in 'open'.
-		// Upper/Lower/Camel cases are detected. Camel case dection uses only the first two characters and assumes
-		// that 'closeComplete' contains wors separated by spaces (e.g. 'End Loop')
+								// This is useful for cases like BEGIN/END or begin/end where the opening and closing phrases are unrelated.
+								// For identical phrases, use the $1 replacement syntax above directly in closeComplete, as it will
+								// include the proper casing from the captured string in 'open'.
+								// Upper/Lower/Camel cases are detected. Camel case dection uses only the first two characters and assumes
+								// that 'closeComplete' contains wors separated by spaces (e.g. 'End Loop')
 
 		closeTrigger?: string; // The character that will trigger the evaluation of 'close'.
 		close?: RegExp; // The definition of when a closing brace is detected. This regex is matched against the entire line upto, and including the last typed character (the trigger character).
@@ -695,8 +656,8 @@ declare module Modes {
 	}
 
 	/**
-		* Definition of documentation comments (e.g. Javadoc/JSdoc)
-		*/
+		 * Definition of documentation comments (e.g. Javadoc/JSdoc)
+		 */
 	export interface IDocComment {
 		scope: string; // What tokens should be used to detect a doc comment (e.g. 'comment.documentation').
 		open: string; // The string that starts a doc comment (e.g. '/**')
@@ -705,166 +666,30 @@ declare module Modes {
 	}
 
 	// --- Begin InplaceReplaceSupport
-	interface IInplaceReplaceSupportResult {
-		value: string;
-		range: IRange;
-	}
 	/**
-		* Interface used to navigate with a value-set.
-		*/
+		 * Interface used to navigate with a value-set.
+		 */
 	interface IInplaceReplaceSupport {
-		navigateValueSet(resource: Uri, range: IRange, up: boolean, token: CancellationToken): Thenable<IInplaceReplaceSupportResult>;
+		sets: string[][];
 	}
-	interface IInplaceReplaceSupportCustomization {
-		textReplace?: (value: string, up: boolean) => string;
-		navigateValueSetFallback?: (resource: Uri, range: IRange, up: boolean, token: CancellationToken) => Thenable<IInplaceReplaceSupportResult>;
-	}
+	var InplaceReplaceSupport: {
+		register(modeId: string, inplaceReplaceSupport: Modes.IInplaceReplaceSupport): void;
+	};
 	// --- End InplaceReplaceSupport
 
 
 	// --- Begin TokenizationSupport
-	interface IStream {
-		/**
-			* Returns the current character position of the stream on the line.
-			*/
-		pos(): number;
-		/**
-			* Returns true iff the stream is at the end of the line.
-			*/
-		eos(): boolean;
-		/**
-			* Returns the next character in the stream.
-			*/
-		peek(): string;
-		/**
-			* Returns the next character in the stream, and advances it by one character.
-			*/
-		next(): string;
-		/**
-			* Advances the stream by `n` characters.
-			*/
-		advance(n: number): string;
-		/**
-			* Advances the stream until the end of the line.
-			*/
-		advanceToEOS(): string;
-		/**
-			* Brings the stream back `n` characters.
-			*/
-		goBack(n: number): void;
-		/**
-			*  Advances the stream if the next characters validate a condition. A condition can be
-			*
-			*      - a regular expression (always starting with ^)
-			* 			EXAMPLES: /^\d+/, /^function|var|interface|class/
-			*
-			*  	- a string
-			* 			EXAMPLES: "1954", "albert"
-			*/
-		advanceIfCharCode(charCode: number): string;
-		advanceIfString(condition: string): string;
-		advanceIfStringCaseInsensitive(condition: string): string;
-		advanceIfRegExp(condition: RegExp): string;
-		/**
-			* Advances the stream while the next characters validate a condition. Check #advanceIf for
-			* details on the possible types for condition.
-			*/
-		advanceWhile(condition: string): string;
-		advanceWhile(condition: RegExp): string;
-		/**
-			* Advances the stream until the some characters validate a condition. Check #advanceIf for
-			* details on the possible types for condition. The `including` boolean value indicates
-			* whether the stream will advance the characters that matched the condition as well, or not.
-			*/
-		advanceUntil(condition: string, including: boolean): string;
-		advanceUntil(condition: RegExp, including: boolean): string;
-		/**
-			* The token rules define how consecutive characters should be put together as a token,
-			* or separated into two different tokens. They are given through a separator characters
-			* string and a whitespace characters string. A separator is always one token. Consecutive
-			* whitespace is always one token. Everything in between these two token types, is also a token.
-			*
-			* 	EXAMPLE: stream.setTokenRules("+-", " ");
-			* 	Setting these token rules defines the tokens for the string "123+456 -    7" as being
-			* 		["123", "+", "456", " ", "-", "    ", "7"]
-			*/
-		setTokenRules(separators: string, whitespace: string): void;
-		/**
-			* Returns the next token, given that the stream was configured with token rules.
-			*/
-		peekToken(): string;
-		/**
-			* Returns the next token, given that the stream was configured with token rules, and advances the
-			* stream by the exact length of the found token.
-			*/
-		nextToken(): string;
-		/**
-			* Returns the next whitespace, if found. Returns an empty string otherwise.
-			*/
-		peekWhitespace(): string;
-		/**
-			* Returns the next whitespace, if found, and advances the stream by the exact length of the found
-			* whitespace. Returns an empty string otherwise.
-			*/
-		skipWhitespace(): string;
-	}
-
 	enum Bracket {
 		None = 0,
 		Open = 1,
 		Close = -1
-	}
-
-	interface ITokenizationResult {
-		type?: string;
-		bracket?: Bracket;
-		nextState?: IState;
-	}
-
-	interface IToken {
-		startIndex: number;
-		type: string;
-		bracket: Bracket;
-	}
-
-	interface IModeTransition {
-		startIndex: number;
-		mode: IMode;
-	}
-
-	interface ILineTokens {
-		tokens: IToken[];
-		actualStopOffset: number;
-		endState: IState;
-		modeTransitions: IModeTransition[];
-		retokenize?: Thenable<void>;
-	}
-
-	interface IState {
-		clone(): IState;
-		equals(other: IState): boolean;
-		getMode(): IMode;
-		tokenize(stream: IStream): ITokenizationResult;
-		getStateData(): IState;
-		setStateData(state: IState): void;
-	}
-
-	export interface ITokenizationSupport {
-
-		shouldGenerateEmbeddedModels: boolean;
-
-		getInitialState(): IState;
-
-		// add offsetDelta to each of the returned indices
-		// stop tokenizing at absolute value stopAtOffset (i.e. stream.pos() + offsetDelta > stopAtOffset)
-		tokenize(line: string, state: IState, offsetDelta?: number, stopAtOffset?: number): ILineTokens;
 	}
 	// --- End TokenizationSupport
 
 	// --- Begin IDeclarationSupport
 	export interface IDeclarationSupport {
 		tokens?: string[];
-		findDeclaration(resource: Uri, position: IPosition, token: CancellationToken): Thenable<IReference>;
+		findDeclaration(document: Document, position: Position, token: CancellationToken): Thenable<IReference>;
 	}
 	var DeclarationSupport: {
 		register(modeId: string, declarationSupport: IDeclarationSupport): void;
@@ -873,15 +698,15 @@ declare module Modes {
 
 	// --- Begin ICodeLensSupport
 	export interface ICodeLensSupport {
-		findCodeLensSymbols(resource: Uri, token: CancellationToken): Thenable<ICodeLensSymbol[]>;
-		findCodeLensReferences(resource: Uri, requests: ICodeLensSymbolRequest[], token: CancellationToken): Thenable<ICodeLensReferences>;
+		findCodeLensSymbols(document: Document, token: CancellationToken): Thenable<ICodeLensSymbol[]>;
+		findCodeLensReferences(document: Document, requests: ICodeLensSymbolRequest[], token: CancellationToken): Thenable<ICodeLensReferences>;
 	}
 	export interface ICodeLensSymbolRequest {
-		position: IPosition;
+		position: Position;
 		languageModeStateId?: number;
 	}
 	export interface ICodeLensSymbol {
-		range: IRange;
+		range: Range;
 	}
 	export interface ICodeLensReferences {
 		references: IReference[][];
@@ -895,10 +720,10 @@ declare module Modes {
 	// --- Begin IOccurrencesSupport
 	export interface IOccurrence {
 		kind?: string;
-		range: IRange;
+		range: Range;
 	}
 	export interface IOccurrencesSupport {
-		findOccurrences(resource: Uri, position: IPosition, token: CancellationToken): Thenable<IOccurrence[]>;
+		findOccurrences(resource: Document, position: Position, token: CancellationToken): Thenable<IOccurrence[]>;
 	}
 	var OccurrencesSupport: {
 		register(modeId: string, occurrencesSupport: IOccurrencesSupport): void;
@@ -910,11 +735,11 @@ declare module Modes {
 		label: string;
 		type: string;
 		icon?: string; // icon class or null to use the default images based on the type
-		range: IRange;
+		range: Range;
 		children?: IOutlineEntry[];
 	}
 	export interface IOutlineSupport {
-		getOutline(resource: Uri, token: CancellationToken): Thenable<IOutlineEntry[]>;
+		getOutline(document: Document, token: CancellationToken): Thenable<IOutlineEntry[]>;
 		outlineGroupLabel?: { [name: string]: string; };
 	}
 	var OutlineSupport: {
@@ -935,8 +760,8 @@ declare module Modes {
 	}
 
 	export interface IQuickFixSupport {
-		getQuickFixes(resource: Uri, marker: Services.IMarker | IRange, token: CancellationToken): Thenable<IQuickFix[]>;
-		runQuickFixAction(resource: Uri, range: IRange, id: any, token: CancellationToken): Thenable<IQuickFixResult>;
+		getQuickFixes(resource: Document, marker: Services.IMarker | Range, token: CancellationToken): Thenable<IQuickFix[]>;
+		runQuickFixAction(resource: Document, range: Range, id: any, token: CancellationToken): Thenable<IQuickFixResult>;
 	}
 	var QuickFixSupport: {
 		register(modeId: string, quickFixSupport: IQuickFixSupport): void
@@ -948,10 +773,10 @@ declare module Modes {
 		tokens?: string[];
 
 		/**
-			* @returns a list of reference of the symbol at the position in the
-			* 	given resource.
-			*/
-		findReferences(resource: Uri, position: IPosition, includeDeclaration: boolean, token: CancellationToken): Thenable<IReference[]>;
+		 * @returns a list of reference of the symbol at the position in the
+		 * 	given resource.
+		 */
+		findReferences(document: Document, position: Position, includeDeclaration: boolean, token: CancellationToken): Thenable<IReference[]>;
 	}
 	var ReferenceSupport: {
 		register(modeId: string, quickFixSupport: IReferenceSupport): void;
@@ -980,18 +805,18 @@ declare module Modes {
 
 	export interface IParameterHintsSupport {
 		/**
-			* On which characters presses should parameter hints be potentially shown.
-			*/
+		 * On which characters presses should parameter hints be potentially shown.
+		 */
 		triggerCharacters: string[];
 
 		/**
-			* A list of token types that prevent the parameter hints from being shown (e.g. comment, string)
-			*/
+		 * A list of token types that prevent the parameter hints from being shown (e.g. comment, string)
+		 */
 		excludeTokens: string[];
 		/**
-			* @returns the parameter hints for the specified position in the file.
-			*/
-		getParameterHints(resource: Uri, position: IPosition, token: CancellationToken): Thenable<IParameterHints>;
+		 * @returns the parameter hints for the specified position in the file.
+		 */
+		getParameterHints(document: Document, position: Position, token: CancellationToken): Thenable<IParameterHints>;
 	}
 	var ParameterHintsSupport: {
 		register(modeId: string, parameterHintsSupport: IParameterHintsSupport): void;
@@ -1000,13 +825,13 @@ declare module Modes {
 
 	// --- Begin IExtraInfoSupport
 	export interface IComputeExtraInfoResult {
-		range: IRange;
+		range: Range;
 		value?: string;
 		htmlContent?: IHTMLContentElement[];
 		className?: string;
 	}
 	export interface IExtraInfoSupport {
-		computeInfo(resource: Uri, position: IPosition, token: CancellationToken): Thenable<IComputeExtraInfoResult>;
+		computeInfo(document: Document, position: Position, token: CancellationToken): Thenable<IComputeExtraInfoResult>;
 	}
 	var ExtraInfoSupport: {
 		register(modeId: string, extraInfoSupport: IExtraInfoSupport): void;
@@ -1021,7 +846,7 @@ declare module Modes {
 	}
 	export interface IRenameSupport {
 		filter?: string[];
-		rename(resource: Uri, position: IPosition, newName: string, token: CancellationToken): Thenable<IRenameResult>;
+		rename(document: Document, position: Position, newName: string, token: CancellationToken): Thenable<IRenameResult>;
 	}
 	var RenameSupport: {
 		register(modeId: string, renameSupport: IRenameSupport): void;
@@ -1030,24 +855,24 @@ declare module Modes {
 
 	// --- Begin IFormattingSupport
 	/**
-		* Interface used to format a model
-		*/
+		 * Interface used to format a model
+		 */
 	export interface IFormattingOptions {
 		tabSize: number;
 		insertSpaces: boolean;
 	}
 	/**
-		* Supports to format source code. There are three levels
-		* on which formatting can be offered:
-		* (1) format a document
-		* (2) format a selectin
-		* (3) format on keystroke
-		*/
+		 * Supports to format source code. There are three levels
+		 * on which formatting can be offered:
+		 * (1) format a document
+		 * (2) format a selectin
+		 * (3) format on keystroke
+		 */
 	export interface IFormattingSupport {
-		formatDocument: (resource: Uri, options: IFormattingOptions, token: CancellationToken) => Thenable<Models.ISingleEditOperation[]>;
-		formatRange?: (resource: Uri, range: IRange, options: IFormattingOptions, token: CancellationToken) => Thenable<Models.ISingleEditOperation[]>;
+		formatDocument: (document: Document, options: IFormattingOptions, token: CancellationToken) => Thenable<Models.ISingleEditOperation[]>;
+		formatRange?: (document: Document, range: Range, options: IFormattingOptions, token: CancellationToken) => Thenable<Models.ISingleEditOperation[]>;
 		autoFormatTriggerCharacters?: string[];
-		formatAfterKeystroke?: (resource: Uri, position: IPosition, ch: string, options: IFormattingOptions, token: CancellationToken) => Thenable<Models.ISingleEditOperation[]>;
+		formatAfterKeystroke?: (document: Document, position: Position, ch: string, options: IFormattingOptions, token: CancellationToken) => Thenable<Models.ISingleEditOperation[]>;
 	}
 	var FormattingSupport: {
 		register(modeId: string, formattingSupport: IFormattingSupport): void;
@@ -1084,8 +909,8 @@ declare module Modes {
 
 		sortBy?: ISortingTypeAndSeparator[];
 
-		suggest: (resource: Uri, position: IPosition, token: CancellationToken) => Thenable<ISuggestions[]>;
-		getSuggestionDetails?: (resource: Uri, position: IPosition, suggestion: ISuggestion, token: CancellationToken) => Thenable<ISuggestion>;
+		suggest: (document: Document, position: Position, token: CancellationToken) => Thenable<ISuggestions[]>;
+		getSuggestionDetails?: (document: Document, position: Position, suggestion: ISuggestion, token: CancellationToken) => Thenable<ISuggestion>;
 	}
 	var SuggestSupport: {
 		register(modeId: string, suggestSupport: ISuggestSupport): void;
@@ -1099,12 +924,12 @@ declare module Modes {
 		name: string;
 		parameters: string;
 		type: string;
-		range: IRange;
+		range: Range;
 		resourceUri: Uri;
 	}
 
 	export interface INavigateTypesSupport {
-		getNavigateToItems: (search: string, resource: Uri, token: CancellationToken) => Thenable<ITypeBearing[]>;
+		getNavigateToItems: (search: string, token: CancellationToken) => Thenable<ITypeBearing[]>;
 	}
 	var NavigateTypesSupport: {
 		register(modeId: string, navigateTypeSupport: INavigateTypesSupport): void;
@@ -1154,8 +979,8 @@ declare module Modes {
 		surroundingPairs?: IAutoClosingPair[];
 	}
 	/**
-		* Interface used to support insertion of matching characters like brackets and qoutes.
-		*/
+		 * Interface used to support insertion of matching characters like brackets and qoutes.
+		 */
 	export interface IAutoClosingPair {
 		open: string;
 		close: string;
@@ -1205,29 +1030,15 @@ declare module Modes {
 	};
 	// --- End IOnEnterSupport
 
-	export interface ILineContext {
-		getLineContent(): string;
-		// TODO@Alex
-		modeTransitions: IModeTransition[];
-
-		getTokenCount(): number;
-		getTokenStartIndex(tokenIndex: number): number;
-		getTokenType(tokenIndex: number): string;
-		getTokenBracket(tokenIndex: number): Bracket;
-		getTokenText(tokenIndex: number): string;
-		getTokenEndIndex(tokenIndex: number): number;
-		findIndexOfOffset(offset: number): number;
-	}
-
 	export interface IResourceEdit {
 		resource: Uri;
-		range?: IRange;
+		range?: Range;
 		newText: string;
 	}
 
 	export interface IReference {
 		resource: Uri;
-		range: IRange;
+		range: Range;
 	}
 
 	interface IMode {
@@ -1236,12 +1047,7 @@ declare module Modes {
 
 	function registerMonarchDefinition(modeId: string, language: Modes.ILanguage): void;
 	function loadInBackgroundWorker<T>(scriptSrc: string): Thenable<T>;
-	var InplaceReplaceSupport: {
-		register(modeId: string, inplaceReplaceSupport: Modes.IInplaceReplaceSupport): void;
-		create(customization?: Modes.IInplaceReplaceSupportCustomization): Modes.IInplaceReplaceSupport;
-		valueSetReplace(valueSet: string[], value: string, up: boolean): string;
-		valueSetsReplace(valueSets: string[][], value: string, up: boolean): string;
-	};
+
 }
 
 declare module Plugins {
@@ -1249,13 +1055,13 @@ declare module Plugins {
 }
 
 /**
-	* DO NOT USE.
-	*/
+ * DO NOT USE.
+ */
 export namespace _internal {
 
 	/**
-		* DO NOT USE.
-		*/
+		 * DO NOT USE.
+		 */
 	export function sendTelemetryEvent(event: string, data: any): void;
 }
 
