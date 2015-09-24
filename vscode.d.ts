@@ -34,6 +34,17 @@ export namespace commands {
 	export function registerCommand(commandId: string, callback: CommandCallback, thisArg?: any): Disposable;
 
 	/**
+		 * Register a text editor command that will make edits.
+		 * It can be invoked via a keyboard shortcut, a menu item, an action, or directly.
+		 *
+		 * @param commandId - The unique identifier of this command
+		 * @param callback - The command callback. The {{textEditor}} and {{edit}} passed in are available only for the duration of the callback.
+		 * @param thisArgs - (optional) The `this` context used when invoking {{callback}}
+		 * @return Disposable which unregisters this command on disposal
+		 */
+	export function registerTextEditorCommand(commandId: string, callback: (textEditor: TextEditor, edit: TextEditorEdit) => void, thisArg?: any): Disposable;
+
+	/**
 		 * Executes a command
 		 *
 		 * @param commandId - An identifier of a command
@@ -50,32 +61,72 @@ export interface EditorOptions {
 
 export class Document {
 
-	onContentChange: Event<Models.IContentChangedEvent[]>;
-
 	constructor(uri: Uri, lines: string[], eol: string, languageId: string, versionId: number);
 
+	/**
+		 * An event that is emitted after the contents of a document have been changed.
+		 */
+	onDidChangeContent: Event<Models.IContentChangedEvent[]>;
+
+	/**
+		 * Get the associated URI for this document. Most documents have the file:// scheme, indicating that they represent files on disk.
+		 * However, some documents may have other schemes indicating that they are not available on disk.
+		 */
 	getUri(): Uri;
 
+	/**
+		 * Is this document representing an untitled file.
+		 */
 	isUntitled(): boolean;
 
+	/**
+		 * The language identifier associated with this document.
+		 */
 	getLanguageId(): string;
 
+	/**
+		 * The version number of this document (it will strictly increase after each change).
+		 */
 	getVersionId(): number;
 
+	/**
+		 * Get the entire text in this document.
+		 */
 	getText(): string;
 
+	/**
+		 * Get the text in a specific range in this document.
+		 */
 	getTextInRange(range: Range): string;
 
+	/**
+		 * Get the text on a specific line in this document.
+		 */
 	getTextOnLine(line: number): string;
 
+	/**
+		 * Ensure a range sticks to the text.
+		 */
 	validateRange(range: Range): Range;
 
+	/**
+		 * Ensure a position sticks to the text.
+		 */
 	validatePosition(position: Position): Position;
 
+	/**
+		 * Get the number of lines in this document.
+		 */
 	getLineCount(): number;
 
+	/**
+		 * Get the maximum column for line {{line}}.
+		 */
 	getLineMaxColumn(line: number): number;
 
+	/**
+		 * Get the word under a certain position. May return null if position is at whitespace, on empty line, etc.
+		 */
 	getWordRangeAtPosition(position: Position): Range;
 }
 
@@ -122,179 +173,85 @@ export class TextEditor {
 
 	dispose();
 
+	/**
+		 * Get the document associated with this text editor. The document will be the same for the entire lifetime of this text editor.
+		 */
 	getDocument(): Document;
 
+	/**
+		 * Get the primary selection on this text editor. In case the text editor has multiple selections, the first one will be returned.
+		 */
 	getSelection(): Selection;
 
+	/**
+		 * Set the selection on this text editor.
+		 */
 	setSelection(value: Position | Range | Selection): Thenable<any>;
 
+	/**
+		 * Get the selections in this text editor.
+		 */
 	getSelections(): Selection[];
 
+	/**
+		 * Set the selections in this text editor.
+		 */
 	setSelections(value: Selection[]): Thenable<TextEditor>;
 
-	onSelectionsChange: Event<TextEditor>;
+	/**
+		 * Event fired after the text editor selections have changed.
+		 */
+	onDidChangeSelections: Event<TextEditor>;
 
+	/**
+		 * Get text editor options.
+		 */
 	getOptions(): EditorOptions;
 
+	/**
+		 * Change text editor options.
+		 */
 	setOptions(options: EditorOptions): Thenable<TextEditor>;
 
-	onOptionsChange: Event<TextEditor>;
+	/**
+		 * Event fired after the text editor options have changed.
+		 */
+	onDidChangeOptions: Event<TextEditor>;
 
-	createEdit(): TextEditorEdit;
+	/**
+		 * Perform an edit on the document associated with this text editor.
+		 * The passed in {{edit}} is available only for the duration of the callback.
+		 */
+	edit(callback: (edit: TextEditorEdit) => void): Thenable<boolean>;
 
-	applyEdit(edit: TextEditorEdit): Thenable<boolean>;
 }
 
+/**
+ * A complex edit that will be applied on a TextEditor.
+ * This holds a description of the edits and if the edits are valid (i.e. no overlapping regions, etc.) they can be applied on a Document associated with a TextEditor.
+ */
 export interface TextEditorEdit {
-
+	/**
+		 * Replace a certain text region with a new value.
+		 */
 	replace(location: Position | Range | Selection, value: string): void;
 
+	/**
+		 * Insert text at a location
+		 */
 	insert(location: Position, value: string): void;
 
+	/**
+		 * Delete a certain text region.
+		 */
 	delete(location: Range | Selection): void;
 
 }
 
-
-// TODO@api, TODO@Joh,Ben
-// output channels need to be known upfront (contributes in package.json)
-export interface OutputChannel extends Disposable {
-	append(value: string): void;
-	appendLine(value: string): void;
-	clear(): void;
-	reveal(): void;
-}
-
-export interface ExecutionOptions {
-	cwd?: string;
-	env?: { [name: string]: any };
-}
-
-export namespace shell {
-
-	export function getActiveTextEditor(): TextEditor;
-
-	export const onDidChangeActiveTextEditor: Event<TextEditor>;
-
-	export interface MessageFunction {
-		(message: string): Thenable<void>;
-		(message: string, ...commands: { title: string; command: string | CommandCallback; }[]): Thenable<void>;
-	}
-
-	export const showInformationMessage: MessageFunction;
-
-	export const showWarningMessage: MessageFunction;
-
-	export const showErrorMessage: MessageFunction;
-
-	export function setStatusBarMessage(message: string, hideAfter?: number): Disposable;
-
-	export interface QuickPickOptions {
-		/**
-		* an optional flag to include the description when filtering the picks
-		*/
-		matchOnDescription?: boolean;
-
-		/**
-		* an optional string to show as place holder in the input box to guide the user what she picks on
-		*/
-		placeHolder?: string;
-	}
-
-	export interface QuickPickItem {
-		label: string;
-		description: string;
-	}
-
-	// TODO@api naming: showQuickOpen, showQuickPanel, showSelectionPanel, showQuickie
-	export function showQuickPick(items: string[], options?: QuickPickOptions): Thenable<string>;
-	export function showQuickPick<T extends QuickPickItem>(items: T[], options?: QuickPickOptions): Thenable<T>;
-
-	export interface InputBoxOptions {
-		/**
-		* More context around the input that is being asked for.
-		*/
-		description?: string;
-
-		/**
-		* an optional string to show as place holder in the input box to guide the user what to type
-		*/
-		placeHolder?: string;
-	}
-
-	/**
-		 * Opens an input box to ask the user for input.
-		 */
-	export function showInputBox(options?: InputBoxOptions): Thenable<string>;
-
-	export function getOutputChannel(name: string): OutputChannel;
-
-	// TODO@api
-	// Justification: Should this be part of the API? Is there a node module that can do the same?
-	export function runInTerminal(command: string, args: string[], options?: ExecutionOptions): Thenable<any>;
-
-}
-
-export interface FileSystemWatcher extends Disposable {
-	onDidCreate: Event<Uri>;
-	onDidChange: Event<Uri>;
-	onDidDelete: Event<Uri>;
-}
-
-// TODO@api in the future there might be multiple opened folder in VSCode
-// so that we shouldn't make broken assumptions here
-export namespace workspace {
-
-	export function createFileSystemWatcher(globPattern: string, ignoreCreateEvents?: boolean, ignoreChangeEvents?: boolean, ignoreDeleteEvents?: boolean): FileSystemWatcher;
-
-	// TODO@api - justify this being here
-	export function getPath(): string;
-
-	export function getRelativePath(pathOrUri: string | Uri): string;
-
-	// TODO@api - justify this being here
-	export function findFiles(include: string, exclude: string, maxResults?: number): Thenable<Uri[]>;
-
-	/**
-		 * save all dirty files
-		 */
-	export function saveAll(includeUntitled?: boolean): Thenable<boolean>;
-
-	/**
-		 * are there any dirty files
-		 */
-	export function anyDirty(): Thenable<boolean>;
-}
-
-export namespace languages {
-
-	interface LanguageFilter {
-		language: string;
-		scheme?: string;
-		pattern?: string;
-	}
-
-	type LanguageSelector = string | LanguageFilter | Uri | (string | LanguageFilter | Uri)[];
-
-	export interface LanguageStatusFunction {
-		(language: LanguageSelector, message: string | { octicon: string; message: string; }, command: string | CommandCallback): Disposable
-	}
-
-	export const addInformationLanguageStatus: LanguageStatusFunction;
-	export const addWarningLanguageStatus: LanguageStatusFunction;
-	export const addErrorLanguageStatus: LanguageStatusFunction;
-}
-
-interface Memento {
-	// createChild(key: string): Memento;
-	getValue<T>(key: string, defaultValue?: T): Thenable<T>;
-	setValue(key: string, value: any): Thenable<void>;
-}
-
-export namespace plugins {
-	export function getStateObject(pluginId: string, global?: boolean): Memento;
-}
-
+/**
+ * A universal resource identifier representing either a file on disk on
+ * or another resource, e.g untitled.
+ */
 declare class Uri {
 
 	constructor();
@@ -330,13 +287,6 @@ declare class Uri {
 		 * fragment is the 'fragment' part of 'http://www.msft.com/some/path?query#fragment'.
 		 */
 	fragment: string;
-
-	withScheme(value: string): Uri;
-	withAuthority(value: string): Uri;
-	withPath(value: string): Uri;
-	withQuery(value: string): Uri;
-	withFragment(value: string): Uri;
-	with(scheme: string, authority: string, path: string, query: string, fragment: string): Uri;
 
 	/**
 		 * Retuns a string representing the corresponding file system path of this URI.
@@ -380,6 +330,199 @@ interface Event<T> {
 		 * @return
 		 */
 	(listener: (e: T) => any, thisArgs?: any, disposables?: Disposable[]): Disposable;
+}
+
+/**
+ * A file system watcher notifies about changes to files and folders
+ * on disk. To get an instanceof of a {{FileSystemWatcher}} use
+ * {{workspace.createFileSystemWatcher}}.
+ */
+export interface FileSystemWatcher extends Disposable {
+
+	/**
+		 * Happens on file/folder creation.
+		 */
+	onDidCreate: Event<Uri>;
+
+	/**
+		 * Happens on file/folder change.
+		 */
+	onDidChange: Event<Uri>;
+
+	/**
+		 * Happens on file/folder deletion.
+		 */
+	onDidDelete: Event<Uri>;
+}
+
+/**
+ *
+ */
+export interface QuickPickOptions {
+	/**
+	* an optional flag to include the description when filtering the picks
+	*/
+	matchOnDescription?: boolean;
+
+	/**
+	* an optional string to show as place holder in the input box to guide the user what she picks on
+	*/
+	placeHolder?: string;
+}
+
+/**
+ *
+ */
+export interface QuickPickItem {
+	label: string;
+	description: string;
+}
+
+/**
+ *
+ */
+export interface InputBoxOptions {
+	/**
+	* More context around the input that is being asked for.
+	*/
+	description?: string;
+
+	/**
+	* an optional string to show as place holder in the input box to guide the user what to type
+	*/
+	placeHolder?: string;
+}
+
+/**
+ *
+ */
+interface LanguageFilter {
+	language: string;
+	scheme?: string;
+	pattern?: string;
+}
+
+/**
+ *
+ */
+declare type LanguageSelector = string | LanguageFilter | Uri | (string | LanguageFilter | Uri)[];
+
+
+/**
+ *
+ */
+interface ReadOnlyMemento {
+	getValue<T>(key: string, defaultValue?: T): Thenable<T>;
+}
+
+/**
+ *
+ */
+interface Memento extends ReadOnlyMemento {
+	setValue(key: string, value: any): Thenable<void>;
+}
+
+// TODO@api, TODO@Joh,Ben
+// output channels need to be known upfront (contributes in package.json)
+export interface OutputChannel extends Disposable {
+	append(value: string): void;
+	appendLine(value: string): void;
+	clear(): void;
+	reveal(): void;
+}
+
+export interface ExecutionOptions {
+	cwd?: string;
+	env?: { [name: string]: any };
+}
+
+export namespace shell {
+
+	export function getActiveTextEditor(): TextEditor;
+
+	export const onDidChangeActiveTextEditor: Event<TextEditor>;
+
+	export interface MessageFunction {
+		(message: string): Thenable<void>;
+		(message: string, ...commands: { title: string; command: string | CommandCallback; }[]): Thenable<void>;
+	}
+
+	export const showInformationMessage: MessageFunction;
+
+	export const showWarningMessage: MessageFunction;
+
+	export const showErrorMessage: MessageFunction;
+
+	export function setStatusBarMessage(message: string, hideAfter?: number): Disposable;
+
+
+	// TODO@api naming: showQuickOpen, showQuickPanel, showSelectionPanel, showQuickie
+	export function showQuickPick(items: string[], options?: QuickPickOptions): Thenable<string>;
+	export function showQuickPick<T extends QuickPickItem>(items: T[], options?: QuickPickOptions): Thenable<T>;
+
+	/**
+		 * Opens an input box to ask the user for input.
+		 */
+	export function showInputBox(options?: InputBoxOptions): Thenable<string>;
+
+	export function getOutputChannel(name: string): OutputChannel;
+
+	// TODO@api
+	// Justification: Should this be part of the API? Is there a node module that can do the same?
+	export function runInTerminal(command: string, args: string[], options?: ExecutionOptions): Thenable<any>;
+
+}
+
+// TODO@api in the future there might be multiple opened folder in VSCode
+// so that we shouldn't make broken assumptions here
+export namespace workspace {
+
+	/**
+		 * Creates a file system watcher. A glob pattern that filters the
+		 * file events must be provided. Optionally, flags to ignore certain
+		 * kind of events can be provided.
+		 *
+		 * @param globPattern - A glob pattern that is applied to the names of created, changed, and deleted files.
+		 * @param ignoreCreateEvents - Ignore when files have been created.
+		 * @param ignoreChangeEvents - Ignore when files have been changed.
+		 * @param ignoreDeleteEvents - Ignore when files have been deleted.
+		 */
+	export function createFileSystemWatcher(globPattern: string, ignoreCreateEvents?: boolean, ignoreChangeEvents?: boolean, ignoreDeleteEvents?: boolean): FileSystemWatcher;
+
+	// TODO@api - justify this being here
+	export function getPath(): string;
+
+	export function getRelativePath(pathOrUri: string | Uri): string;
+
+	// TODO@api - justify this being here
+	export function findFiles(include: string, exclude: string, maxResults?: number): Thenable<Uri[]>;
+
+	/**
+		 * save all dirty files
+		 */
+	export function saveAll(includeUntitled?: boolean): Thenable<boolean>;
+
+	/**
+		 * are there any dirty files
+		 */
+	export function anyDirty(): Thenable<boolean>;
+}
+
+export namespace languages {
+
+	export interface LanguageStatusFunction {
+		(language: LanguageSelector, message: string | { octicon: string; message: string; }, command: string | CommandCallback): Disposable
+	}
+
+	export const addInformationLanguageStatus: LanguageStatusFunction;
+	export const addWarningLanguageStatus: LanguageStatusFunction;
+	export const addErrorLanguageStatus: LanguageStatusFunction;
+}
+
+export namespace plugins {
+	export function getStateObject(pluginId: string, global?: boolean): Memento;
+
+	export function getConfigurationObject(pluginId: string): ReadOnlyMemento;
 }
 
 /**
@@ -473,20 +616,9 @@ declare module Services {
 
 	// --- End IMarkerService
 
-	// --- Begin IConfigurationService
-
-	export interface IConfigurationService {
-		loadConfiguration(section?: string): Thenable<any>;
-	}
-
-	// --- End IConfigurationService
-
-
 	export var MarkerService: IMarkerService;
 
 	export var ModelService: IModelService;
-
-	export var ConfigurationService: IConfigurationService;
 }
 
 declare module Models {
@@ -617,11 +749,11 @@ declare module Modes {
 		open: RegExp; // The definition of when an opening brace is detected. This regex is matched against the entire line upto, and including the last typed character (the trigger character).
 		closeComplete?: string; // How to complete a matching open brace. Matches from 'open' will be expanded, e.g. '</$1>'
 		matchCase?: boolean; // If set to true, the case of the string captured in 'open' will be detected an applied also to 'closeComplete'.
-		// This is useful for cases like BEGIN/END or begin/end where the opening and closing phrases are unrelated.
-		// For identical phrases, use the $1 replacement syntax above directly in closeComplete, as it will
-		// include the proper casing from the captured string in 'open'.
-		// Upper/Lower/Camel cases are detected. Camel case dection uses only the first two characters and assumes
-		// that 'closeComplete' contains wors separated by spaces (e.g. 'End Loop')
+								// This is useful for cases like BEGIN/END or begin/end where the opening and closing phrases are unrelated.
+								// For identical phrases, use the $1 replacement syntax above directly in closeComplete, as it will
+								// include the proper casing from the captured string in 'open'.
+								// Upper/Lower/Camel cases are detected. Camel case dection uses only the first two characters and assumes
+								// that 'closeComplete' contains wors separated by spaces (e.g. 'End Loop')
 
 		closeTrigger?: string; // The character that will trigger the evaluation of 'close'.
 		close?: RegExp; // The definition of when a closing brace is detected. This regex is matched against the entire line upto, and including the last typed character (the trigger character).
