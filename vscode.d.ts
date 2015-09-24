@@ -17,9 +17,10 @@ export interface CommandCallback {
 	<T>(...args: any[]): T | Thenable<T>;
 }
 
-// TODO@api
-// Naming: Inline types or have an explicit ICommands interface?
-export const commands: {
+/**
+ * Namespace for commanding
+ */
+export namespace commands {
 
 	/**
 		 * Registers a command that can be invoked via a keyboard shortcut,
@@ -30,7 +31,7 @@ export const commands: {
 		 * @param thisArgs - (optional) The this context used when invoking {{callback}}
 		 * @return Disposable which unregisters this command on disposal
 		 */
-	registerCommand(commandId: string, callback: CommandCallback, thisArg?: any): Disposable;
+	export function registerCommand(commandId: string, callback: CommandCallback, thisArg?: any): Disposable;
 
 	/**
 		 * Executes a command
@@ -39,8 +40,8 @@ export const commands: {
 		 * @param ...rest - Parameter passed to the command function
 		 * @return
 		 */
-	executeCommand<T>(commandId: string, ...rest: any[]): Thenable<T>;
-};
+	export function executeCommand<T>(commandId: string, ...rest: any[]): Thenable<T>;
+}
 
 export interface EditorOptions {
 	tabSize: number;
@@ -49,9 +50,13 @@ export interface EditorOptions {
 
 export class Document {
 
+	onContentChange: Event<Models.IContentChangedEvent[]>;
+
 	constructor(uri: Uri, lines: string[], eol: string, languageId: string, versionId: number);
 
 	getUri(): Uri;
+
+	isUntitled(): boolean;
 
 	getLanguageId(): string;
 
@@ -205,17 +210,42 @@ export namespace shell {
 	export function showQuickPick(items: string[], options?: QuickPickOptions): Thenable<string>;
 	export function showQuickPick<T extends QuickPickItem>(items: T[], options?: QuickPickOptions): Thenable<T>;
 
+	export interface InputBoxOptions {
+		/**
+		* More context around the input that is being asked for.
+		*/
+		description?: string;
+
+		/**
+		* an optional string to show as place holder in the input box to guide the user what to type
+		*/
+		placeHolder?: string;
+	}
+
+	/**
+		 * Opens an input box to ask the user for input.
+		 */
+	export function showInputBox(options?: InputBoxOptions): Thenable<string>;
 
 	export function getOutputChannel(name: string): OutputChannel;
 
 	// TODO@api
 	// Justification: Should this be part of the API? Is there a node module that can do the same?
 	export function runInTerminal(command: string, args: string[], options?: ExecutionOptions): Thenable<any>;
+
+}
+
+export interface FileSystemWatcher extends Disposable {
+	onDidCreate: Event<Uri>;
+	onDidChange: Event<Uri>;
+	onDidDelete: Event<Uri>;
 }
 
 // TODO@api in the future there might be multiple opened folder in VSCode
 // so that we shouldn't make broken assumptions here
 export namespace workspace {
+
+	export function createFileSystemWatcher(globPattern: string, ignoreCreateEvents?: boolean, ignoreChangeEvents?: boolean, ignoreDeleteEvents?: boolean): FileSystemWatcher;
 
 	// TODO@api - justify this being here
 	export function getPath(): string;
@@ -398,11 +428,10 @@ declare module Services {
 	}
 
 	export interface IModelService {
-		onModelAdd: Event<IModel>;
-		onModelRemove: Event<IModel>;
-		removeModel(model: IModel): void;
-		getModels(): IModel[];
-		getModel(resource: Uri): IModel;
+		onDidAddDocument: Event<Document>;
+		onDidRemoveDocument: Event<Document>;
+		getDocuments(): Document[];
+		getDocument(resource: Uri): Document;
 	}
 
 	// --- Begin MarkerService
@@ -452,36 +481,12 @@ declare module Services {
 
 	// --- End IConfigurationService
 
-	// --- Begin IFileSystemEventService
-
-	export enum FileChangeTypes {
-		Changed = 0,
-		Created = 1,
-		Deleted = 2
-	}
-
-	export interface IFileSystemEvent {
-		resource: Uri;
-		changeType: FileChangeTypes;
-	}
-
-	export interface IFileSystemWatcher extends Disposable {
-		onFileChange: Event<IFileSystemEvent>;
-	}
-
-	export interface IFileSystemEventService {
-		createWatcher(pattern?: string): IFileSystemWatcher;
-	}
-
-	// --- End IFileSystemEventService
 
 	export var MarkerService: IMarkerService;
 
 	export var ModelService: IModelService;
 
 	export var ConfigurationService: IConfigurationService;
-
-	export var FileSystemEventService: IFileSystemEventService;
 }
 
 declare module Models {
@@ -549,37 +554,6 @@ declare module Models {
 	}
 }
 
-export interface IModel {
-
-	getUri(): Uri;
-
-	toRawText(): {
-		BOM: string;
-		EOL: string;
-		lines: string[];
-		length: number;
-	};
-
-	getVersionId(): number;
-
-	/**
-		 * @review
-		 */
-	isUntitled(): boolean;
-
-	/**
-		 * Get the text stored in this model.
-		 * @param eol The end of line character preference. Defaults to `EndOfLinePreference.TextDefined`.
-		 * @param preserverBOM Preserve a BOM character if it was detected when the model was constructed.
-		 * @return The text.
-		 */
-	getValue(eol?: Models.EndOfLinePreference, preserveBOM?: boolean): string;
-
-	getModeId(): string;
-
-	onContentChange: Event<Models.IContentChangedEvent[]>;
-}
-
 // --- Begin Monaco.Modes
 declare module Modes {
 	interface ILanguage {
@@ -616,13 +590,13 @@ declare module Modes {
 
 	interface ILanguageAutoComplete {
 		triggers: string;				// characters that trigger auto completion rules
-		match: string /* || RegExp */;	// autocomplete if this matches
+		match: string | RegExp;			// autocomplete if this matches
 		complete: string;				// complete with this string
 	}
 
 	interface ILanguageAutoIndent {
-		match: string /* || RegExp */;		// auto indent if this matches on enter
-		matchAfter: string /* || RegExp */;	// and auto-outdent if this matches on the next line
+		match: string | RegExp; 			// auto indent if this matches on enter
+		matchAfter: string | RegExp;		// and auto-outdent if this matches on the next line
 	}
 
 	/**
@@ -643,11 +617,11 @@ declare module Modes {
 		open: RegExp; // The definition of when an opening brace is detected. This regex is matched against the entire line upto, and including the last typed character (the trigger character).
 		closeComplete?: string; // How to complete a matching open brace. Matches from 'open' will be expanded, e.g. '</$1>'
 		matchCase?: boolean; // If set to true, the case of the string captured in 'open' will be detected an applied also to 'closeComplete'.
-								// This is useful for cases like BEGIN/END or begin/end where the opening and closing phrases are unrelated.
-								// For identical phrases, use the $1 replacement syntax above directly in closeComplete, as it will
-								// include the proper casing from the captured string in 'open'.
-								// Upper/Lower/Camel cases are detected. Camel case dection uses only the first two characters and assumes
-								// that 'closeComplete' contains wors separated by spaces (e.g. 'End Loop')
+		// This is useful for cases like BEGIN/END or begin/end where the opening and closing phrases are unrelated.
+		// For identical phrases, use the $1 replacement syntax above directly in closeComplete, as it will
+		// include the proper casing from the captured string in 'open'.
+		// Upper/Lower/Camel cases are detected. Camel case dection uses only the first two characters and assumes
+		// that 'closeComplete' contains wors separated by spaces (e.g. 'End Loop')
 
 		closeTrigger?: string; // The character that will trigger the evaluation of 'close'.
 		close?: RegExp; // The definition of when a closing brace is detected. This regex is matched against the entire line upto, and including the last typed character (the trigger character).
@@ -1071,15 +1045,15 @@ export namespace _internal {
  * enables reusing existing code without migrating to a specific promise implementation. Still,
  * we recommand the use of native promises which are available in VS Code.
  */
-interface Thenable<T> {
+interface Thenable<R> {
     /**
     * Attaches callbacks for the resolution and/or rejection of the Promise.
     * @param onfulfilled The callback to execute when the Promise is resolved.
     * @param onrejected The callback to execute when the Promise is rejected.
     * @returns A Promise for the completion of which ever callback is executed.
     */
-    then<TResult>(onfulfilled?: (value: T) => TResult | Thenable<TResult>, onrejected?: (reason: any) => TResult | Thenable<TResult>): Thenable<TResult>;
-    then<TResult>(onfulfilled?: (value: T) => TResult | Thenable<TResult>, onrejected?: (reason: any) => void): Thenable<TResult>;
+    then<TResult>(onfulfilled?: (value: R) => TResult | Thenable<TResult>, onrejected?: (reason: any) => TResult | Thenable<TResult>): Thenable<TResult>;
+    then<TResult>(onfulfilled?: (value: R) => TResult | Thenable<TResult>, onrejected?: (reason: any) => void): Thenable<TResult>;
 }
 
 // ---- ES6 promise ------------------------------------------------------
