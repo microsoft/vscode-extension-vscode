@@ -54,19 +54,14 @@ export namespace commands {
 	export function executeCommand<T>(commandId: string, ...rest: any[]): Thenable<T>;
 }
 
-export interface EditorOptions {
+export interface TextEditorOptions {
 	tabSize: number;
 	insertSpaces: boolean;
 }
 
-export class Document {
+export class TextDocument {
 
-	constructor(uri: Uri, lines: string[], eol: string, languageId: string, versionId: number);
-
-	/**
-		 * An event that is emitted after the contents of a document have been changed.
-		 */
-	onDidChangeContent: Event<Models.IContentChangedEvent[]>;
+	constructor(uri: Uri, lines: string[], eol: string, languageId: string, versionId: number, isDirty: boolean);
 
 	/**
 		 * Get the associated URI for this document. Most documents have the file:// scheme, indicating that they represent files on disk.
@@ -78,6 +73,8 @@ export class Document {
 		 * Is this document representing an untitled file.
 		 */
 	isUntitled(): boolean;
+
+	isDirty(): boolean;
 
 	/**
 		 * The language identifier associated with this document.
@@ -169,14 +166,14 @@ export class Selection {
 
 export class TextEditor {
 
-	constructor(document: Document, selections: Selection[], options: EditorOptions);
+	constructor(document: TextDocument, selections: Selection[], options: TextEditorOptions);
 
 	dispose();
 
 	/**
 		 * Get the document associated with this text editor. The document will be the same for the entire lifetime of this text editor.
 		 */
-	getDocument(): Document;
+	getTextDocument(): TextDocument;
 
 	/**
 		 * Get the primary selection on this text editor. In case the text editor has multiple selections, the first one will be returned.
@@ -199,24 +196,14 @@ export class TextEditor {
 	setSelections(value: Selection[]): Thenable<TextEditor>;
 
 	/**
-		 * Event fired after the text editor selections have changed.
-		 */
-	onDidChangeSelections: Event<TextEditor>;
-
-	/**
 		 * Get text editor options.
 		 */
-	getOptions(): EditorOptions;
+	getOptions(): TextEditorOptions;
 
 	/**
 		 * Change text editor options.
 		 */
-	setOptions(options: EditorOptions): Thenable<TextEditor>;
-
-	/**
-		 * Event fired after the text editor options have changed.
-		 */
-	onDidChangeOptions: Event<TextEditor>;
+	setOptions(options: TextEditorOptions): Thenable<TextEditor>;
 
 	/**
 		 * Perform an edit on the document associated with this text editor.
@@ -310,10 +297,49 @@ interface CancellationToken {
 	onCancellationRequested: Event<any>;
 }
 
+declare class CancellationTokenSource {
+
+	token: CancellationToken;
+
+	cancel(): void;
+
+	dispose(): void;
+}
+
+/**
+ * Represents a type which can release resources, such
+ * as event listening or a timer.
+ */
 declare class Disposable {
+
+	/**
+		 * Combine many disposables into one.
+		 *
+		 * @return Returns a new disposable which, upon dispose, will
+		 * dispose all provided disposables
+		 */
 	static of(...disposables: Disposable[]): Disposable;
-	static from(...disposableLikes: { dispose: () => void }[]): Disposable;
+
+	/**
+		 * Combine many disposable-likes into one. Use this method
+		 * when having objects with a dispose function which are not
+		 * instances of Disposable.
+		 *
+		 * @return Returns a new disposable which, upon dispose, will
+		 * dispose all provides disposable-likes.
+		 */
+	static from(...disposableLikes: { dispose: () => any }[]): Disposable;
+
+	/**
+		 * Creates a new Disposable calling the provided function
+		 * on dispose
+		 * @param callOnDispose Function that disposes something
+		 */
 	constructor(callOnDispose: Function);
+
+	/**
+		 * Dispose this object.
+		 */
 	dispose(): any;
 }
 
@@ -405,14 +431,25 @@ interface LanguageFilter {
 /**
  *
  */
-declare type LanguageSelector = string | LanguageFilter | Uri | (string | LanguageFilter | Uri)[];
+declare type LanguageSelector = string | LanguageFilter | (string | LanguageFilter)[];
 
 
 /**
  *
  */
 interface ReadOnlyMemento {
+
+	/**
+		 * @param key The name of a property to read.
+		 * @param defaultValue The default value in case the denoted property doesn't exists.
+		 * @return
+		 */
 	getValue<T>(key: string, defaultValue?: T): Thenable<T>;
+
+	/**
+		 *
+		 */
+	getValues<T>(defaultValue?: T): Thenable<T>;
 }
 
 /**
@@ -420,6 +457,41 @@ interface ReadOnlyMemento {
  */
 interface Memento extends ReadOnlyMemento {
 	setValue(key: string, value: any): Thenable<void>;
+}
+
+/**
+ * Represents the severity of diagnostics.
+ */
+export enum DiagnosticSeverity {
+	Warning = 1,
+	Error = 2
+}
+
+/**
+ * Represents a location inside a resource, such as a line
+ * inside a text file.
+ */
+export class Location {
+	constructor(uri: Uri, range: Selection | Range | Position);
+	uri: Uri;
+	range: Range;
+}
+
+/**
+ * Represents a diagnostic, such as a compiler error or warning, along with the location
+ * in which they occurred.
+ */
+export class Diagnostic {
+
+	constructor(severity: DiagnosticSeverity, location: Location, message: string, source?: string);
+
+	severity: DiagnosticSeverity;
+
+	location: Location;
+
+	message: string;
+
+	source: string;
 }
 
 // TODO@api, TODO@Joh,Ben
@@ -436,28 +508,42 @@ export interface ExecutionOptions {
 	env?: { [name: string]: any };
 }
 
-export namespace shell {
+export interface TextEditorSelectionChangeEvent {
+	textEditor: TextEditor;
+	selections: Selection[];
+}
+
+export interface TextEditorOptionsChangeEvent {
+	textEditor: TextEditor;
+	options: TextEditorOptions;
+}
+
+export interface ITelemetryInfo {
+	sessionId: string;
+	machineId: string;
+	instanceId: string;
+}
+
+export namespace window {
 
 	export function getActiveTextEditor(): TextEditor;
 
 	export const onDidChangeActiveTextEditor: Event<TextEditor>;
 
-	export interface MessageFunction {
-		(message: string): Thenable<void>;
-		(message: string, ...commands: { title: string; command: string | CommandCallback; }[]): Thenable<void>;
-	}
+	export const onDidChangeTextEditorSelection: Event<TextEditorSelectionChangeEvent>;
 
-	export const showInformationMessage: MessageFunction;
+	export const onDidChangeTextEditorOptions: Event<TextEditorOptionsChangeEvent>;
 
-	export const showWarningMessage: MessageFunction;
+	export function showInformationMessage(message: string, ...commands: { title: string; command: string | CommandCallback; }[]): Thenable<void>;
 
-	export const showErrorMessage: MessageFunction;
+	export function showWarningMessage(message: string, ...commands: { title: string; command: string | CommandCallback; }[]): Thenable<void>;
 
-	export function setStatusBarMessage(message: string, hideAfter?: number): Disposable;
+	export function showErrorMessage(message: string, ...commands: { title: string; command: string | CommandCallback; }[]): Thenable<void>;
 
+	export function setStatusBarMessage(message: string, hideAfterSeconds?: number): Disposable;
 
-	// TODO@api naming: showQuickOpen, showQuickPanel, showSelectionPanel, showQuickie
 	export function showQuickPick(items: string[], options?: QuickPickOptions): Thenable<string>;
+
 	export function showQuickPick<T extends QuickPickItem>(items: T[], options?: QuickPickOptions): Thenable<T>;
 
 	/**
@@ -467,10 +553,37 @@ export namespace shell {
 
 	export function getOutputChannel(name: string): OutputChannel;
 
-	// TODO@api
-	// Justification: Should this be part of the API? Is there a node module that can do the same?
+	/**
+		 * ✂ - don't use. Will be cut soone!
+	TODO@api move into a node_module
+		 */
 	export function runInTerminal(command: string, args: string[], options?: ExecutionOptions): Thenable<any>;
 
+	export function getTelemetryInfo(): Thenable<ITelemetryInfo>;
+
+}
+
+/**
+ * An event describing a change in the text of a model.
+ */
+export interface TextDocumentContentChangeEvent {
+	/**
+		 * The range that got replaced.
+		 */
+	range: Range;
+	/**
+		 * The length of the range that got replaced.
+		 */
+	rangeLength: number;
+	/**
+		 * The new text for the range.
+		 */
+	text: string;
+}
+
+export interface TextDocumentChangeEvent {
+	document: TextDocument;
+	contentChanges: TextDocumentContentChangeEvent[];
 }
 
 // TODO@api in the future there might be multiple opened folder in VSCode
@@ -502,49 +615,50 @@ export namespace workspace {
 		 */
 	export function saveAll(includeUntitled?: boolean): Thenable<boolean>;
 
-	/**
-		 * are there any dirty files
-		 */
-	export function anyDirty(): Thenable<boolean>;
+	export function getTextDocuments(): TextDocument[];
+	export function getTextDocument(resource: Uri): TextDocument;
+	export const onDidAddTextDocument: Event<TextDocument>;
+	export const onDidRemoveTextDocument: Event<TextDocument>;
+	export const onDidChangeTextDocument: Event<TextDocumentChangeEvent>;
+	export const onDidSaveTextDocument: Event<TextDocument>;
 }
 
 export namespace languages {
 
-	export interface LanguageStatusFunction {
-		(language: LanguageSelector, message: string | { octicon: string; message: string; }, command: string | CommandCallback): Disposable
-	}
+	/**
+		 * Add diagnostics, such as compiler errors or warnings. They wil represented as
+		 * squiggles in text editors and in general list of errors.
+		 * To remove the diagnostics again, dispose the `Disposable` which is returned
+		 * from this function call.
+		 *
+		 * @param diagnostics Array of diagnostics
+		 * @return A disposable the removes the diagnostics again.
+		 */
+	export function addDiagnostics(diagnostics: Diagnostic[]): Disposable;
 
-	export const addInformationLanguageStatus: LanguageStatusFunction;
-	export const addWarningLanguageStatus: LanguageStatusFunction;
-	export const addErrorLanguageStatus: LanguageStatusFunction;
+	/**
+		 *
+		 */
+	export function addInformationLanguageStatus(language: LanguageSelector | Uri | Uri[], message: string | { octicon: string; message: string; }, command: string | CommandCallback): Disposable;
+
+	/**
+		 *
+		 */
+	export function addWarningLanguageStatus(language: LanguageSelector | Uri | Uri[], message: string | { octicon: string; message: string; }, command: string | CommandCallback): Disposable;
+
+	/**
+		 *
+		 */
+	export function addErrorLanguageStatus(language: LanguageSelector | Uri | Uri[], message: string | { octicon: string; message: string; }, command: string | CommandCallback): Disposable;
 }
 
-export namespace plugins {
-	export function getStateObject(pluginId: string, global?: boolean): Memento;
+export namespace extensions {
 
-	export function getConfigurationObject(pluginId: string): ReadOnlyMemento;
-}
+	export function getStateMemento(extensionId: string, global?: boolean): Memento;
 
-/**
- * A range in the editor. This interface is suitable for serialization.
- */
-interface IRange {
-	/**
-		 * Line number on which the range starts (starts at 1).
-		 */
-	startLineNumber: number;
-	/**
-		 * Column on which the range starts in line `startLineNumber` (starts at 1).
-		 */
-	startColumn: number;
-	/**
-		 * Line number on which the range ends.
-		 */
-	endLineNumber: number;
-	/**
-		 * Column on which the range ends in line `endLineNumber`.
-		 */
-	endColumn: number;
+	export function getConfigurationMemento(extensionId: string): ReadOnlyMemento;
+
+	export function getExtension(extensionId: string): any;
 }
 
 export interface IHTMLContentElement {
@@ -556,134 +670,6 @@ export interface IHTMLContentElement {
 	tagName?: string;
 	children?: IHTMLContentElement[];
 	isText?: boolean;
-}
-
-declare module Services {
-	enum Severity {
-		Ignore = 0,
-		Info = 1,
-		Warning = 2,
-		Error = 3
-	}
-
-	module Severity {
-		export function fromValue(value: string): Severity;
-	}
-
-	export interface IModelService {
-		onDidAddDocument: Event<Document>;
-		onDidRemoveDocument: Event<Document>;
-		getDocuments(): Document[];
-		getDocument(resource: Uri): Document;
-	}
-
-	// --- Begin MarkerService
-	export interface IMarkerData {
-		code?: string;
-		severity: Severity;
-		message: string;
-		startLineNumber: number;
-		startColumn: number;
-		endLineNumber: number;
-		endColumn: number;
-	}
-
-	export interface IResourceMarker {
-		resource: Uri;
-		marker: IMarkerData;
-	}
-
-	export interface IMarker {
-		owner: string;
-		resource: Uri;
-		severity: Severity;
-		code?: string;
-		message: string;
-		startLineNumber: number;
-		startColumn: number;
-		endLineNumber: number;
-		endColumn: number;
-	}
-
-	export interface IMarkerService {
-
-		changeOne(owner: string, resource: Uri, markers: IMarkerData[]): void;
-
-		changeAll(owner: string, data: IResourceMarker[]): void;
-
-		remove(owner: string, resources: Uri[]): void
-	}
-
-	// --- End IMarkerService
-
-	export var MarkerService: IMarkerService;
-
-	export var ModelService: IModelService;
-}
-
-declare module Models {
-	/**
-		 * A single edit operation, that acts as a simple replace.
-		 * i.e. Replace text at `range` with `text` in model.
-		 */
-	export interface ISingleEditOperation {
-		/**
-		 * The range to replace. This can be empty to emulate a simple insert.
-		 */
-		range: IRange;
-		/**
-		 * The text to replace with. This can be null to emulate a simple delete.
-		 */
-		text: string;
-	}
-
-	/**
-		 * End of line character preference.
-		 */
-	export enum EndOfLinePreference {
-		/**
-		 * Use the end of line character identified in the text buffer.
-		 */
-		TextDefined = 0,
-		/**
-		 * Use line feed (\n) as the end of line character.
-		 */
-		LF = 1,
-		/**
-		 * Use carriage return and line feed (\r\n) as the end of line character.
-		 */
-		CRLF = 2
-	}
-
-	/**
-		 * An event describing a change in the text of a model.
-		 */
-	export interface IContentChangedEvent {
-		/**
-		 * The range that got replaced.
-		 */
-		range: IRange;
-		/**
-		 * The length of the range that got replaced.
-		 */
-		rangeLength: number;
-		/**
-		 * The new text for the range.
-		 */
-		text: string;
-		/**
-		 * The new version id the model has transitioned to.
-		 */
-		versionId: number;
-		/**
-		 * Flag that indicates that this event was generated while undoing.
-		 */
-		isUndoing: boolean;
-		/**
-		 * Flag that indicates that this event was generated while redoing.
-		 */
-		isRedoing: boolean;
-	}
 }
 
 // --- Begin Monaco.Modes
@@ -795,7 +781,7 @@ declare module Modes {
 	// --- Begin IDeclarationSupport
 	export interface IDeclarationSupport {
 		tokens?: string[];
-		findDeclaration(document: Document, position: Position, token: CancellationToken): Thenable<IReference>;
+		findDeclaration(document: TextDocument, position: Position, token: CancellationToken): Thenable<IReference>;
 	}
 	var DeclarationSupport: {
 		register(modeId: string, declarationSupport: IDeclarationSupport): void;
@@ -804,8 +790,8 @@ declare module Modes {
 
 	// --- Begin ICodeLensSupport
 	export interface ICodeLensSupport {
-		findCodeLensSymbols(document: Document, token: CancellationToken): Thenable<ICodeLensSymbol[]>;
-		findCodeLensReferences(document: Document, requests: ICodeLensSymbolRequest[], token: CancellationToken): Thenable<ICodeLensReferences>;
+		findCodeLensSymbols(document: TextDocument, token: CancellationToken): Thenable<ICodeLensSymbol[]>;
+		findCodeLensReferences(document: TextDocument, requests: ICodeLensSymbolRequest[], token: CancellationToken): Thenable<ICodeLensReferences>;
 	}
 	export interface ICodeLensSymbolRequest {
 		position: Position;
@@ -829,7 +815,7 @@ declare module Modes {
 		range: Range;
 	}
 	export interface IOccurrencesSupport {
-		findOccurrences(resource: Document, position: Position, token: CancellationToken): Thenable<IOccurrence[]>;
+		findOccurrences(resource: TextDocument, position: Position, token: CancellationToken): Thenable<IOccurrence[]>;
 	}
 	var OccurrencesSupport: {
 		register(modeId: string, occurrencesSupport: IOccurrencesSupport): void;
@@ -845,7 +831,7 @@ declare module Modes {
 		children?: IOutlineEntry[];
 	}
 	export interface IOutlineSupport {
-		getOutline(document: Document, token: CancellationToken): Thenable<IOutlineEntry[]>;
+		getOutline(document: TextDocument, token: CancellationToken): Thenable<IOutlineEntry[]>;
 		outlineGroupLabel?: { [name: string]: string; };
 	}
 	var OutlineSupport: {
@@ -866,8 +852,8 @@ declare module Modes {
 	}
 
 	export interface IQuickFixSupport {
-		getQuickFixes(resource: Document, marker: Services.IMarker | Range, token: CancellationToken): Thenable<IQuickFix[]>;
-		runQuickFixAction(resource: Document, range: Range, id: any, token: CancellationToken): Thenable<IQuickFixResult>;
+		getQuickFixes(resource: TextDocument, marker: Range, token: CancellationToken): Thenable<IQuickFix[]>;
+		runQuickFixAction(resource: TextDocument, range: Range, id: any, token: CancellationToken): Thenable<IQuickFixResult>;
 	}
 	var QuickFixSupport: {
 		register(modeId: string, quickFixSupport: IQuickFixSupport): void
@@ -882,7 +868,7 @@ declare module Modes {
 		 * @returns a list of reference of the symbol at the position in the
 		 * 	given resource.
 		 */
-		findReferences(document: Document, position: Position, includeDeclaration: boolean, token: CancellationToken): Thenable<IReference[]>;
+		findReferences(document: TextDocument, position: Position, includeDeclaration: boolean, token: CancellationToken): Thenable<IReference[]>;
 	}
 	var ReferenceSupport: {
 		register(modeId: string, quickFixSupport: IReferenceSupport): void;
@@ -922,7 +908,7 @@ declare module Modes {
 		/**
 		 * @returns the parameter hints for the specified position in the file.
 		 */
-		getParameterHints(document: Document, position: Position, token: CancellationToken): Thenable<IParameterHints>;
+		getParameterHints(document: TextDocument, position: Position, token: CancellationToken): Thenable<IParameterHints>;
 	}
 	var ParameterHintsSupport: {
 		register(modeId: string, parameterHintsSupport: IParameterHintsSupport): void;
@@ -937,7 +923,7 @@ declare module Modes {
 		className?: string;
 	}
 	export interface IExtraInfoSupport {
-		computeInfo(document: Document, position: Position, token: CancellationToken): Thenable<IComputeExtraInfoResult>;
+		computeInfo(document: TextDocument, position: Position, token: CancellationToken): Thenable<IComputeExtraInfoResult>;
 	}
 	var ExtraInfoSupport: {
 		register(modeId: string, extraInfoSupport: IExtraInfoSupport): void;
@@ -952,7 +938,7 @@ declare module Modes {
 	}
 	export interface IRenameSupport {
 		filter?: string[];
-		rename(document: Document, position: Position, newName: string, token: CancellationToken): Thenable<IRenameResult>;
+		rename(document: TextDocument, position: Position, newName: string, token: CancellationToken): Thenable<IRenameResult>;
 	}
 	var RenameSupport: {
 		register(modeId: string, renameSupport: IRenameSupport): void;
@@ -968,6 +954,20 @@ declare module Modes {
 		insertSpaces: boolean;
 	}
 	/**
+		 * A single edit operation, that acts as a simple replace.
+		 * i.e. Replace text at `range` with `text` in model.
+		 */
+	export interface ISingleEditOperation {
+		/**
+		 * The range to replace. This can be empty to emulate a simple insert.
+		 */
+		range: Range;
+		/**
+		 * The text to replace with. This can be null to emulate a simple delete.
+		 */
+		text: string;
+	}
+	/**
 		 * Supports to format source code. There are three levels
 		 * on which formatting can be offered:
 		 * (1) format a document
@@ -975,10 +975,10 @@ declare module Modes {
 		 * (3) format on keystroke
 		 */
 	export interface IFormattingSupport {
-		formatDocument: (document: Document, options: IFormattingOptions, token: CancellationToken) => Thenable<Models.ISingleEditOperation[]>;
-		formatRange?: (document: Document, range: Range, options: IFormattingOptions, token: CancellationToken) => Thenable<Models.ISingleEditOperation[]>;
+		formatDocument: (document: TextDocument, options: IFormattingOptions, token: CancellationToken) => Thenable<ISingleEditOperation[]>;
+		formatRange?: (document: TextDocument, range: Range, options: IFormattingOptions, token: CancellationToken) => Thenable<ISingleEditOperation[]>;
 		autoFormatTriggerCharacters?: string[];
-		formatAfterKeystroke?: (document: Document, position: Position, ch: string, options: IFormattingOptions, token: CancellationToken) => Thenable<Models.ISingleEditOperation[]>;
+		formatAfterKeystroke?: (document: TextDocument, position: Position, ch: string, options: IFormattingOptions, token: CancellationToken) => Thenable<ISingleEditOperation[]>;
 	}
 	var FormattingSupport: {
 		register(modeId: string, formattingSupport: IFormattingSupport): void;
@@ -1015,8 +1015,8 @@ declare module Modes {
 
 		sortBy?: ISortingTypeAndSeparator[];
 
-		suggest: (document: Document, position: Position, token: CancellationToken) => Thenable<ISuggestions[]>;
-		getSuggestionDetails?: (document: Document, position: Position, suggestion: ISuggestion, token: CancellationToken) => Thenable<ISuggestion>;
+		suggest: (document: TextDocument, position: Position, token: CancellationToken) => Thenable<ISuggestions[]>;
+		getSuggestionDetails?: (document: TextDocument, position: Position, suggestion: ISuggestion, token: CancellationToken) => Thenable<ISuggestion>;
 	}
 	var SuggestSupport: {
 		register(modeId: string, suggestSupport: ISuggestSupport): void;
@@ -1153,22 +1153,6 @@ declare module Modes {
 
 	function registerMonarchDefinition(modeId: string, language: Modes.ILanguage): void;
 	function loadInBackgroundWorker<T>(scriptSrc: string): Thenable<T>;
-
-}
-
-declare module Plugins {
-	function get(pluginId: string): any;
-}
-
-/**
- * DO NOT USE.
- */
-export namespace _internal {
-
-	/**
-		 * DO NOT USE.
-		 */
-	export function sendTelemetryEvent(event: string, data: any): void;
 }
 
 /**
