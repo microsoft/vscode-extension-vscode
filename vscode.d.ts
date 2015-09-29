@@ -76,6 +76,8 @@ export class TextDocument {
 
 	isDirty(): boolean;
 
+	save(): Thenable<boolean>;
+
 	/**
 		 * The language identifier associated with this document.
 		 */
@@ -207,9 +209,9 @@ export class TextEditor {
 
 	/**
 		 * Perform an edit on the document associated with this text editor.
-		 * The passed in {{edit}} is available only for the duration of the callback.
+		 * The passed in {{editBuilder}} is available only for the duration of the callback.
 		 */
-	edit(callback: (edit: TextEditorEdit) => void): Thenable<boolean>;
+	edit(callback: (editBuilder: TextEditorEdit) => void): Thenable<boolean>;
 
 }
 
@@ -617,8 +619,8 @@ export namespace workspace {
 
 	export function getTextDocuments(): TextDocument[];
 	export function getTextDocument(resource: Uri): TextDocument;
-	export const onDidAddTextDocument: Event<TextDocument>;
-	export const onDidRemoveTextDocument: Event<TextDocument>;
+	export const onDidOpenTextDocument: Event<TextDocument>;
+	export const onDidCloseTextDocument: Event<TextDocument>;
 	export const onDidChangeTextDocument: Event<TextDocumentChangeEvent>;
 	export const onDidSaveTextDocument: Event<TextDocument>;
 }
@@ -765,7 +767,7 @@ declare module Modes {
 		sets: string[][];
 	}
 	var InplaceReplaceSupport: {
-		register(modeId: string, inplaceReplaceSupport: Modes.IInplaceReplaceSupport): void;
+		register(modeId: string, inplaceReplaceSupport: Modes.IInplaceReplaceSupport): Disposable;
 	};
 	// --- End InplaceReplaceSupport
 
@@ -784,7 +786,7 @@ declare module Modes {
 		findDeclaration(document: TextDocument, position: Position, token: CancellationToken): Thenable<IReference>;
 	}
 	var DeclarationSupport: {
-		register(modeId: string, declarationSupport: IDeclarationSupport): void;
+		register(modeId: string, declarationSupport: IDeclarationSupport): Disposable;
 	};
 	// --- End IDeclarationSupport
 
@@ -805,7 +807,7 @@ declare module Modes {
 		languageModeStateId?: number;
 	}
 	var CodeLensSupport: {
-		register(modeId: string, codeLensSupport: ICodeLensSupport): void;
+		register(modeId: string, codeLensSupport: ICodeLensSupport): Disposable;
 	};
 	// --- End ICodeLensSupport
 
@@ -818,7 +820,7 @@ declare module Modes {
 		findOccurrences(resource: TextDocument, position: Position, token: CancellationToken): Thenable<IOccurrence[]>;
 	}
 	var OccurrencesSupport: {
-		register(modeId: string, occurrencesSupport: IOccurrencesSupport): void;
+		register(modeId: string, occurrencesSupport: IOccurrencesSupport): Disposable;
 	};
 	// --- End IOccurrencesSupport
 
@@ -835,7 +837,7 @@ declare module Modes {
 		outlineGroupLabel?: { [name: string]: string; };
 	}
 	var OutlineSupport: {
-		register(modeId: string, outlineSupport: IOutlineSupport): void;
+		register(modeId: string, outlineSupport: IOutlineSupport): Disposable;
 	};
 	// --- End IOutlineSupport
 
@@ -856,7 +858,7 @@ declare module Modes {
 		runQuickFixAction(resource: TextDocument, range: Range, id: any, token: CancellationToken): Thenable<IQuickFixResult>;
 	}
 	var QuickFixSupport: {
-		register(modeId: string, quickFixSupport: IQuickFixSupport): void
+		register(modeId: string, quickFixSupport: IQuickFixSupport): Disposable
 	};
 	// --- End IOutlineSupport
 
@@ -871,7 +873,7 @@ declare module Modes {
 		findReferences(document: TextDocument, position: Position, includeDeclaration: boolean, token: CancellationToken): Thenable<IReference[]>;
 	}
 	var ReferenceSupport: {
-		register(modeId: string, quickFixSupport: IReferenceSupport): void;
+		register(modeId: string, quickFixSupport: IReferenceSupport): Disposable;
 	};
 	// --- End IReferenceSupport
 
@@ -911,7 +913,7 @@ declare module Modes {
 		getParameterHints(document: TextDocument, position: Position, token: CancellationToken): Thenable<IParameterHints>;
 	}
 	var ParameterHintsSupport: {
-		register(modeId: string, parameterHintsSupport: IParameterHintsSupport): void;
+		register(modeId: string, parameterHintsSupport: IParameterHintsSupport): Disposable;
 	};
 	// --- End IParameterHintsSupport
 
@@ -926,7 +928,7 @@ declare module Modes {
 		computeInfo(document: TextDocument, position: Position, token: CancellationToken): Thenable<IComputeExtraInfoResult>;
 	}
 	var ExtraInfoSupport: {
-		register(modeId: string, extraInfoSupport: IExtraInfoSupport): void;
+		register(modeId: string, extraInfoSupport: IExtraInfoSupport): Disposable;
 	};
 	// --- End IExtraInfoSupport
 
@@ -941,7 +943,7 @@ declare module Modes {
 		rename(document: TextDocument, position: Position, newName: string, token: CancellationToken): Thenable<IRenameResult>;
 	}
 	var RenameSupport: {
-		register(modeId: string, renameSupport: IRenameSupport): void;
+		register(modeId: string, renameSupport: IRenameSupport): Disposable;
 	};
 	// --- End IRenameSupport
 
@@ -981,7 +983,7 @@ declare module Modes {
 		formatAfterKeystroke?: (document: TextDocument, position: Position, ch: string, options: IFormattingOptions, token: CancellationToken) => Thenable<ISingleEditOperation[]>;
 	}
 	var FormattingSupport: {
-		register(modeId: string, formattingSupport: IFormattingSupport): void;
+		register(modeId: string, formattingSupport: IFormattingSupport): Disposable;
 	};
 	// --- End IRenameSupport
 
@@ -1019,7 +1021,7 @@ declare module Modes {
 		getSuggestionDetails?: (document: TextDocument, position: Position, suggestion: ISuggestion, token: CancellationToken) => Thenable<ISuggestion>;
 	}
 	var SuggestSupport: {
-		register(modeId: string, suggestSupport: ISuggestSupport): void;
+		register(modeId: string, suggestSupport: ISuggestSupport): Disposable;
 	};
 	// --- End ISuggestSupport
 
@@ -1038,7 +1040,7 @@ declare module Modes {
 		getNavigateToItems: (search: string, token: CancellationToken) => Thenable<ITypeBearing[]>;
 	}
 	var NavigateTypesSupport: {
-		register(modeId: string, navigateTypeSupport: INavigateTypesSupport): void;
+		register(modeId: string, navigateTypeSupport: INavigateTypesSupport): Disposable;
 	};
 
 	// --- End INavigateTypesSupport
@@ -1053,7 +1055,7 @@ declare module Modes {
 		blockCommentEndToken?: string;
 	}
 	var CommentsSupport: {
-		register(modeId: string, commentsSupport: ICommentsSupport): void;
+		register(modeId: string, commentsSupport: ICommentsSupport): Disposable;
 	};
 	// --- End ICommentsSupport
 
@@ -1062,7 +1064,7 @@ declare module Modes {
 		wordDefinition?: RegExp;
 	}
 	var TokenTypeClassificationSupport: {
-		register(modeId: string, tokenTypeClassificationSupport: ITokenTypeClassificationSupport): void;
+		register(modeId: string, tokenTypeClassificationSupport: ITokenTypeClassificationSupport): Disposable;
 	};
 	// --- End ITokenTypeClassificationSupport
 
@@ -1075,7 +1077,7 @@ declare module Modes {
 		embeddedElectricCharacters?: string[];
 	}
 	var ElectricCharacterSupport: {
-		register(modeId: string, electricCharacterSupport: IElectricCharacterSupport): void;
+		register(modeId: string, electricCharacterSupport: IElectricCharacterSupport): Disposable;
 	};
 	// --- End IElectricCharacterSupport
 
@@ -1095,7 +1097,7 @@ declare module Modes {
 		notIn?: string[];
 	}
 	var CharacterPairSupport: {
-		register(modeId: string, characterPairSupport: ICharacterPairSupport): void;
+		register(modeId: string, characterPairSupport: ICharacterPairSupport): Disposable;
 	};
 	// --- End ICharacterPairSupport
 
@@ -1132,7 +1134,7 @@ declare module Modes {
 		regExpRules?: IOnEnterRegExpRules[];
 	}
 	var OnEnterSupport: {
-		register(modeId: string, opts: IOnEnterSupportOptions): void;
+		register(modeId: string, opts: IOnEnterSupportOptions): Disposable;
 	};
 	// --- End IOnEnterSupport
 
@@ -1151,8 +1153,14 @@ declare module Modes {
 		getId(): string;
 	}
 
-	function registerMonarchDefinition(modeId: string, language: Modes.ILanguage): void;
-	function loadInBackgroundWorker<T>(scriptSrc: string): Thenable<T>;
+	export interface IWorker<T> {
+		disposable: Disposable;
+		load(): Thenable<T>;
+	}
+
+	function registerMonarchDefinition(modeId: string, language: Modes.ILanguage): Disposable;
+	function loadInBackgroundWorker<T>(scriptSrc: string): IWorker<T>;
+
 }
 
 /**
