@@ -170,13 +170,14 @@ export class Range {
 	isOneLine(): boolean;
 }
 
-export class Selection {
+export class Selection extends Range {
 
-	start: Position;
+	anchor: Position;
 
-	end: Position;
+	active: Position;
 
-	constructor(start: Position, end: Position);
+	constructor(anchor: Position, active: Position);
+	constructor(anchorLine: number, anchorColumn: number, activeLine: number, activeColumn: number);
 
 	isReversed(): boolean;
 }
@@ -575,9 +576,6 @@ export namespace window {
 	TODO@api move into a node_module
 		 */
 	export function runInTerminal(command: string, args: string[], options?: ExecutionOptions): Thenable<any>;
-
-	export function getTelemetryInfo(): Thenable<ITelemetryInfo>;
-
 }
 
 /**
@@ -676,6 +674,8 @@ export namespace extensions {
 	export function getConfigurationMemento(extensionId: string): ReadOnlyMemento;
 
 	export function getExtension(extensionId: string): any;
+
+	export function getTelemetryInfo(): Thenable<ITelemetryInfo>;
 }
 
 export interface IHTMLContentElement {
@@ -1177,7 +1177,6 @@ declare module Modes {
 	function loadInBackgroundWorker<T>(scriptSrc: string): IWorker<T>;
 
 }
-
 
 /**
  * Thenable is a common denominator between ES6 promises, Q, jquery.Deferred, WinJS.Promise,

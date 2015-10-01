@@ -16,7 +16,7 @@ declare module 'vscode' {
 		/**
 		 *
 		 */
-		<T>(...args:any[]):T | Thenable<T>;
+		<T>(...args: any[]): T | Thenable<T>;
 	}
 
 	/**
@@ -44,7 +44,7 @@ declare module 'vscode' {
 		 * @param thisArgs - (optional) The `this` context used when invoking {{callback}}
 		 * @return Disposable which unregisters this command on disposal
 		 */
-		export function registerTextEditorCommand(command: string, callback: (textEditor:TextEditor, edit:TextEditorEdit) => void, thisArg?: any): Disposable;
+		export function registerTextEditorCommand(command: string, callback: (textEditor: TextEditor, edit: TextEditorEdit) => void, thisArg?: any): Disposable;
 
 		/**
 		 * Executes a command
@@ -63,7 +63,7 @@ declare module 'vscode' {
 
 	export class TextDocument {
 
-		constructor(uri: Uri, lines: string[], eol: string, languageId: string, versionId: number, isDirty:boolean);
+		constructor(uri: Uri, lines: string[], eol: string, languageId: string, versionId: number, isDirty: boolean);
 
 		/**
 		 * Get the associated URI for this document. Most documents have the file:// scheme, indicating that they represent files on disk.
@@ -109,17 +109,17 @@ declare module 'vscode' {
 		/**
 		 * Get the text on a specific line in this document.
 		 */
-		getTextOnLine(line:number): string;
+		getTextOnLine(line: number): string;
 
 		/**
 		 * Ensure a range sticks to the text.
 		 */
-		validateRange(range:Range): Range;
+		validateRange(range: Range): Range;
 
 		/**
 		 * Ensure a position sticks to the text.
 		 */
-		validatePosition(position:Position): Position;
+		validatePosition(position: Position): Position;
 
 		/**
 		 * Get the number of lines in this document.
@@ -129,12 +129,12 @@ declare module 'vscode' {
 		/**
 		 * Get the maximum column for line {{line}}.
 		 */
-		getLineMaxColumn(line:number): number;
+		getLineMaxColumn(line: number): number;
 
 		/**
 		 * Get the word under a certain position. May return null if position is at whitespace, on empty line, etc.
 		 */
-		getWordRangeAtPosition(position:Position): Range;
+		getWordRangeAtPosition(position: Position): Range;
 	}
 
 	export class Position {
@@ -157,7 +157,7 @@ declare module 'vscode' {
 		end: Position;
 
 		constructor(start: Position, end: Position);
-		constructor(startLine: number, startColumn: number, endLine:number, endColumn:number);
+		constructor(startLine: number, startColumn: number, endLine: number, endColumn: number);
 
 		contains(positionOrRange: Position | Range): boolean;
 
@@ -172,13 +172,14 @@ declare module 'vscode' {
 		isOneLine(): boolean;
 	}
 
-	export class Selection {
+	export class Selection extends Range {
 
-		start: Position;
+		anchor: Position;
 
-		end: Position;
+		active: Position;
 
-		constructor(start: Position, end: Position);
+		constructor(anchor: Position, active: Position);
+		constructor(anchorLine: number, anchorColumn: number, activeLine: number, activeColumn: number);
 
 		isReversed(): boolean;
 	}
@@ -228,7 +229,7 @@ declare module 'vscode' {
 		 * Perform an edit on the document associated with this text editor.
 		 * The passed in {{editBuilder}} is available only for the duration of the callback.
 		 */
-		edit(callback:(editBuilder:TextEditorEdit)=>void): Thenable<boolean>;
+		edit(callback: (editBuilder: TextEditorEdit) => void): Thenable<boolean>;
 
 	}
 
@@ -450,7 +451,7 @@ declare module 'vscode' {
 	/**
 	 *
 	 */
-	type LanguageSelector = string|LanguageFilter|(string|LanguageFilter)[];
+	type LanguageSelector = string | LanguageFilter | (string | LanguageFilter)[];
 
 
 	/**
@@ -502,7 +503,7 @@ declare module 'vscode' {
 	 */
 	export class Diagnostic {
 
-		constructor(severity: DiagnosticSeverity, location: Location, message: string, source?:string);
+		constructor(severity: DiagnosticSeverity, location: Location, message: string, source?: string);
 
 		severity: DiagnosticSeverity;
 
@@ -577,9 +578,6 @@ declare module 'vscode' {
 		TODO@api move into a node_module
 		 */
 		export function runInTerminal(command: string, args: string[], options?: ExecutionOptions): Thenable<any>;
-
-		export function getTelemetryInfo(): Thenable<ITelemetryInfo>;
-
 	}
 
 	/**
@@ -624,10 +622,10 @@ declare module 'vscode' {
 		// TODO@api - justify this being here
 		export function getPath(): string;
 
-		export function getRelativePath(pathOrUri: string|Uri): string;
+		export function getRelativePath(pathOrUri: string | Uri): string;
 
 		// TODO@api - justify this being here
-		export function findFiles(include: string, exclude: string, maxResults?:number): Thenable<Uri[]>;
+		export function findFiles(include: string, exclude: string, maxResults?: number): Thenable<Uri[]>;
 
 		/**
 		 * save all dirty files
@@ -658,7 +656,7 @@ declare module 'vscode' {
 		/**
 		 *
 		 */
-		export function addInformationLanguageStatus(language: LanguageSelector|Uri|Uri[], message: string | { octicon: string; message: string;}, command: string | CommandCallback): Disposable;
+		export function addInformationLanguageStatus(language: LanguageSelector | Uri | Uri[], message: string | { octicon: string; message: string; }, command: string | CommandCallback): Disposable;
 
 		/**
 		 *
@@ -678,10 +676,12 @@ declare module 'vscode' {
 		export function getConfigurationMemento(extensionId: string): ReadOnlyMemento;
 
 		export function getExtension(extensionId: string): any;
+
+		export function getTelemetryInfo(): Thenable<ITelemetryInfo>;
 	}
 
 	export interface IHTMLContentElement {
-		formattedText?:string;
+		formattedText?: string;
 		text?: string;
 		className?: string;
 		style?: string;
@@ -727,23 +727,23 @@ declare module 'vscode' {
 
 		interface ILanguageAutoComplete {
 			triggers: string;				// characters that trigger auto completion rules
-			match: string|RegExp;			// autocomplete if this matches
+			match: string | RegExp;			// autocomplete if this matches
 			complete: string;				// complete with this string
 		}
 
 		interface ILanguageAutoIndent {
-			match: string|RegExp; 			// auto indent if this matches on enter
-			matchAfter: string|RegExp;		// and auto-outdent if this matches on the next line
+			match: string | RegExp; 			// auto indent if this matches on enter
+			matchAfter: string | RegExp;		// and auto-outdent if this matches on the next line
 		}
 
 		/**
 		 * Standard brackets used for auto indentation
 		 */
 		export interface IBracketPair {
-			tokenType:string;
-			open:string;
-			close:string;
-			isElectric:boolean;
+			tokenType: string;
+			open: string;
+			close: string;
+			isElectric: boolean;
 		}
 
 		/**
@@ -754,16 +754,16 @@ declare module 'vscode' {
 			open: RegExp; // The definition of when an opening brace is detected. This regex is matched against the entire line upto, and including the last typed character (the trigger character).
 			closeComplete?: string; // How to complete a matching open brace. Matches from 'open' will be expanded, e.g. '</$1>'
 			matchCase?: boolean; // If set to true, the case of the string captured in 'open' will be detected an applied also to 'closeComplete'.
-								// This is useful for cases like BEGIN/END or begin/end where the opening and closing phrases are unrelated.
-								// For identical phrases, use the $1 replacement syntax above directly in closeComplete, as it will
-								// include the proper casing from the captured string in 'open'.
-								// Upper/Lower/Camel cases are detected. Camel case dection uses only the first two characters and assumes
-								// that 'closeComplete' contains wors separated by spaces (e.g. 'End Loop')
+			// This is useful for cases like BEGIN/END or begin/end where the opening and closing phrases are unrelated.
+			// For identical phrases, use the $1 replacement syntax above directly in closeComplete, as it will
+			// include the proper casing from the captured string in 'open'.
+			// Upper/Lower/Camel cases are detected. Camel case dection uses only the first two characters and assumes
+			// that 'closeComplete' contains wors separated by spaces (e.g. 'End Loop')
 
 			closeTrigger?: string; // The character that will trigger the evaluation of 'close'.
 			close?: RegExp; // The definition of when a closing brace is detected. This regex is matched against the entire line upto, and including the last typed character (the trigger character).
 			tokenType?: string; // The type of the token. Matches from 'open' or 'close' will be expanded, e.g. 'keyword.$1'.
-							   // Only used to auto-(un)indent a closing bracket.
+			// Only used to auto-(un)indent a closing bracket.
 		}
 
 		/**
@@ -830,14 +830,14 @@ declare module 'vscode' {
 
 		// --- Begin IOccurrencesSupport
 		export interface IOccurrence {
-			kind?:string;
-			range:Range;
+			kind?: string;
+			range: Range;
 		}
 		export interface IOccurrencesSupport {
 			findOccurrences(resource: TextDocument, position: Position, token: CancellationToken): Thenable<IOccurrence[]>;
 		}
 		var OccurrencesSupport: {
-			register(modeId: string, occurrencesSupport:IOccurrencesSupport): Disposable;
+			register(modeId: string, occurrencesSupport: IOccurrencesSupport): Disposable;
 		};
 		// --- End IOccurrencesSupport
 
@@ -854,7 +854,7 @@ declare module 'vscode' {
 			outlineGroupLabel?: { [name: string]: string; };
 		}
 		var OutlineSupport: {
-			register(modeId: string, outlineSupport:IOutlineSupport): Disposable;
+			register(modeId: string, outlineSupport: IOutlineSupport): Disposable;
 		};
 		// --- End IOutlineSupport
 
@@ -870,12 +870,12 @@ declare module 'vscode' {
 			edits: IResourceEdit[];
 		}
 
-		 export interface IQuickFixSupport {
+		export interface IQuickFixSupport {
 			getQuickFixes(resource: TextDocument, marker: Range, token: CancellationToken): Thenable<IQuickFix[]>;
 			runQuickFixAction(resource: TextDocument, range: Range, id: any, token: CancellationToken): Thenable<IQuickFixResult>;
 		}
 		var QuickFixSupport: {
-			register(modeId: string, quickFixSupport:IQuickFixSupport): Disposable
+			register(modeId: string, quickFixSupport: IQuickFixSupport): Disposable
 		};
 		// --- End IOutlineSupport
 
@@ -890,28 +890,28 @@ declare module 'vscode' {
 			findReferences(document: TextDocument, position: Position, includeDeclaration: boolean, token: CancellationToken): Thenable<IReference[]>;
 		}
 		var ReferenceSupport: {
-			register(modeId: string, quickFixSupport:IReferenceSupport): Disposable;
+			register(modeId: string, quickFixSupport: IReferenceSupport): Disposable;
 		};
 		// --- End IReferenceSupport
 
 		// --- Begin IParameterHintsSupport
 		export interface IParameter {
-			label:string;
-			documentation?:string;
-			signatureLabelOffset?:number;
-			signatureLabelEnd?:number;
+			label: string;
+			documentation?: string;
+			signatureLabelOffset?: number;
+			signatureLabelEnd?: number;
 		}
 
 		export interface ISignature {
-			label:string;
-			documentation?:string;
-			parameters:IParameter[];
+			label: string;
+			documentation?: string;
+			parameters: IParameter[];
 		}
 
 		export interface IParameterHints {
-			currentSignature:number;
-			currentParameter:number;
-			signatures:ISignature[];
+			currentSignature: number;
+			currentParameter: number;
+			signatures: ISignature[];
 		}
 
 		export interface IParameterHintsSupport {
@@ -930,7 +930,7 @@ declare module 'vscode' {
 			getParameterHints(document: TextDocument, position: Position, token: CancellationToken): Thenable<IParameterHints>;
 		}
 		var ParameterHintsSupport: {
-			register(modeId: string, parameterHintsSupport:IParameterHintsSupport): Disposable;
+			register(modeId: string, parameterHintsSupport: IParameterHintsSupport): Disposable;
 		};
 		// --- End IParameterHintsSupport
 
@@ -945,22 +945,22 @@ declare module 'vscode' {
 			computeInfo(document: TextDocument, position: Position, token: CancellationToken): Thenable<IComputeExtraInfoResult>;
 		}
 		var ExtraInfoSupport: {
-			register(modeId: string, extraInfoSupport:IExtraInfoSupport): Disposable;
+			register(modeId: string, extraInfoSupport: IExtraInfoSupport): Disposable;
 		};
 		// --- End IExtraInfoSupport
 
 		// --- Begin IRenameSupport
 		export interface IRenameResult {
-		    currentName: string;
-		    edits: IResourceEdit[];
-		    rejectReason?: string;
+			currentName: string;
+			edits: IResourceEdit[];
+			rejectReason?: string;
 		}
 		export interface IRenameSupport {
 			filter?: string[];
 			rename(document: TextDocument, position: Position, newName: string, token: CancellationToken): Thenable<IRenameResult>;
 		}
 		var RenameSupport: {
-			register(modeId: string, renameSupport:IRenameSupport): Disposable;
+			register(modeId: string, renameSupport: IRenameSupport): Disposable;
 		};
 		// --- End IRenameSupport
 
@@ -969,8 +969,8 @@ declare module 'vscode' {
 		 * Interface used to format a model
 		 */
 		export interface IFormattingOptions {
-			tabSize:number;
-			insertSpaces:boolean;
+			tabSize: number;
+			insertSpaces: boolean;
 		}
 		/**
 		 * A single edit operation, that acts as a simple replace.
@@ -1000,7 +1000,7 @@ declare module 'vscode' {
 			formatAfterKeystroke?: (document: TextDocument, position: Position, ch: string, options: IFormattingOptions, token: CancellationToken) => Thenable<ISingleEditOperation[]>;
 		}
 		var FormattingSupport: {
-			register(modeId: string, formattingSupport:IFormattingSupport): Disposable;
+			register(modeId: string, formattingSupport: IFormattingSupport): Disposable;
 		};
 		// --- End IRenameSupport
 
@@ -1010,8 +1010,8 @@ declare module 'vscode' {
 			partSeparator?: string;
 		}
 		export interface IHighlight {
-			start:number;
-			end:number;
+			start: number;
+			end: number;
 		}
 		export interface ISuggestion {
 			label: string;
@@ -1022,8 +1022,8 @@ declare module 'vscode' {
 			documentationLabel?: string;
 		}
 		export interface ISuggestions {
-			currentWord:string;
-			suggestions:ISuggestion[];
+			currentWord: string;
+			suggestions: ISuggestion[];
 			incomplete?: boolean;
 			overwriteBefore?: number;
 			overwriteAfter?: number;
@@ -1035,10 +1035,10 @@ declare module 'vscode' {
 			sortBy?: ISortingTypeAndSeparator[];
 
 			suggest: (document: TextDocument, position: Position, token: CancellationToken) => Thenable<ISuggestions[]>;
-			getSuggestionDetails? : (document: TextDocument, position: Position, suggestion:ISuggestion, token: CancellationToken) => Thenable<ISuggestion>;
+			getSuggestionDetails?: (document: TextDocument, position: Position, suggestion: ISuggestion, token: CancellationToken) => Thenable<ISuggestion>;
 		}
 		var SuggestSupport: {
-			register(modeId:string, suggestSupport:ISuggestSupport): Disposable;
+			register(modeId: string, suggestSupport: ISuggestSupport): Disposable;
 		};
 		// --- End ISuggestSupport
 
@@ -1054,10 +1054,10 @@ declare module 'vscode' {
 		}
 
 		export interface INavigateTypesSupport {
-			getNavigateToItems:(search: string, token: CancellationToken) => Thenable<ITypeBearing[]>;
+			getNavigateToItems: (search: string, token: CancellationToken) => Thenable<ITypeBearing[]>;
 		}
 		var NavigateTypesSupport: {
-			register(modeId:string, navigateTypeSupport:INavigateTypesSupport): Disposable;
+			register(modeId: string, navigateTypeSupport: INavigateTypesSupport): Disposable;
 		};
 
 		// --- End INavigateTypesSupport
@@ -1067,12 +1067,12 @@ declare module 'vscode' {
 			commentsConfiguration: ICommentsConfiguration;
 		}
 		export interface ICommentsConfiguration {
-			lineCommentTokens?:string[];
-			blockCommentStartToken?:string;
-			blockCommentEndToken?:string;
+			lineCommentTokens?: string[];
+			blockCommentStartToken?: string;
+			blockCommentEndToken?: string;
 		}
 		var CommentsSupport: {
-			register(modeId:string, commentsSupport:ICommentsSupport): Disposable;
+			register(modeId: string, commentsSupport: ICommentsSupport): Disposable;
 		};
 		// --- End ICommentsSupport
 
@@ -1081,7 +1081,7 @@ declare module 'vscode' {
 			wordDefinition?: RegExp;
 		}
 		var TokenTypeClassificationSupport: {
-			register(modeId:string, tokenTypeClassificationSupport:ITokenTypeClassificationSupport): Disposable;
+			register(modeId: string, tokenTypeClassificationSupport: ITokenTypeClassificationSupport): Disposable;
 		};
 		// --- End ITokenTypeClassificationSupport
 
@@ -1094,7 +1094,7 @@ declare module 'vscode' {
 			embeddedElectricCharacters?: string[];
 		}
 		var ElectricCharacterSupport: {
-			register(modeId:string, electricCharacterSupport:IElectricCharacterSupport): Disposable;
+			register(modeId: string, electricCharacterSupport: IElectricCharacterSupport): Disposable;
 		};
 		// --- End IElectricCharacterSupport
 
@@ -1107,14 +1107,14 @@ declare module 'vscode' {
 		 * Interface used to support insertion of matching characters like brackets and qoutes.
 		 */
 		export interface IAutoClosingPair {
-			open:string;
-			close:string;
+			open: string;
+			close: string;
 		}
 		export interface IAutoClosingPairConditional extends IAutoClosingPair {
 			notIn?: string[];
 		}
 		var CharacterPairSupport: {
-			register(modeId:string, characterPairSupport:ICharacterPairSupport): Disposable;
+			register(modeId: string, characterPairSupport: ICharacterPairSupport): Disposable;
 		};
 		// --- End ICharacterPairSupport
 
@@ -1136,9 +1136,9 @@ declare module 'vscode' {
 			Outdent
 		}
 		export interface IEnterAction {
-			indentAction:IndentAction;
-			appendText?:string;
-			removeText?:number;
+			indentAction: IndentAction;
+			appendText?: string;
+			removeText?: number;
 		}
 		export interface IOnEnterRegExpRules {
 			beforeText: RegExp;
@@ -1151,7 +1151,7 @@ declare module 'vscode' {
 			regExpRules?: IOnEnterRegExpRules[];
 		}
 		var OnEnterSupport: {
-			register(modeId:string, opts:IOnEnterSupportOptions): Disposable;
+			register(modeId: string, opts: IOnEnterSupportOptions): Disposable;
 		};
 		// --- End IOnEnterSupport
 
@@ -1194,14 +1194,14 @@ declare module 'vscode-testing' {
 		line: string;
 		tokens: IRelaxedToken[];
 	}
-	export function testTokenization(name:string, language: vscode.Modes.ILanguage, tests:ITestItem[][]): void;
+	export function testTokenization(name: string, language: vscode.Modes.ILanguage, tests: ITestItem[][]): void;
 	export interface IOnEnterAsserter {
-		nothing(oneLineAboveText:string, beforeText:string, afterText:string): void;
-		indents(oneLineAboveText:string, beforeText:string, afterText:string): void;
-		outdents(oneLineAboveText:string, beforeText:string, afterText:string): void;
-		indentsOutdents(oneLineAboveText:string, beforeText:string, afterText:string): void;
+		nothing(oneLineAboveText: string, beforeText: string, afterText: string): void;
+		indents(oneLineAboveText: string, beforeText: string, afterText: string): void;
+		outdents(oneLineAboveText: string, beforeText: string, afterText: string): void;
+		indentsOutdents(oneLineAboveText: string, beforeText: string, afterText: string): void;
 	}
-	export function testOnEnter(name:string, language: vscode.Modes.ILanguage, callback:(assertOnEnter:IOnEnterAsserter) => void): void;
+	export function testOnEnter(name: string, language: vscode.Modes.ILanguage, callback: (assertOnEnter: IOnEnterAsserter) => void): void;
 }
 
 /**
