@@ -690,7 +690,7 @@ export interface IHTMLContentElement {
 }
 
 // --- Begin Monaco.Modes
-declare module Modes {
+export namespace Modes {
 	interface ILanguage {
 		// required
 		name: string;								// unique name to identify the language
@@ -781,8 +781,8 @@ declare module Modes {
 	interface IInplaceReplaceSupport {
 		sets: string[][];
 	}
-	var InplaceReplaceSupport: {
-		register(modeId: string, inplaceReplaceSupport: Modes.IInplaceReplaceSupport): Disposable;
+	export var InplaceReplaceSupport: {
+		register(modeId: string, inplaceReplaceSupport: IInplaceReplaceSupport): Disposable;
 	};
 	// --- End InplaceReplaceSupport
 
@@ -1173,7 +1173,7 @@ declare module Modes {
 		load(): Thenable<T>;
 	}
 
-	function registerMonarchDefinition(modeId: string, language: Modes.ILanguage): Disposable;
+	function registerMonarchDefinition(modeId: string, language: ILanguage): Disposable;
 	function loadInBackgroundWorker<T>(scriptSrc: string): IWorker<T>;
 
 }
