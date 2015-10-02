@@ -139,9 +139,9 @@ export class Position {
 
 	line: number;
 
-	column: number;
+	character: number;
 
-	constructor(line: number, column: number);
+	constructor(line: number, character: number);
 
 	isBefore(other: Position): boolean;
 
