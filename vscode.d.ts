@@ -257,7 +257,7 @@ export interface TextEditorEdit {
  * A universal resource identifier representing either a file on disk on
  * or another resource, e.g untitled.
  */
-declare class Uri {
+export class Uri {
 
 	constructor();
 	static parse(path: string): Uri;
@@ -315,7 +315,7 @@ interface CancellationToken {
 	onCancellationRequested: Event<any>;
 }
 
-declare class CancellationTokenSource {
+export class CancellationTokenSource {
 
 	token: CancellationToken;
 
@@ -328,7 +328,7 @@ declare class CancellationTokenSource {
  * Represents a type which can release resources, such
  * as event listening or a timer.
  */
-declare class Disposable {
+export class Disposable {
 
 	/**
 		 * Combine many disposables into one.
@@ -449,7 +449,7 @@ interface LanguageFilter {
 /**
  *
  */
-declare type LanguageSelector = string | LanguageFilter | (string | LanguageFilter)[];
+export type LanguageSelector = string | LanguageFilter | (string | LanguageFilter)[];
 
 
 /**
@@ -800,7 +800,7 @@ export namespace Modes {
 		tokens?: string[];
 		findDeclaration(document: TextDocument, position: Position, token: CancellationToken): Thenable<IReference>;
 	}
-	var DeclarationSupport: {
+	export var DeclarationSupport: {
 		register(modeId: string, declarationSupport: IDeclarationSupport): Disposable;
 	};
 	// --- End IDeclarationSupport
@@ -821,7 +821,7 @@ export namespace Modes {
 		references: IReference[][];
 		languageModeStateId?: number;
 	}
-	var CodeLensSupport: {
+	export var CodeLensSupport: {
 		register(modeId: string, codeLensSupport: ICodeLensSupport): Disposable;
 	};
 	// --- End ICodeLensSupport
@@ -834,7 +834,7 @@ export namespace Modes {
 	export interface IOccurrencesSupport {
 		findOccurrences(resource: TextDocument, position: Position, token: CancellationToken): Thenable<IOccurrence[]>;
 	}
-	var OccurrencesSupport: {
+	export var OccurrencesSupport: {
 		register(modeId: string, occurrencesSupport: IOccurrencesSupport): Disposable;
 	};
 	// --- End IOccurrencesSupport
@@ -851,7 +851,7 @@ export namespace Modes {
 		getOutline(document: TextDocument, token: CancellationToken): Thenable<IOutlineEntry[]>;
 		outlineGroupLabel?: { [name: string]: string; };
 	}
-	var OutlineSupport: {
+	export var OutlineSupport: {
 		register(modeId: string, outlineSupport: IOutlineSupport): Disposable;
 	};
 	// --- End IOutlineSupport
@@ -872,7 +872,7 @@ export namespace Modes {
 		getQuickFixes(resource: TextDocument, marker: Range, token: CancellationToken): Thenable<IQuickFix[]>;
 		runQuickFixAction(resource: TextDocument, range: Range, id: any, token: CancellationToken): Thenable<IQuickFixResult>;
 	}
-	var QuickFixSupport: {
+	export var QuickFixSupport: {
 		register(modeId: string, quickFixSupport: IQuickFixSupport): Disposable
 	};
 	// --- End IOutlineSupport
@@ -887,7 +887,7 @@ export namespace Modes {
 		 */
 		findReferences(document: TextDocument, position: Position, includeDeclaration: boolean, token: CancellationToken): Thenable<IReference[]>;
 	}
-	var ReferenceSupport: {
+	export var ReferenceSupport: {
 		register(modeId: string, quickFixSupport: IReferenceSupport): Disposable;
 	};
 	// --- End IReferenceSupport
@@ -927,7 +927,7 @@ export namespace Modes {
 		 */
 		getParameterHints(document: TextDocument, position: Position, token: CancellationToken): Thenable<IParameterHints>;
 	}
-	var ParameterHintsSupport: {
+	export var ParameterHintsSupport: {
 		register(modeId: string, parameterHintsSupport: IParameterHintsSupport): Disposable;
 	};
 	// --- End IParameterHintsSupport
@@ -942,7 +942,7 @@ export namespace Modes {
 	export interface IExtraInfoSupport {
 		computeInfo(document: TextDocument, position: Position, token: CancellationToken): Thenable<IComputeExtraInfoResult>;
 	}
-	var ExtraInfoSupport: {
+	export var ExtraInfoSupport: {
 		register(modeId: string, extraInfoSupport: IExtraInfoSupport): Disposable;
 	};
 	// --- End IExtraInfoSupport
@@ -957,7 +957,7 @@ export namespace Modes {
 		filter?: string[];
 		rename(document: TextDocument, position: Position, newName: string, token: CancellationToken): Thenable<IRenameResult>;
 	}
-	var RenameSupport: {
+	export var RenameSupport: {
 		register(modeId: string, renameSupport: IRenameSupport): Disposable;
 	};
 	// --- End IRenameSupport
@@ -997,7 +997,7 @@ export namespace Modes {
 		autoFormatTriggerCharacters?: string[];
 		formatAfterKeystroke?: (document: TextDocument, position: Position, ch: string, options: IFormattingOptions, token: CancellationToken) => Thenable<ISingleEditOperation[]>;
 	}
-	var FormattingSupport: {
+	export var FormattingSupport: {
 		register(modeId: string, formattingSupport: IFormattingSupport): Disposable;
 	};
 	// --- End IRenameSupport
@@ -1035,7 +1035,7 @@ export namespace Modes {
 		suggest: (document: TextDocument, position: Position, token: CancellationToken) => Thenable<ISuggestions[]>;
 		getSuggestionDetails?: (document: TextDocument, position: Position, suggestion: ISuggestion, token: CancellationToken) => Thenable<ISuggestion>;
 	}
-	var SuggestSupport: {
+	export var SuggestSupport: {
 		register(modeId: string, suggestSupport: ISuggestSupport): Disposable;
 	};
 	// --- End ISuggestSupport
@@ -1054,7 +1054,7 @@ export namespace Modes {
 	export interface INavigateTypesSupport {
 		getNavigateToItems: (search: string, token: CancellationToken) => Thenable<ITypeBearing[]>;
 	}
-	var NavigateTypesSupport: {
+	export var NavigateTypesSupport: {
 		register(modeId: string, navigateTypeSupport: INavigateTypesSupport): Disposable;
 	};
 
@@ -1069,7 +1069,7 @@ export namespace Modes {
 		blockCommentStartToken?: string;
 		blockCommentEndToken?: string;
 	}
-	var CommentsSupport: {
+	export var CommentsSupport: {
 		register(modeId: string, commentsSupport: ICommentsSupport): Disposable;
 	};
 	// --- End ICommentsSupport
@@ -1078,7 +1078,7 @@ export namespace Modes {
 	export interface ITokenTypeClassificationSupport {
 		wordDefinition?: RegExp;
 	}
-	var TokenTypeClassificationSupport: {
+	export var TokenTypeClassificationSupport: {
 		register(modeId: string, tokenTypeClassificationSupport: ITokenTypeClassificationSupport): Disposable;
 	};
 	// --- End ITokenTypeClassificationSupport
@@ -1091,7 +1091,7 @@ export namespace Modes {
 		caseInsensitive?: boolean;
 		embeddedElectricCharacters?: string[];
 	}
-	var ElectricCharacterSupport: {
+	export var ElectricCharacterSupport: {
 		register(modeId: string, electricCharacterSupport: IElectricCharacterSupport): Disposable;
 	};
 	// --- End IElectricCharacterSupport
@@ -1111,7 +1111,7 @@ export namespace Modes {
 	export interface IAutoClosingPairConditional extends IAutoClosingPair {
 		notIn?: string[];
 	}
-	var CharacterPairSupport: {
+	export var CharacterPairSupport: {
 		register(modeId: string, characterPairSupport: ICharacterPairSupport): Disposable;
 	};
 	// --- End ICharacterPairSupport
@@ -1148,7 +1148,7 @@ export namespace Modes {
 		indentationRules?: IIndentationRules;
 		regExpRules?: IOnEnterRegExpRules[];
 	}
-	var OnEnterSupport: {
+	export var OnEnterSupport: {
 		register(modeId: string, opts: IOnEnterSupportOptions): Disposable;
 	};
 	// --- End IOnEnterSupport
@@ -1280,4 +1280,4 @@ interface PromiseConstructor {
     // [Symbol.species]: Function;
 }
 
-declare var Promise: PromiseConstructor;
+export var Promise: PromiseConstructor;
