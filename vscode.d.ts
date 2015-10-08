@@ -5,7 +5,8 @@
 declare namespace vscode {
 
 	/**
-	 * The command callback.
+	 * The command callback is a function which represents 
+     * a commend
 	 */
 	export interface CommandCallback {
 
@@ -16,7 +17,7 @@ declare namespace vscode {
 	}
 
 	/**
-	 * Namespace for commanding
+	 * The ```commands``` namespace contains function to register and execute commands. 
 	 */
 	export namespace commands {
 
@@ -56,7 +57,10 @@ declare namespace vscode {
 		tabSize: number;
 		insertSpaces: boolean;
 	}
-
+    
+    /**
+     * A text document is an immutable representaton of text. To edit a document, use a ```TextEditor```.
+     */
 	export class TextDocument {
 
 		constructor(uri: Uri, lines: string[], eol: string, languageId: string, versionId: number, isDirty:boolean);
@@ -68,42 +72,50 @@ declare namespace vscode {
 		getUri(): Uri;
 
 		/**
-		 * Returns the file system path of the file associated with this document. Shorthand
+		 * @return The file system path of the file associated with this document. Shorthand
 		 * notation for ```TextDocument.getUri().fsPath```
 		 */
 		getPath(): string;
 
 		/**
-		 * Is this document representing an untitled file.
+		 * @return Is this document representing an untitled file.
 		 */
 		isUntitled(): boolean;
-
+        
+        /**
+         * @return true iff there are changes to be saved on disk
+         */
 		isDirty(): boolean;
 
+        /**
+         * Saves the underlying file with contents of this document.
+         */
 		save(): Thenable<boolean>;
 
 		/**
-		 * The language identifier associated with this document.
+		 * @return The language identifier associated with this document.
 		 */
 		getLanguageId(): string;
 
 		/**
-		 * The version number of this document (it will strictly increase after each change).
+		 * @return The version number of this document (it will strictly increase after each change).
 		 */
 		getVersionId(): number;
 
 		/**
-		 * Get the entire text in this document.
+		 * @return Get the entire text in this document.
 		 */
 		getText(): string;
 
 		/**
-		 * Get the text in a specific range in this document.
+         * @param range a range of the document
+		 * @return Get the text in a specific range in this document.
 		 */
 		getTextInRange(range: Range): string;
 
 		/**
-		 * Get the text on a specific line in this document.
+         * @param a line number
+		 * @return Get the text on a specific line in this document.
 		 */
 		getTextOnLine(line:number): string;
 
@@ -118,21 +130,26 @@ declare namespace vscode {
 		validatePosition(position:Position): Position;
 
 		/**
-		 * Get the number of lines in this document.
+		 * @return Get the number of lines in this document.
 		 */
 		getLineCount(): number;
 
 		/**
-		 * Get the maximum column for line {{line}}.
+         * @param line a line number
+		 * @return Get the maximum column for the specified line
 		 */
 		getLineMaxColumn(line:number): number;
 
 		/**
-		 * Get the word under a certain position. May return null if position is at whitespace, on empty line, etc.
+         * @param position a position
+		 * @return Get the word under a certain position. May return null if position is at whitespace, on empty line, etc.
 		 */
 		getWordRangeAtPosition(position:Position): Range;
 	}
-
+    
+    /**
+     * A position represents a line and character of a ```TextDocument```
+     */
 	export class Position {
 
 		line: number;
@@ -145,7 +162,12 @@ declare namespace vscode {
 
 		isBeforeOrEqual(other: Position): boolean;
 	}
-
+    
+    
+    /**
+     * A range represents two ```Positions``` of a ```TextDocument```. Often
+     * ranges cover multiple lines.
+     */
 	export class Range {
 
 		start: Position;
@@ -167,7 +189,12 @@ declare namespace vscode {
 		 */
 		isOneLine(): boolean;
 	}
-
+    
+    /**
+     * A selection is a range define by a user gesture in a ```TextEditor```. 
+     * Selection have an anchor position, where a selection starts, and an
+     * active position, where a selection ends and where the cursor is. 
+     */
 	export class Selection extends Range {
 
 		anchor: Position;
@@ -177,14 +204,15 @@ declare namespace vscode {
 		constructor(anchor: Position, active: Position);
 		constructor(anchorLine: number, anchorColumn: number, activeLine:number, activeColumn:number);
 
+        /**
+         * @return true iff ```active``` !== ```start```
+         */        
 		isReversed(): boolean;
 	}
 
-	export class TextEditor {
+    export class TextEditor {
 
 		constructor(document: TextDocument, selections: Selection[], options: TextEditorOptions);
-
-		dispose();
 
 		/**
 		 * Get the document associated with this text editor. The document will be the same for the entire lifetime of this text editor.
@@ -226,7 +254,6 @@ declare namespace vscode {
 		 * The passed in {{editBuilder}} is available only for the duration of the callback.
 		 */
 		edit(callback:(editBuilder:TextEditorEdit)=>void): Thenable<boolean>;
-
 	}
 
 	/**
@@ -248,7 +275,6 @@ declare namespace vscode {
 		 * Delete a certain text region.
 		 */
 		delete(location: Range | Selection): void;
-
 	}
 
 	/**
@@ -487,7 +513,7 @@ declare namespace vscode {
 	 * inside a text file.
 	 */
 	export class Location {
-		constructor(uri: Uri, range: Selection | Range | Position);
+		constructor(uri: Uri, range: Range | Position);
 		uri: Uri;
 		range: Range;
 	}
@@ -539,6 +565,9 @@ declare namespace vscode {
 		instanceId: string;
 	}
 
+    /**
+     * The ```window``` namespace contains functions to interact with the active window of VS Code.
+     */
 	export namespace window {
 
 		export function getActiveTextEditor(): TextEditor;
@@ -598,8 +627,9 @@ declare namespace vscode {
 		contentChanges: TextDocumentContentChangeEvent[];
 	}
 
-	// TODO@api in the future there might be multiple opened folder in VSCode
-	// so that we shouldn't make broken assumptions here
+	/**
+     * The ```workspace``` namespace contains functions to interact with currently opened folder.
+     */
 	export namespace workspace {
 
 		/**
@@ -634,7 +664,11 @@ declare namespace vscode {
 		export const onDidChangeTextDocument: Event<TextDocumentChangeEvent>;
 		export const onDidSaveTextDocument: Event<TextDocument>;
 	}
-
+    
+    /**
+     * The ```languages``` namespace contains functions that are specific to implemnting a 
+     * language service.
+     */
 	export namespace languages {
 
 		/**
@@ -663,7 +697,10 @@ declare namespace vscode {
 		 */
 		export function addErrorLanguageStatus(language: LanguageSelector | Uri | Uri[], message: string | { octicon: string; message: string; }, command: string | CommandCallback): Disposable;
 	}
-
+    
+    /**
+     * The ```extensions``` namespace contains function that are specific to extensions.
+     */
 	export namespace extensions {
 
 		export function getStateMemento(extensionId: string, global?: boolean): Memento;
