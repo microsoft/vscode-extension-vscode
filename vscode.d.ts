@@ -148,7 +148,10 @@ declare namespace vscode {
 	}
     
     /**
-     * A position represents a line and character of a ```TextDocument```
+     * A position represents a line and character of a ```TextDocument```.
+     * 
+     * This type is *immutable* which means after creation its state cannot
+     * be modified anymore.
      */
 	export class Position {
 
@@ -167,8 +170,11 @@ declare namespace vscode {
     /**
      * A range represents two ```Positions``` of a ```TextDocument```. Often
      * ranges cover multiple lines.
+     * 
+     * This type is *immutable* which means after creation its state cannot
+     * be modified anymore.
      */
-	export class Range {
+    export class Range {
 
 		start: Position;
 
@@ -193,7 +199,10 @@ declare namespace vscode {
     /**
      * A selection is a range define by a user gesture in a ```TextEditor```. 
      * Selection have an anchor position, where a selection starts, and an
-     * active position, where a selection ends and where the cursor is. 
+     * active position, where a selection ends and where the cursor is.
+     * 
+     * This type is *immutable* which means after creation its state cannot
+     * be modified anymore.
      */
 	export class Selection extends Range {
 
