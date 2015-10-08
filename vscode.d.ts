@@ -2,27 +2,25 @@
  * Copyright (C) Microsoft Corporation. All rights reserved.
  *--------------------------------------------------------*/
 
-
-// TODO@api
-// Naming: Command, Action, ...
-
-/**
- * The command callback.
- */
-export interface CommandCallback {
+declare namespace vscode {
 
 	/**
+	 * The command callback.
+	 */
+	export interface CommandCallback {
+
+		/**
 		 *
 		 */
-	<T>(...args: any[]): T | Thenable<T>;
-}
-
-/**
- * Namespace for commanding
- */
-export namespace commands {
+		<T>(...args:any[]):T | Thenable<T>;
+	}
 
 	/**
+	 * Namespace for commanding
+	 */
+	export namespace commands {
+
+		/**
 		 * Registers a command that can be invoked via a keyboard shortcut,
 		 * an menu item, an action, or directly.
 		 *
@@ -31,9 +29,9 @@ export namespace commands {
 		 * @param thisArgs - (optional) The this context used when invoking {{callback}}
 		 * @return Disposable which unregisters this command on disposal
 		 */
-	export function registerCommand(command: string, callback: CommandCallback, thisArg?: any): Disposable;
+		export function registerCommand(command: string, callback: CommandCallback, thisArg?: any): Disposable;
 
-	/**
+		/**
 		 * Register a text editor command that will make edits.
 		 * It can be invoked via a keyboard shortcut, a menu item, an action, or directly.
 		 *
@@ -42,303 +40,303 @@ export namespace commands {
 		 * @param thisArgs - (optional) The `this` context used when invoking {{callback}}
 		 * @return Disposable which unregisters this command on disposal
 		 */
-	export function registerTextEditorCommand(command: string, callback: (textEditor: TextEditor, edit: TextEditorEdit) => void, thisArg?: any): Disposable;
+		export function registerTextEditorCommand(command: string, callback: (textEditor:TextEditor, edit:TextEditorEdit) => void, thisArg?: any): Disposable;
 
-	/**
+		/**
 		 * Executes a command
 		 *
 		 * @param command - Identifier of the command to execute
 		 * @param ...rest - Parameter passed to the command function
 		 * @return
 		 */
-	export function executeCommand<T>(command: string, ...rest: any[]): Thenable<T>;
-}
+		export function executeCommand<T>(command: string, ...rest: any[]): Thenable<T>;
+	}
 
-export interface TextEditorOptions {
-	tabSize: number;
-	insertSpaces: boolean;
-}
+	export interface TextEditorOptions {
+		tabSize: number;
+		insertSpaces: boolean;
+	}
 
-export class TextDocument {
+	export class TextDocument {
 
-	constructor(uri: Uri, lines: string[], eol: string, languageId: string, versionId: number, isDirty: boolean);
+		constructor(uri: Uri, lines: string[], eol: string, languageId: string, versionId: number, isDirty:boolean);
 
-	/**
+		/**
 		 * Get the associated URI for this document. Most documents have the file:// scheme, indicating that they represent files on disk.
 		 * However, some documents may have other schemes indicating that they are not available on disk.
 		 */
-	getUri(): Uri;
+		getUri(): Uri;
 
-	/**
+		/**
 		 * Returns the file system path of the file associated with this document. Shorthand
 		 * notation for ```TextDocument.getUri().fsPath```
 		 */
-	getPath(): string;
+		getPath(): string;
 
-	/**
+		/**
 		 * Is this document representing an untitled file.
 		 */
-	isUntitled(): boolean;
+		isUntitled(): boolean;
 
-	isDirty(): boolean;
+		isDirty(): boolean;
 
-	save(): Thenable<boolean>;
+		save(): Thenable<boolean>;
 
-	/**
+		/**
 		 * The language identifier associated with this document.
 		 */
-	getLanguageId(): string;
+		getLanguageId(): string;
 
-	/**
+		/**
 		 * The version number of this document (it will strictly increase after each change).
 		 */
-	getVersionId(): number;
+		getVersionId(): number;
 
-	/**
+		/**
 		 * Get the entire text in this document.
 		 */
-	getText(): string;
+		getText(): string;
 
-	/**
+		/**
 		 * Get the text in a specific range in this document.
 		 */
-	getTextInRange(range: Range): string;
+		getTextInRange(range: Range): string;
 
-	/**
+		/**
 		 * Get the text on a specific line in this document.
 		 */
-	getTextOnLine(line: number): string;
+		getTextOnLine(line:number): string;
 
-	/**
+		/**
 		 * Ensure a range sticks to the text.
 		 */
-	validateRange(range: Range): Range;
+		validateRange(range:Range): Range;
 
-	/**
+		/**
 		 * Ensure a position sticks to the text.
 		 */
-	validatePosition(position: Position): Position;
+		validatePosition(position:Position): Position;
 
-	/**
+		/**
 		 * Get the number of lines in this document.
 		 */
-	getLineCount(): number;
+		getLineCount(): number;
 
-	/**
+		/**
 		 * Get the maximum column for line {{line}}.
 		 */
-	getLineMaxColumn(line: number): number;
+		getLineMaxColumn(line:number): number;
 
-	/**
+		/**
 		 * Get the word under a certain position. May return null if position is at whitespace, on empty line, etc.
 		 */
-	getWordRangeAtPosition(position: Position): Range;
-}
+		getWordRangeAtPosition(position:Position): Range;
+	}
 
-export class Position {
+	export class Position {
 
-	line: number;
+		line: number;
 
-	character: number;
+		character: number;
 
-	constructor(line: number, character: number);
+		constructor(line: number, character: number);
 
-	isBefore(other: Position): boolean;
+		isBefore(other: Position): boolean;
 
-	isBeforeOrEqual(other: Position): boolean;
-}
+		isBeforeOrEqual(other: Position): boolean;
+	}
 
-export class Range {
+	export class Range {
 
-	start: Position;
+		start: Position;
 
-	end: Position;
+		end: Position;
 
-	constructor(start: Position, end: Position);
-	constructor(startLine: number, startColumn: number, endLine: number, endColumn: number);
+		constructor(start: Position, end: Position);
+		constructor(startLine: number, startColumn: number, endLine:number, endColumn:number);
 
-	contains(positionOrRange: Position | Range): boolean;
+		contains(positionOrRange: Position | Range): boolean;
 
-	/**
+		/**
 		 * @return `true` iff `start` and `end` are equal
 		 */
-	isEmpty(): boolean;
+		isEmpty(): boolean;
 
-	/**
+		/**
 		 * @return `true` iff start and end are on the same line
 		 */
-	isOneLine(): boolean;
-}
+		isOneLine(): boolean;
+	}
 
-export class Selection extends Range {
+	export class Selection extends Range {
 
-	anchor: Position;
+		anchor: Position;
 
-	active: Position;
+		active: Position;
 
-	constructor(anchor: Position, active: Position);
-	constructor(anchorLine: number, anchorColumn: number, activeLine: number, activeColumn: number);
+		constructor(anchor: Position, active: Position);
+		constructor(anchorLine: number, anchorColumn: number, activeLine:number, activeColumn:number);
 
-	isReversed(): boolean;
-}
+		isReversed(): boolean;
+	}
 
-export class TextEditor {
+	export class TextEditor {
 
-	constructor(document: TextDocument, selections: Selection[], options: TextEditorOptions);
+		constructor(document: TextDocument, selections: Selection[], options: TextEditorOptions);
 
-	dispose();
+		dispose();
 
-	/**
+		/**
 		 * Get the document associated with this text editor. The document will be the same for the entire lifetime of this text editor.
 		 */
-	getTextDocument(): TextDocument;
+		getTextDocument(): TextDocument;
 
-	/**
+		/**
 		 * Get the primary selection on this text editor. In case the text editor has multiple selections, the first one will be returned.
 		 */
-	getSelection(): Selection;
+		getSelection(): Selection;
 
-	/**
+		/**
 		 * Set the selection on this text editor.
 		 */
-	setSelection(value: Position | Range | Selection): Thenable<any>;
+		setSelection(value: Position | Range | Selection): Thenable<any>;
 
-	/**
+		/**
 		 * Get the selections in this text editor.
 		 */
-	getSelections(): Selection[];
+		getSelections(): Selection[];
 
-	/**
+		/**
 		 * Set the selections in this text editor.
 		 */
-	setSelections(value: Selection[]): Thenable<TextEditor>;
+		setSelections(value: Selection[]): Thenable<TextEditor>;
 
-	/**
+		/**
 		 * Get text editor options.
 		 */
-	getOptions(): TextEditorOptions;
+		getOptions(): TextEditorOptions;
 
-	/**
+		/**
 		 * Change text editor options.
 		 */
-	setOptions(options: TextEditorOptions): Thenable<TextEditor>;
+		setOptions(options: TextEditorOptions): Thenable<TextEditor>;
 
-	/**
+		/**
 		 * Perform an edit on the document associated with this text editor.
 		 * The passed in {{editBuilder}} is available only for the duration of the callback.
 		 */
-	edit(callback: (editBuilder: TextEditorEdit) => void): Thenable<boolean>;
+		edit(callback:(editBuilder:TextEditorEdit)=>void): Thenable<boolean>;
 
-}
+	}
 
-/**
- * A complex edit that will be applied on a TextEditor.
- * This holds a description of the edits and if the edits are valid (i.e. no overlapping regions, etc.) they can be applied on a Document associated with a TextEditor.
- */
-export interface TextEditorEdit {
 	/**
+	 * A complex edit that will be applied on a TextEditor.
+	 * This holds a description of the edits and if the edits are valid (i.e. no overlapping regions, etc.) they can be applied on a Document associated with a TextEditor.
+	 */
+	export interface TextEditorEdit {
+		/**
 		 * Replace a certain text region with a new value.
 		 */
-	replace(location: Position | Range | Selection, value: string): void;
+		replace(location: Position | Range | Selection, value: string): void;
 
-	/**
+		/**
 		 * Insert text at a location
 		 */
-	insert(location: Position, value: string): void;
+		insert(location: Position, value: string): void;
 
-	/**
+		/**
 		 * Delete a certain text region.
 		 */
-	delete(location: Range | Selection): void;
+		delete(location: Range | Selection): void;
 
-}
-
-/**
- * A universal resource identifier representing either a file on disk on
- * or another resource, e.g untitled.
- */
-export class Uri {
-
-	constructor();
-	static parse(path: string): Uri;
-	static file(path: string): Uri;
-	static create(path: string): Uri;
+	}
 
 	/**
+	 * A universal resource identifier representing either a file on disk on
+	 * or another resource, e.g untitled.
+	 */
+	export class Uri {
+
+		constructor();
+		static parse(path: string): Uri;
+		static file(path: string): Uri;
+		static create(path: string): Uri;
+
+		/**
 		 * scheme is the 'http' part of 'http://www.msft.com/some/path?query#fragment'.
 		 * The part before the first colon.
 		 */
-	scheme: string;
+		scheme: string;
 
 
-	/**
+		/**
 		 * authority is the 'www.msft.com' part of 'http://www.msft.com/some/path?query#fragment'.
 		 * The part between the first double slashes and the next slash.
 		 */
-	authority: string;
+		authority: string;
 
 
-	/**
+		/**
 		 * path is the '/some/path' part of 'http://www.msft.com/some/path?query#fragment'.
 		 */
-	path: string;
+		path: string;
 
-	/**
+		/**
 		 * query is the 'query' part of 'http://www.msft.com/some/path?query#fragment'.
 		 */
-	query: string;
+		query: string;
 
-	/**
+		/**
 		 * fragment is the 'fragment' part of 'http://www.msft.com/some/path?query#fragment'.
 		 */
-	fragment: string;
+		fragment: string;
 
-	/**
+		/**
 		 * Retuns a string representing the corresponding file system path of this URI.
 		 * Will handle UNC paths and normalize windows drive letters to lower-case. Also
 		 * uses the platform specific path separator. Will *not* validate the path for
 		 * invalid characters and semantics. Will *not* look at the scheme of this URI.
 		 */
-	fsPath: string;
+		fsPath: string;
 
-	/**
+		/**
 		 * Returns a canonical representation of this URI. The representation and normalization
 		 * of a URI depends on the scheme.
 		 */
-	toString(): string;
+		toString(): string;
 
-	toJSON(): any;
-}
+		toJSON(): any;
+	}
 
-interface CancellationToken {
-	isCancellationRequested: boolean;
-	onCancellationRequested: Event<any>;
-}
+	export interface CancellationToken {
+		isCancellationRequested: boolean;
+		onCancellationRequested: Event<any>;
+	}
 
-export class CancellationTokenSource {
+	export class CancellationTokenSource {
 
-	token: CancellationToken;
+		token: CancellationToken;
 
-	cancel(): void;
+		cancel(): void;
 
-	dispose(): void;
-}
-
-/**
- * Represents a type which can release resources, such
- * as event listening or a timer.
- */
-export class Disposable {
+		dispose(): void;
+	}
 
 	/**
+	 * Represents a type which can release resources, such
+	 * as event listening or a timer.
+	 */
+	export class Disposable {
+
+		/**
 		 * Combine many disposables into one.
 		 *
 		 * @return Returns a new disposable which, upon dispose, will
 		 * dispose all provided disposables
 		 */
-	static of(...disposables: Disposable[]): Disposable;
+		static of(...disposables: Disposable[]): Disposable;
 
-	/**
+		/**
 		 * Combine many disposable-likes into one. Use this method
 		 * when having objects with a dispose function which are not
 		 * instances of Disposable.
@@ -346,266 +344,265 @@ export class Disposable {
 		 * @return Returns a new disposable which, upon dispose, will
 		 * dispose all provides disposable-likes.
 		 */
-	static from(...disposableLikes: { dispose: () => any }[]): Disposable;
+		static from(...disposableLikes: { dispose: () => any }[]): Disposable;
 
-	/**
+		/**
 		 * Creates a new Disposable calling the provided function
 		 * on dispose
 		 * @param callOnDispose Function that disposes something
 		 */
-	constructor(callOnDispose: Function);
+		constructor(callOnDispose: Function);
 
-	/**
+		/**
 		 * Dispose this object.
 		 */
-	dispose(): any;
-}
-
-/**
- * Represents a typed event.
- */
-interface Event<T> {
+		dispose(): any;
+	}
 
 	/**
+	 * Represents a typed event.
+	 */
+	export interface Event<T> {
+
+		/**
 		 *
 		 * @param listener The listener function will be call when the event happens.
 		 * @param thisArgs The 'this' which will be used when calling the event listener.
 		 * @param disposables An array to which a {{IDisposable}} will be added. The
 		 * @return
 		 */
-	(listener: (e: T) => any, thisArgs?: any, disposables?: Disposable[]): Disposable;
-}
-
-/**
- * A file system watcher notifies about changes to files and folders
- * on disk. To get an instanceof of a {{FileSystemWatcher}} use
- * {{workspace.createFileSystemWatcher}}.
- */
-export interface FileSystemWatcher extends Disposable {
+		(listener: (e: T) => any, thisArgs?: any, disposables?: Disposable[]): Disposable;
+	}
 
 	/**
+	 * A file system watcher notifies about changes to files and folders
+	 * on disk. To get an instanceof of a {{FileSystemWatcher}} use
+	 * {{workspace.createFileSystemWatcher}}.
+	 */
+	export interface FileSystemWatcher extends Disposable {
+
+		/**
 		 * Happens on file/folder creation.
 		 */
-	onDidCreate: Event<Uri>;
+		onDidCreate: Event<Uri>;
 
-	/**
+		/**
 		 * Happens on file/folder change.
 		 */
-	onDidChange: Event<Uri>;
+		onDidChange: Event<Uri>;
 
-	/**
+		/**
 		 * Happens on file/folder deletion.
 		 */
-	onDidDelete: Event<Uri>;
-}
-
-/**
- *
- */
-export interface QuickPickOptions {
-	/**
-	* an optional flag to include the description when filtering the picks
-	*/
-	matchOnDescription?: boolean;
+		onDidDelete: Event<Uri>;
+	}
 
 	/**
-	* an optional string to show as place holder in the input box to guide the user what she picks on
-	*/
-	placeHolder?: string;
-}
+	 *
+	 */
+	export interface QuickPickOptions {
+		/**
+		* an optional flag to include the description when filtering the picks
+		*/
+		matchOnDescription?: boolean;
 
-/**
- *
- */
-export interface QuickPickItem {
-	label: string;
-	description: string;
-}
-
-/**
- *
- */
-export interface InputBoxOptions {
-	/**
-	* The text to display underneath the input box.
-	*/
-	prompt?: string;
+		/**
+		* an optional string to show as place holder in the input box to guide the user what she picks on
+		*/
+		placeHolder?: string;
+	}
 
 	/**
-	* an optional string to show as place holder in the input box to guide the user what to type
-	*/
-	placeHolder?: string;
-}
-
-/**
- *
- */
-interface LanguageFilter {
-	language?: string;
-	scheme?: string;
-	pattern?: string;
-}
-
-/**
- *
- */
-export type LanguageSelector = string | LanguageFilter | (string | LanguageFilter)[];
-
-
-/**
- *
- */
-interface ReadOnlyMemento {
+	 *
+	 */
+	export interface QuickPickItem {
+		label: string;
+		description: string;
+	}
 
 	/**
+	 *
+	 */
+	export interface InputBoxOptions {
+		/**
+		* The text to display underneath the input box.
+		*/
+		prompt?: string;
+
+		/**
+		* an optional string to show as place holder in the input box to guide the user what to type
+		*/
+		placeHolder?: string;
+	}
+
+	/**
+	 *
+	 */
+	export interface LanguageFilter {
+		language?: string;
+		scheme?: string;
+		pattern?: string;
+	}
+
+	/**
+	 *
+	 */
+	export type LanguageSelector = string|LanguageFilter|(string|LanguageFilter)[];
+
+	/**
+	 *
+	 */
+	export interface ReadOnlyMemento {
+
+		/**
 		 * @param key The name of a property to read.
 		 * @param defaultValue The default value in case the denoted property doesn't exists.
 		 * @return
 		 */
-	getValue<T>(key: string, defaultValue?: T): Thenable<T>;
+		getValue<T>(key: string, defaultValue?: T): Thenable<T>;
 
-	/**
+		/**
 		 *
 		 */
-	getValues<T>(defaultValue?: T): Thenable<T>;
-}
-
-/**
- *
- */
-interface Memento extends ReadOnlyMemento {
-	setValue(key: string, value: any): Thenable<void>;
-}
-
-/**
- * Represents the severity of diagnostics.
- */
-export enum DiagnosticSeverity {
-	Warning = 1,
-	Error = 2
-}
-
-/**
- * Represents a location inside a resource, such as a line
- * inside a text file.
- */
-export class Location {
-	constructor(uri: Uri, range: Selection | Range | Position);
-	uri: Uri;
-	range: Range;
-}
-
-/**
- * Represents a diagnostic, such as a compiler error or warning, along with the location
- * in which they occurred.
- */
-export class Diagnostic {
-
-	constructor(severity: DiagnosticSeverity, location: Location, message: string, source?: string);
-
-	severity: DiagnosticSeverity;
-
-	location: Location;
-
-	message: string;
-
-	source: string;
-}
-
-// TODO@api, TODO@Joh,Ben
-// output channels need to be known upfront (contributes in package.json)
-export interface OutputChannel extends Disposable {
-	append(value: string): void;
-	appendLine(value: string): void;
-	clear(): void;
-	reveal(): void;
-}
-
-export interface ExecutionOptions {
-	cwd?: string;
-	env?: { [name: string]: any };
-}
-
-export interface TextEditorSelectionChangeEvent {
-	textEditor: TextEditor;
-	selections: Selection[];
-}
-
-export interface TextEditorOptionsChangeEvent {
-	textEditor: TextEditor;
-	options: TextEditorOptions;
-}
-
-export interface ITelemetryInfo {
-	sessionId: string;
-	machineId: string;
-	instanceId: string;
-}
-
-export namespace window {
-
-	export function getActiveTextEditor(): TextEditor;
-
-	export const onDidChangeActiveTextEditor: Event<TextEditor>;
-
-	export const onDidChangeTextEditorSelection: Event<TextEditorSelectionChangeEvent>;
-
-	export const onDidChangeTextEditorOptions: Event<TextEditorOptionsChangeEvent>;
-
-	export function showInformationMessage(message: string, ...commands: { title: string; command: string | CommandCallback; }[]): Thenable<void>;
-
-	export function showWarningMessage(message: string, ...commands: { title: string; command: string | CommandCallback; }[]): Thenable<void>;
-
-	export function showErrorMessage(message: string, ...commands: { title: string; command: string | CommandCallback; }[]): Thenable<void>;
-
-	export function setStatusBarMessage(message: string, hideAfterSeconds?: number): Disposable;
-
-	export function showQuickPick(items: string[], options?: QuickPickOptions): Thenable<string>;
-
-	export function showQuickPick<T extends QuickPickItem>(items: T[], options?: QuickPickOptions): Thenable<T>;
+		getValues<T>(defaultValue?: T): Thenable<T>;
+	}
 
 	/**
+	 *
+	 */
+	export interface Memento extends ReadOnlyMemento {
+		setValue(key: string, value: any): Thenable<void>;
+	}
+
+	/**
+	 * Represents the severity of diagnostics.
+	 */
+	export enum DiagnosticSeverity {
+		Warning = 1,
+		Error = 2
+	}
+
+	/**
+	 * Represents a location inside a resource, such as a line
+	 * inside a text file.
+	 */
+	export class Location {
+		constructor(uri: Uri, range: Selection | Range | Position);
+		uri: Uri;
+		range: Range;
+	}
+
+	/**
+	 * Represents a diagnostic, such as a compiler error or warning, along with the location
+	 * in which they occurred.
+	 */
+	export class Diagnostic {
+
+		constructor(severity: DiagnosticSeverity, location: Location, message: string, source?:string);
+
+		severity: DiagnosticSeverity;
+
+		location: Location;
+
+		message: string;
+
+		source: string;
+	}
+
+	// TODO@api, TODO@Joh,Ben
+	// output channels need to be known upfront (contributes in package.json)
+	export interface OutputChannel extends Disposable {
+		append(value: string): void;
+		appendLine(value: string): void;
+		clear(): void;
+		reveal(): void;
+	}
+
+	export interface ExecutionOptions {
+		cwd?: string;
+		env?: { [name: string]: any };
+	}
+
+	export interface TextEditorSelectionChangeEvent {
+		textEditor: TextEditor;
+		selections: Selection[];
+	}
+
+	export interface TextEditorOptionsChangeEvent {
+		textEditor: TextEditor;
+		options: TextEditorOptions;
+	}
+
+	export interface ITelemetryInfo {
+		sessionId: string;
+		machineId: string;
+		instanceId: string;
+	}
+
+	export namespace window {
+
+		export function getActiveTextEditor(): TextEditor;
+
+		export const onDidChangeActiveTextEditor: Event<TextEditor>;
+
+		export const onDidChangeTextEditorSelection: Event<TextEditorSelectionChangeEvent>;
+
+		export const onDidChangeTextEditorOptions: Event<TextEditorOptionsChangeEvent>;
+
+		export function showInformationMessage(message: string, ...commands: { title: string; command: string | CommandCallback; }[]): Thenable<void>;
+
+		export function showWarningMessage(message: string, ...commands: { title: string; command: string | CommandCallback; }[]): Thenable<void>;
+
+		export function showErrorMessage(message: string, ...commands: { title: string; command: string | CommandCallback; }[]): Thenable<void>;
+
+		export function setStatusBarMessage(message: string, hideAfterSeconds?: number): Disposable;
+
+		export function showQuickPick(items: string[], options?: QuickPickOptions): Thenable<string>;
+
+		export function showQuickPick<T extends QuickPickItem>(items: T[], options?: QuickPickOptions): Thenable<T>;
+
+		/**
 		 * Opens an input box to ask the user for input.
 		 */
-	export function showInputBox(options?: InputBoxOptions): Thenable<string>;
+		export function showInputBox(options?: InputBoxOptions): Thenable<string>;
 
-	export function getOutputChannel(name: string): OutputChannel;
+		export function getOutputChannel(name: string): OutputChannel;
 
-	/**
+		/**
 		 * ✂ - don't use. Will be cut soone!
-	TODO@api move into a node_module
+		TODO@api move into a node_module
 		 */
-	export function runInTerminal(command: string, args: string[], options?: ExecutionOptions): Thenable<any>;
-}
+		export function runInTerminal(command: string, args: string[], options?: ExecutionOptions): Thenable<any>;
+	}
 
-/**
- * An event describing a change in the text of a model.
- */
-export interface TextDocumentContentChangeEvent {
 	/**
+	 * An event describing a change in the text of a model.
+	 */
+	export interface TextDocumentContentChangeEvent {
+		/**
 		 * The range that got replaced.
 		 */
-	range: Range;
-	/**
+		range: Range;
+		/**
 		 * The length of the range that got replaced.
 		 */
-	rangeLength: number;
-	/**
+		rangeLength: number;
+		/**
 		 * The new text for the range.
 		 */
-	text: string;
-}
+		text: string;
+	}
 
-export interface TextDocumentChangeEvent {
-	document: TextDocument;
-	contentChanges: TextDocumentContentChangeEvent[];
-}
+	export interface TextDocumentChangeEvent {
+		document: TextDocument;
+		contentChanges: TextDocumentContentChangeEvent[];
+	}
 
-// TODO@api in the future there might be multiple opened folder in VSCode
-// so that we shouldn't make broken assumptions here
-export namespace workspace {
+	// TODO@api in the future there might be multiple opened folder in VSCode
+	// so that we shouldn't make broken assumptions here
+	export namespace workspace {
 
-	/**
+		/**
 		 * Creates a file system watcher. A glob pattern that filters the
 		 * file events must be provided. Optionally, flags to ignore certain
 		 * kind of events can be provided.
@@ -615,32 +612,32 @@ export namespace workspace {
 		 * @param ignoreChangeEvents - Ignore when files have been changed.
 		 * @param ignoreDeleteEvents - Ignore when files have been deleted.
 		 */
-	export function createFileSystemWatcher(globPattern: string, ignoreCreateEvents?: boolean, ignoreChangeEvents?: boolean, ignoreDeleteEvents?: boolean): FileSystemWatcher;
+		export function createFileSystemWatcher(globPattern: string, ignoreCreateEvents?: boolean, ignoreChangeEvents?: boolean, ignoreDeleteEvents?: boolean): FileSystemWatcher;
 
-	// TODO@api - justify this being here
-	export function getPath(): string;
+		// TODO@api - justify this being here
+		export function getPath(): string;
 
-	export function getRelativePath(pathOrUri: string | Uri): string;
+		export function getRelativePath(pathOrUri: string|Uri): string;
 
-	// TODO@api - justify this being here
-	export function findFiles(include: string, exclude: string, maxResults?: number): Thenable<Uri[]>;
+		// TODO@api - justify this being here
+		export function findFiles(include: string, exclude: string, maxResults?:number): Thenable<Uri[]>;
 
-	/**
+		/**
 		 * save all dirty files
 		 */
-	export function saveAll(includeUntitled?: boolean): Thenable<boolean>;
+		export function saveAll(includeUntitled?: boolean): Thenable<boolean>;
 
-	export function getTextDocuments(): TextDocument[];
-	export function getTextDocument(resource: Uri): TextDocument;
-	export const onDidOpenTextDocument: Event<TextDocument>;
-	export const onDidCloseTextDocument: Event<TextDocument>;
-	export const onDidChangeTextDocument: Event<TextDocumentChangeEvent>;
-	export const onDidSaveTextDocument: Event<TextDocument>;
-}
+		export function getTextDocuments(): TextDocument[];
+		export function getTextDocument(resource: Uri): TextDocument;
+		export const onDidOpenTextDocument: Event<TextDocument>;
+		export const onDidCloseTextDocument: Event<TextDocument>;
+		export const onDidChangeTextDocument: Event<TextDocumentChangeEvent>;
+		export const onDidSaveTextDocument: Event<TextDocument>;
+	}
 
-export namespace languages {
+	export namespace languages {
 
-	/**
+		/**
 		 * Add diagnostics, such as compiler errors or warnings. They will be represented as
 		 * squiggles in text editors and in a list of diagnostics.
 		 * To remove the diagnostics again, dispose the `Disposable` which is returned
@@ -649,532 +646,535 @@ export namespace languages {
 		 * @param diagnostics Array of diagnostics
 		 * @return A disposable the removes the diagnostics again.
 		 */
-	export function addDiagnostics(diagnostics: Diagnostic[]): Disposable;
+		export function addDiagnostics(diagnostics: Diagnostic[]): Disposable;
 
-	/**
+		/**
 		 *
 		 */
-	export function addInformationLanguageStatus(language: LanguageSelector | Uri | Uri[], message: string | { octicon: string; message: string; }, command: string | CommandCallback): Disposable;
+		export function addInformationLanguageStatus(language: LanguageSelector|Uri|Uri[], message: string | { octicon: string; message: string;}, command: string | CommandCallback): Disposable;
 
-	/**
+		/**
 		 *
 		 */
-	export function addWarningLanguageStatus(language: LanguageSelector | Uri | Uri[], message: string | { octicon: string; message: string; }, command: string | CommandCallback): Disposable;
+		export function addWarningLanguageStatus(language: LanguageSelector | Uri | Uri[], message: string | { octicon: string; message: string; }, command: string | CommandCallback): Disposable;
 
-	/**
+		/**
 		 *
 		 */
-	export function addErrorLanguageStatus(language: LanguageSelector | Uri | Uri[], message: string | { octicon: string; message: string; }, command: string | CommandCallback): Disposable;
-}
-
-export namespace extensions {
-
-	export function getStateMemento(extensionId: string, global?: boolean): Memento;
-
-	export function getConfigurationMemento(extensionId: string): ReadOnlyMemento;
-
-	export function getExtension(extensionId: string): any;
-
-	export function getTelemetryInfo(): Thenable<ITelemetryInfo>;
-}
-
-export interface IHTMLContentElement {
-	formattedText?: string;
-	text?: string;
-	className?: string;
-	style?: string;
-	customStyle?: any;
-	tagName?: string;
-	children?: IHTMLContentElement[];
-	isText?: boolean;
-}
-
-// --- Begin Monaco.Modes
-export namespace Modes {
-	interface ILanguage {
-		// required
-		name: string;								// unique name to identify the language
-		tokenizer: Object;							// map from string to ILanguageRule[]
-
-		// optional
-		displayName?: string;						// nice display name
-		ignoreCase?: boolean;							// is the language case insensitive?
-		lineComment?: string;						// used to insert/delete line comments in the editor
-		blockCommentStart?: string;					// used to insert/delete block comments in the editor
-		blockCommentEnd?: string;
-		defaultToken?: string;						// if no match in the tokenizer assign this token class (default 'source')
-		brackets?: ILanguageBracket[];				// for example [['{','}','delimiter.curly']]
-
-		// advanced
-		start?: string;								// start symbol in the tokenizer (by default the first entry is used)
-		tokenPostfix?: string;						// attach this to every token class (by default '.' + name)
-		autoClosingPairs?: string[][];				// for example [['"','"']]
-		wordDefinition?: RegExp;					// word definition regular expression
-		outdentTriggers?: string;					// characters that could potentially cause outdentation
-		enhancedBrackets?: Modes.IRegexBracketPair[];// Advanced auto completion, auto indenting, and bracket matching
+		export function addErrorLanguageStatus(language: LanguageSelector | Uri | Uri[], message: string | { octicon: string; message: string; }, command: string | CommandCallback): Disposable;
 	}
 
-	/**
+	export namespace extensions {
+
+		export function getStateMemento(extensionId: string, global?: boolean): Memento;
+
+		export function getConfigurationMemento(extensionId: string): ReadOnlyMemento;
+
+		export function getExtension(extensionId: string): any;
+
+		export function getTelemetryInfo(): Thenable<ITelemetryInfo>;
+	}
+
+	export interface IHTMLContentElement {
+		formattedText?:string;
+		text?: string;
+		className?: string;
+		style?: string;
+		customStyle?: any;
+		tagName?: string;
+		children?: IHTMLContentElement[];
+		isText?: boolean;
+	}
+
+	// --- Begin Monaco.Modes
+	export namespace Modes {
+		export interface ILanguage {
+			// required
+			name: string;								// unique name to identify the language
+			tokenizer: Object;							// map from string to ILanguageRule[]
+
+			// optional
+			displayName?: string;						// nice display name
+			ignoreCase?: boolean;							// is the language case insensitive?
+			lineComment?: string;						// used to insert/delete line comments in the editor
+			blockCommentStart?: string;					// used to insert/delete block comments in the editor
+			blockCommentEnd?: string;
+			defaultToken?: string;						// if no match in the tokenizer assign this token class (default 'source')
+			brackets?: ILanguageBracket[];				// for example [['{','}','delimiter.curly']]
+
+			// advanced
+			start?: string;								// start symbol in the tokenizer (by default the first entry is used)
+			tokenPostfix?: string;						// attach this to every token class (by default '.' + name)
+			autoClosingPairs?: string[][];				// for example [['"','"']]
+			wordDefinition?: RegExp;					// word definition regular expression
+			outdentTriggers?: string;					// characters that could potentially cause outdentation
+			enhancedBrackets?: Modes.IRegexBracketPair[];// Advanced auto completion, auto indenting, and bracket matching
+		}
+
+		/**
 		 * This interface can be shortened as an array, ie. ['{','}','delimiter.curly']
 		 */
-	interface ILanguageBracket {
-		open: string;	// open bracket
-		close: string;	// closeing bracket
-		token: string;	// token class
-	}
+		export interface ILanguageBracket {
+			open: string;	// open bracket
+			close: string;	// closeing bracket
+			token: string;	// token class
+		}
 
-	interface ILanguageAutoComplete {
-		triggers: string;				// characters that trigger auto completion rules
-		match: string | RegExp;			// autocomplete if this matches
-		complete: string;				// complete with this string
-	}
+		export interface ILanguageAutoComplete {
+			triggers: string;				// characters that trigger auto completion rules
+			match: string|RegExp;			// autocomplete if this matches
+			complete: string;				// complete with this string
+		}
 
-	interface ILanguageAutoIndent {
-		match: string | RegExp; 			// auto indent if this matches on enter
-		matchAfter: string | RegExp;		// and auto-outdent if this matches on the next line
-	}
+		export interface ILanguageAutoIndent {
+			match: string|RegExp; 			// auto indent if this matches on enter
+			matchAfter: string|RegExp;		// and auto-outdent if this matches on the next line
+		}
 
-	/**
+		/**
 		 * Standard brackets used for auto indentation
 		 */
-	export interface IBracketPair {
-		tokenType: string;
-		open: string;
-		close: string;
-		isElectric: boolean;
-	}
+		export interface IBracketPair {
+			tokenType:string;
+			open:string;
+			close:string;
+			isElectric:boolean;
+		}
 
-	/**
+		/**
 		 * Regular expression based brackets. These are always electric.
 		 */
-	export interface IRegexBracketPair {
-		openTrigger?: string; // The character that will trigger the evaluation of 'open'.
-		open: RegExp; // The definition of when an opening brace is detected. This regex is matched against the entire line upto, and including the last typed character (the trigger character).
-		closeComplete?: string; // How to complete a matching open brace. Matches from 'open' will be expanded, e.g. '</$1>'
-		matchCase?: boolean; // If set to true, the case of the string captured in 'open' will be detected an applied also to 'closeComplete'.
+		export interface IRegexBracketPair {
+			openTrigger?: string; // The character that will trigger the evaluation of 'open'.
+			open: RegExp; // The definition of when an opening brace is detected. This regex is matched against the entire line upto, and including the last typed character (the trigger character).
+			closeComplete?: string; // How to complete a matching open brace. Matches from 'open' will be expanded, e.g. '</$1>'
+			matchCase?: boolean; // If set to true, the case of the string captured in 'open' will be detected an applied also to 'closeComplete'.
 								// This is useful for cases like BEGIN/END or begin/end where the opening and closing phrases are unrelated.
 								// For identical phrases, use the $1 replacement syntax above directly in closeComplete, as it will
 								// include the proper casing from the captured string in 'open'.
 								// Upper/Lower/Camel cases are detected. Camel case dection uses only the first two characters and assumes
 								// that 'closeComplete' contains wors separated by spaces (e.g. 'End Loop')
 
-		closeTrigger?: string; // The character that will trigger the evaluation of 'close'.
-		close?: RegExp; // The definition of when a closing brace is detected. This regex is matched against the entire line upto, and including the last typed character (the trigger character).
-		tokenType?: string; // The type of the token. Matches from 'open' or 'close' will be expanded, e.g. 'keyword.$1'.
-		// Only used to auto-(un)indent a closing bracket.
-	}
+			closeTrigger?: string; // The character that will trigger the evaluation of 'close'.
+			close?: RegExp; // The definition of when a closing brace is detected. This regex is matched against the entire line upto, and including the last typed character (the trigger character).
+			tokenType?: string; // The type of the token. Matches from 'open' or 'close' will be expanded, e.g. 'keyword.$1'.
+							   // Only used to auto-(un)indent a closing bracket.
+		}
 
-	/**
+		/**
 		 * Definition of documentation comments (e.g. Javadoc/JSdoc)
 		 */
-	export interface IDocComment {
-		scope: string; // What tokens should be used to detect a doc comment (e.g. 'comment.documentation').
-		open: string; // The string that starts a doc comment (e.g. '/**')
-		lineStart: string; // The string that appears at the start of each line, except the first and last (e.g. ' * ').
-		close?: string; // The string that appears on the last line and closes the doc comment (e.g. ' */').
-	}
+		export interface IDocComment {
+			scope: string; // What tokens should be used to detect a doc comment (e.g. 'comment.documentation').
+			open: string; // The string that starts a doc comment (e.g. '/**')
+			lineStart: string; // The string that appears at the start of each line, except the first and last (e.g. ' * ').
+			close?: string; // The string that appears on the last line and closes the doc comment (e.g. ' */').
+		}
 
-	// --- Begin InplaceReplaceSupport
-	/**
+		// --- Begin InplaceReplaceSupport
+		/**
 		 * Interface used to navigate with a value-set.
 		 */
-	interface IInplaceReplaceSupport {
-		sets: string[][];
-	}
-	export var InplaceReplaceSupport: {
-		register(modeId: string, inplaceReplaceSupport: IInplaceReplaceSupport): Disposable;
-	};
-	// --- End InplaceReplaceSupport
+		export interface IInplaceReplaceSupport {
+			sets: string[][];
+		}
+		export var InplaceReplaceSupport: {
+			register(modeId: string, inplaceReplaceSupport: Modes.IInplaceReplaceSupport): Disposable;
+		};
+		// --- End InplaceReplaceSupport
 
 
-	// --- Begin TokenizationSupport
-	enum Bracket {
-		None = 0,
-		Open = 1,
-		Close = -1
-	}
-	// --- End TokenizationSupport
+		// --- Begin TokenizationSupport
+		enum Bracket {
+			None = 0,
+			Open = 1,
+			Close = -1
+		}
+		// --- End TokenizationSupport
 
-	// --- Begin IDeclarationSupport
-	export interface IDeclarationSupport {
-		tokens?: string[];
-		findDeclaration(document: TextDocument, position: Position, token: CancellationToken): Thenable<IReference>;
-	}
-	export var DeclarationSupport: {
-		register(modeId: string, declarationSupport: IDeclarationSupport): Disposable;
-	};
-	// --- End IDeclarationSupport
+		// --- Begin IDeclarationSupport
+		export interface IDeclarationSupport {
+			tokens?: string[];
+			findDeclaration(document: TextDocument, position: Position, token: CancellationToken): Thenable<IReference>;
+		}
+		export var DeclarationSupport: {
+			register(modeId: string, declarationSupport: IDeclarationSupport): Disposable;
+		};
+		// --- End IDeclarationSupport
 
-	// --- Begin ICodeLensSupport
-	export interface ICodeLensSupport {
-		findCodeLensSymbols(document: TextDocument, token: CancellationToken): Thenable<ICodeLensSymbol[]>;
-		findCodeLensReferences(document: TextDocument, requests: ICodeLensSymbolRequest[], token: CancellationToken): Thenable<ICodeLensReferences>;
-	}
-	export interface ICodeLensSymbolRequest {
-		position: Position;
-		languageModeStateId?: number;
-	}
-	export interface ICodeLensSymbol {
-		range: Range;
-	}
-	export interface ICodeLensReferences {
-		references: IReference[][];
-		languageModeStateId?: number;
-	}
-	export var CodeLensSupport: {
-		register(modeId: string, codeLensSupport: ICodeLensSupport): Disposable;
-	};
-	// --- End ICodeLensSupport
+		// --- Begin ICodeLensSupport
+		export interface ICodeLensSupport {
+			findCodeLensSymbols(document: TextDocument, token: CancellationToken): Thenable<ICodeLensSymbol[]>;
+			findCodeLensReferences(document: TextDocument, requests: ICodeLensSymbolRequest[], token: CancellationToken): Thenable<ICodeLensReferences>;
+		}
+		export interface ICodeLensSymbolRequest {
+			position: Position;
+			languageModeStateId?: number;
+		}
+		export interface ICodeLensSymbol {
+			range: Range;
+		}
+		export interface ICodeLensReferences {
+			references: IReference[][];
+			languageModeStateId?: number;
+		}
+		export var CodeLensSupport: {
+			register(modeId: string, codeLensSupport: ICodeLensSupport): Disposable;
+		};
+		// --- End ICodeLensSupport
 
-	// --- Begin IOccurrencesSupport
-	export interface IOccurrence {
-		kind?: string;
-		range: Range;
-	}
-	export interface IOccurrencesSupport {
-		findOccurrences(resource: TextDocument, position: Position, token: CancellationToken): Thenable<IOccurrence[]>;
-	}
-	export var OccurrencesSupport: {
-		register(modeId: string, occurrencesSupport: IOccurrencesSupport): Disposable;
-	};
-	// --- End IOccurrencesSupport
+		// --- Begin IOccurrencesSupport
+		export interface IOccurrence {
+			kind?:string;
+			range:Range;
+		}
+		export interface IOccurrencesSupport {
+			findOccurrences(resource: TextDocument, position: Position, token: CancellationToken): Thenable<IOccurrence[]>;
+		}
+		export var OccurrencesSupport: {
+			register(modeId: string, occurrencesSupport:IOccurrencesSupport): Disposable;
+		};
+		// --- End IOccurrencesSupport
 
-	// --- Begin IOutlineSupport
-	export interface IOutlineEntry {
-		label: string;
-		type: string;
-		icon?: string; // icon class or null to use the default images based on the type
-		range: Range;
-		children?: IOutlineEntry[];
-	}
-	export interface IOutlineSupport {
-		getOutline(document: TextDocument, token: CancellationToken): Thenable<IOutlineEntry[]>;
-		outlineGroupLabel?: { [name: string]: string; };
-	}
-	export var OutlineSupport: {
-		register(modeId: string, outlineSupport: IOutlineSupport): Disposable;
-	};
-	// --- End IOutlineSupport
+		// --- Begin IOutlineSupport
+		export interface IOutlineEntry {
+			label: string;
+			type: string;
+			icon?: string; // icon class or null to use the default images based on the type
+			range: Range;
+			children?: IOutlineEntry[];
+		}
+		export interface IOutlineSupport {
+			getOutline(document: TextDocument, token: CancellationToken): Thenable<IOutlineEntry[]>;
+			outlineGroupLabel?: { [name: string]: string; };
+		}
+		export var OutlineSupport: {
+			register(modeId: string, outlineSupport:IOutlineSupport): Disposable;
+		};
+		// --- End IOutlineSupport
 
-	// --- Begin IOutlineSupport
-	export interface IQuickFix {
-		label: string;
-		id: any;
-		score: number;
-		documentation?: string;
-	}
+		// --- Begin IOutlineSupport
+		export interface IQuickFix {
+			label: string;
+			id: any;
+			score: number;
+			documentation?: string;
+		}
 
-	export interface IQuickFixResult {
-		edits: IResourceEdit[];
-	}
+		export interface IQuickFixResult {
+			edits: IResourceEdit[];
+		}
 
-	export interface IQuickFixSupport {
-		getQuickFixes(resource: TextDocument, marker: Range, token: CancellationToken): Thenable<IQuickFix[]>;
-		runQuickFixAction(resource: TextDocument, range: Range, id: any, token: CancellationToken): Thenable<IQuickFixResult>;
-	}
-	export var QuickFixSupport: {
-		register(modeId: string, quickFixSupport: IQuickFixSupport): Disposable
-	};
-	// --- End IOutlineSupport
+		 export interface IQuickFixSupport {
+			getQuickFixes(resource: TextDocument, marker: Range, token: CancellationToken): Thenable<IQuickFix[]>;
+			runQuickFixAction(resource: TextDocument, range: Range, id: any, token: CancellationToken): Thenable<IQuickFixResult>;
+		}
+		export var QuickFixSupport: {
+			register(modeId: string, quickFixSupport:IQuickFixSupport): Disposable
+		};
+		// --- End IOutlineSupport
 
-	// --- Begin IReferenceSupport
-	export interface IReferenceSupport {
-		tokens?: string[];
+		// --- Begin IReferenceSupport
+		export interface IReferenceSupport {
+			tokens?: string[];
 
+			/**
+			 * @returns a list of reference of the symbol at the position in the
+			 * 	given resource.
+			 */
+			findReferences(document: TextDocument, position: Position, includeDeclaration: boolean, token: CancellationToken): Thenable<IReference[]>;
+		}
+		export var ReferenceSupport: {
+			register(modeId: string, quickFixSupport:IReferenceSupport): Disposable;
+		};
+		// --- End IReferenceSupport
+
+		// --- Begin IParameterHintsSupport
+		export interface IParameter {
+			label:string;
+			documentation?:string;
+			signatureLabelOffset?:number;
+			signatureLabelEnd?:number;
+		}
+
+		export interface ISignature {
+			label:string;
+			documentation?:string;
+			parameters:IParameter[];
+		}
+
+		export interface IParameterHints {
+			currentSignature:number;
+			currentParameter:number;
+			signatures:ISignature[];
+		}
+
+		export interface IParameterHintsSupport {
+			/**
+			 * On which characters presses should parameter hints be potentially shown.
+			 */
+			triggerCharacters: string[];
+
+			/**
+			 * A list of token types that prevent the parameter hints from being shown (e.g. comment, string)
+			 */
+			excludeTokens: string[];
+			/**
+			 * @returns the parameter hints for the specified position in the file.
+			 */
+			getParameterHints(document: TextDocument, position: Position, token: CancellationToken): Thenable<IParameterHints>;
+		}
+		export var ParameterHintsSupport: {
+			register(modeId: string, parameterHintsSupport:IParameterHintsSupport): Disposable;
+		};
+		// --- End IParameterHintsSupport
+
+		// --- Begin IExtraInfoSupport
+		export interface IComputeExtraInfoResult {
+			range: Range;
+			value?: string;
+			htmlContent?: IHTMLContentElement[];
+			className?: string;
+		}
+		export interface IExtraInfoSupport {
+			computeInfo(document: TextDocument, position: Position, token: CancellationToken): Thenable<IComputeExtraInfoResult>;
+		}
+		export var ExtraInfoSupport: {
+			register(modeId: string, extraInfoSupport:IExtraInfoSupport): Disposable;
+		};
+		// --- End IExtraInfoSupport
+
+		// --- Begin IRenameSupport
+		export interface IRenameResult {
+		    currentName: string;
+		    edits: IResourceEdit[];
+		    rejectReason?: string;
+		}
+		export interface IRenameSupport {
+			filter?: string[];
+			rename(document: TextDocument, position: Position, newName: string, token: CancellationToken): Thenable<IRenameResult>;
+		}
+		export var RenameSupport: {
+			register(modeId: string, renameSupport:IRenameSupport): Disposable;
+		};
+		// --- End IRenameSupport
+
+		// --- Begin IFormattingSupport
 		/**
-		 * @returns a list of reference of the symbol at the position in the
-		 * 	given resource.
-		 */
-		findReferences(document: TextDocument, position: Position, includeDeclaration: boolean, token: CancellationToken): Thenable<IReference[]>;
-	}
-	export var ReferenceSupport: {
-		register(modeId: string, quickFixSupport: IReferenceSupport): Disposable;
-	};
-	// --- End IReferenceSupport
-
-	// --- Begin IParameterHintsSupport
-	export interface IParameter {
-		label: string;
-		documentation?: string;
-		signatureLabelOffset?: number;
-		signatureLabelEnd?: number;
-	}
-
-	export interface ISignature {
-		label: string;
-		documentation?: string;
-		parameters: IParameter[];
-	}
-
-	export interface IParameterHints {
-		currentSignature: number;
-		currentParameter: number;
-		signatures: ISignature[];
-	}
-
-	export interface IParameterHintsSupport {
-		/**
-		 * On which characters presses should parameter hints be potentially shown.
-		 */
-		triggerCharacters: string[];
-
-		/**
-		 * A list of token types that prevent the parameter hints from being shown (e.g. comment, string)
-		 */
-		excludeTokens: string[];
-		/**
-		 * @returns the parameter hints for the specified position in the file.
-		 */
-		getParameterHints(document: TextDocument, position: Position, token: CancellationToken): Thenable<IParameterHints>;
-	}
-	export var ParameterHintsSupport: {
-		register(modeId: string, parameterHintsSupport: IParameterHintsSupport): Disposable;
-	};
-	// --- End IParameterHintsSupport
-
-	// --- Begin IExtraInfoSupport
-	export interface IComputeExtraInfoResult {
-		range: Range;
-		value?: string;
-		htmlContent?: IHTMLContentElement[];
-		className?: string;
-	}
-	export interface IExtraInfoSupport {
-		computeInfo(document: TextDocument, position: Position, token: CancellationToken): Thenable<IComputeExtraInfoResult>;
-	}
-	export var ExtraInfoSupport: {
-		register(modeId: string, extraInfoSupport: IExtraInfoSupport): Disposable;
-	};
-	// --- End IExtraInfoSupport
-
-	// --- Begin IRenameSupport
-	export interface IRenameResult {
-		currentName: string;
-		edits: IResourceEdit[];
-		rejectReason?: string;
-	}
-	export interface IRenameSupport {
-		filter?: string[];
-		rename(document: TextDocument, position: Position, newName: string, token: CancellationToken): Thenable<IRenameResult>;
-	}
-	export var RenameSupport: {
-		register(modeId: string, renameSupport: IRenameSupport): Disposable;
-	};
-	// --- End IRenameSupport
-
-	// --- Begin IFormattingSupport
-	/**
 		 * Interface used to format a model
 		 */
-	export interface IFormattingOptions {
-		tabSize: number;
-		insertSpaces: boolean;
-	}
-	/**
+		export interface IFormattingOptions {
+			tabSize:number;
+			insertSpaces:boolean;
+		}
+		/**
 		 * A single edit operation, that acts as a simple replace.
 		 * i.e. Replace text at `range` with `text` in model.
 		 */
-	export interface ISingleEditOperation {
+		export interface ISingleEditOperation {
+			/**
+			 * The range to replace. This can be empty to emulate a simple insert.
+			 */
+			range: Range;
+			/**
+			 * The text to replace with. This can be null to emulate a simple delete.
+			 */
+			text: string;
+		}
 		/**
-		 * The range to replace. This can be empty to emulate a simple insert.
-		 */
-		range: Range;
-		/**
-		 * The text to replace with. This can be null to emulate a simple delete.
-		 */
-		text: string;
-	}
-	/**
 		 * Supports to format source code. There are three levels
 		 * on which formatting can be offered:
 		 * (1) format a document
 		 * (2) format a selectin
 		 * (3) format on keystroke
 		 */
-	export interface IFormattingSupport {
-		formatDocument: (document: TextDocument, options: IFormattingOptions, token: CancellationToken) => Thenable<ISingleEditOperation[]>;
-		formatRange?: (document: TextDocument, range: Range, options: IFormattingOptions, token: CancellationToken) => Thenable<ISingleEditOperation[]>;
-		autoFormatTriggerCharacters?: string[];
-		formatAfterKeystroke?: (document: TextDocument, position: Position, ch: string, options: IFormattingOptions, token: CancellationToken) => Thenable<ISingleEditOperation[]>;
-	}
-	export var FormattingSupport: {
-		register(modeId: string, formattingSupport: IFormattingSupport): Disposable;
-	};
-	// --- End IRenameSupport
+		export interface IFormattingSupport {
+			formatDocument: (document: TextDocument, options: IFormattingOptions, token: CancellationToken) => Thenable<ISingleEditOperation[]>;
+			formatRange?: (document: TextDocument, range: Range, options: IFormattingOptions, token: CancellationToken) => Thenable<ISingleEditOperation[]>;
+			autoFormatTriggerCharacters?: string[];
+			formatAfterKeystroke?: (document: TextDocument, position: Position, ch: string, options: IFormattingOptions, token: CancellationToken) => Thenable<ISingleEditOperation[]>;
+		}
+		export var FormattingSupport: {
+			register(modeId: string, formattingSupport:IFormattingSupport): Disposable;
+		};
+		// --- End IRenameSupport
 
-	// --- Begin ISuggestSupport
-	export interface ISortingTypeAndSeparator {
-		type: string;
-		partSeparator?: string;
-	}
-	export interface IHighlight {
-		start: number;
-		end: number;
-	}
-	export interface ISuggestion {
-		label: string;
-		codeSnippet: string;
-		type: string;
-		highlights?: IHighlight[];
-		typeLabel?: string;
-		documentationLabel?: string;
-	}
-	export interface ISuggestions {
-		currentWord: string;
-		suggestions: ISuggestion[];
-		incomplete?: boolean;
-		overwriteBefore?: number;
-		overwriteAfter?: number;
-	}
-	export interface ISuggestSupport {
-		triggerCharacters: string[];
-		excludeTokens: string[];
+		// --- Begin ISuggestSupport
+		export interface ISortingTypeAndSeparator {
+			type: string;
+			partSeparator?: string;
+		}
+		export interface IHighlight {
+			start:number;
+			end:number;
+		}
+		export interface ISuggestion {
+			label: string;
+			codeSnippet: string;
+			type: string;
+			highlights?: IHighlight[];
+			typeLabel?: string;
+			documentationLabel?: string;
+		}
+		export interface ISuggestions {
+			currentWord:string;
+			suggestions:ISuggestion[];
+			incomplete?: boolean;
+			overwriteBefore?: number;
+			overwriteAfter?: number;
+		}
+		export interface ISuggestSupport {
+			triggerCharacters: string[];
+			excludeTokens: string[];
 
-		sortBy?: ISortingTypeAndSeparator[];
+			sortBy?: ISortingTypeAndSeparator[];
 
-		suggest: (document: TextDocument, position: Position, token: CancellationToken) => Thenable<ISuggestions[]>;
-		getSuggestionDetails?: (document: TextDocument, position: Position, suggestion: ISuggestion, token: CancellationToken) => Thenable<ISuggestion>;
-	}
-	export var SuggestSupport: {
-		register(modeId: string, suggestSupport: ISuggestSupport): Disposable;
-	};
-	// --- End ISuggestSupport
+			suggest: (document: TextDocument, position: Position, token: CancellationToken) => Thenable<ISuggestions[]>;
+			getSuggestionDetails? : (document: TextDocument, position: Position, suggestion:ISuggestion, token: CancellationToken) => Thenable<ISuggestion>;
+		}
+		export var SuggestSupport: {
+			register(modeId:string, suggestSupport:ISuggestSupport): Disposable;
+		};
+		// --- End ISuggestSupport
 
-	// --- Start INavigateTypesSupport
+		// --- Start INavigateTypesSupport
 
-	export interface ITypeBearing {
-		containerName: string;
-		name: string;
-		parameters: string;
-		type: string;
-		range: Range;
-		resourceUri: Uri;
-	}
+		export interface ITypeBearing {
+			containerName: string;
+			name: string;
+			parameters: string;
+			type: string;
+			range: Range;
+			resourceUri: Uri;
+		}
 
-	export interface INavigateTypesSupport {
-		getNavigateToItems: (search: string, token: CancellationToken) => Thenable<ITypeBearing[]>;
-	}
-	export var NavigateTypesSupport: {
-		register(modeId: string, navigateTypeSupport: INavigateTypesSupport): Disposable;
-	};
+		export interface INavigateTypesSupport {
+			getNavigateToItems:(search: string, token: CancellationToken) => Thenable<ITypeBearing[]>;
+		}
+		export var NavigateTypesSupport: {
+			register(modeId:string, navigateTypeSupport:INavigateTypesSupport): Disposable;
+		};
 
-	// --- End INavigateTypesSupport
+		// --- End INavigateTypesSupport
 
-	// --- Begin ICommentsSupport
-	export interface ICommentsSupport {
-		commentsConfiguration: ICommentsConfiguration;
-	}
-	export interface ICommentsConfiguration {
-		lineCommentTokens?: string[];
-		blockCommentStartToken?: string;
-		blockCommentEndToken?: string;
-	}
-	export var CommentsSupport: {
-		register(modeId: string, commentsSupport: ICommentsSupport): Disposable;
-	};
-	// --- End ICommentsSupport
+		// --- Begin ICommentsSupport
+		export interface ICommentsSupport {
+			commentsConfiguration: ICommentsConfiguration;
+		}
+		export interface ICommentsConfiguration {
+			lineCommentTokens?:string[];
+			blockCommentStartToken?:string;
+			blockCommentEndToken?:string;
+		}
+		export var CommentsSupport: {
+			register(modeId:string, commentsSupport:ICommentsSupport): Disposable;
+		};
+		// --- End ICommentsSupport
 
-	// --- Begin ITokenTypeClassificationSupport
-	export interface ITokenTypeClassificationSupport {
-		wordDefinition?: RegExp;
-	}
-	export var TokenTypeClassificationSupport: {
-		register(modeId: string, tokenTypeClassificationSupport: ITokenTypeClassificationSupport): Disposable;
-	};
-	// --- End ITokenTypeClassificationSupport
+		// --- Begin ITokenTypeClassificationSupport
+		export interface ITokenTypeClassificationSupport {
+			wordDefinition?: RegExp;
+		}
+		export var TokenTypeClassificationSupport: {
+			register(modeId:string, tokenTypeClassificationSupport:ITokenTypeClassificationSupport): Disposable;
+		};
+		// --- End ITokenTypeClassificationSupport
 
-	// --- Begin IElectricCharacterSupport
-	export interface IElectricCharacterSupport {
-		brackets: IBracketPair[];
-		regexBrackets?: IRegexBracketPair[];
-		docComment?: IDocComment;
-		caseInsensitive?: boolean;
-		embeddedElectricCharacters?: string[];
-	}
-	export var ElectricCharacterSupport: {
-		register(modeId: string, electricCharacterSupport: IElectricCharacterSupport): Disposable;
-	};
-	// --- End IElectricCharacterSupport
+		// --- Begin IElectricCharacterSupport
+		export interface IElectricCharacterSupport {
+			brackets: IBracketPair[];
+			regexBrackets?: IRegexBracketPair[];
+			docComment?: IDocComment;
+			caseInsensitive?: boolean;
+			embeddedElectricCharacters?: string[];
+		}
+		export var ElectricCharacterSupport: {
+			register(modeId:string, electricCharacterSupport:IElectricCharacterSupport): Disposable;
+		};
+		// --- End IElectricCharacterSupport
 
-	// --- Begin ICharacterPairSupport
-	export interface ICharacterPairSupport {
-		autoClosingPairs: IAutoClosingPairConditional[];
-		surroundingPairs?: IAutoClosingPair[];
-	}
-	/**
+		// --- Begin ICharacterPairSupport
+		export interface ICharacterPairSupport {
+			autoClosingPairs: IAutoClosingPairConditional[];
+			surroundingPairs?: IAutoClosingPair[];
+		}
+		/**
 		 * Interface used to support insertion of matching characters like brackets and qoutes.
 		 */
-	export interface IAutoClosingPair {
-		open: string;
-		close: string;
-	}
-	export interface IAutoClosingPairConditional extends IAutoClosingPair {
-		notIn?: string[];
-	}
-	export var CharacterPairSupport: {
-		register(modeId: string, characterPairSupport: ICharacterPairSupport): Disposable;
-	};
-	// --- End ICharacterPairSupport
+		export interface IAutoClosingPair {
+			open:string;
+			close:string;
+		}
+		export interface IAutoClosingPairConditional extends IAutoClosingPair {
+			notIn?: string[];
+		}
+		export var CharacterPairSupport: {
+			register(modeId:string, characterPairSupport:ICharacterPairSupport): Disposable;
+		};
+		// --- End ICharacterPairSupport
 
-	// --- Begin IOnEnterSupport
-	export interface IBracketPair2 {
-		open: string;
-		close: string;
-	}
-	export interface IIndentationRules {
-		decreaseIndentPattern: RegExp;
-		increaseIndentPattern: RegExp;
-		indentNextLinePattern?: RegExp;
-		unIndentedLinePattern?: RegExp;
-	}
-	export enum IndentAction {
-		None,
-		Indent,
-		IndentOutdent,
-		Outdent
-	}
-	export interface IEnterAction {
-		indentAction: IndentAction;
-		appendText?: string;
-		removeText?: number;
-	}
-	export interface IOnEnterRegExpRules {
-		beforeText: RegExp;
-		afterText?: RegExp;
-		action: IEnterAction;
-	}
-	export interface IOnEnterSupportOptions {
-		brackets?: IBracketPair2[];
-		indentationRules?: IIndentationRules;
-		regExpRules?: IOnEnterRegExpRules[];
-	}
-	export var OnEnterSupport: {
-		register(modeId: string, opts: IOnEnterSupportOptions): Disposable;
-	};
-	// --- End IOnEnterSupport
+		// --- Begin IOnEnterSupport
+		export interface IBracketPair2 {
+			open: string;
+			close: string;
+		}
+		export interface IIndentationRules {
+			decreaseIndentPattern: RegExp;
+			increaseIndentPattern: RegExp;
+			indentNextLinePattern?: RegExp;
+			unIndentedLinePattern?: RegExp;
+		}
+		export enum IndentAction {
+			None,
+			Indent,
+			IndentOutdent,
+			Outdent
+		}
+		export interface IEnterAction {
+			indentAction:IndentAction;
+			appendText?:string;
+			removeText?:number;
+		}
+		export interface IOnEnterRegExpRules {
+			beforeText: RegExp;
+			afterText?: RegExp;
+			action: IEnterAction;
+		}
+		export interface IOnEnterSupportOptions {
+			brackets?: IBracketPair2[];
+			indentationRules?: IIndentationRules;
+			regExpRules?: IOnEnterRegExpRules[];
+		}
+		export var OnEnterSupport: {
+			register(modeId:string, opts:IOnEnterSupportOptions): Disposable;
+		};
+		// --- End IOnEnterSupport
 
-	export interface IResourceEdit {
-		resource: Uri;
-		range?: Range;
-		newText: string;
+		export interface IResourceEdit {
+			resource: Uri;
+			range?: Range;
+			newText: string;
+		}
+
+		export interface IReference {
+			resource: Uri;
+			range: Range;
+		}
+
+		export interface IMode {
+			getId(): string;
+		}
+
+		export interface IWorker<T> {
+			disposable: Disposable;
+			load(): Thenable<T>;
+		}
+
+		function registerMonarchDefinition(modeId: string, language: Modes.ILanguage): Disposable;
+		function loadInBackgroundWorker<T>(scriptSrc: string): IWorker<T>;
+
 	}
 
-	export interface IReference {
-		resource: Uri;
-		range: Range;
-	}
-
-	interface IMode {
-		getId(): string;
-	}
-
-	export interface IWorker<T> {
-		disposable: Disposable;
-		load(): Thenable<T>;
-	}
-
-	function registerMonarchDefinition(modeId: string, language: ILanguage): Disposable;
-	function loadInBackgroundWorker<T>(scriptSrc: string): IWorker<T>;
 
 }
 
@@ -1280,4 +1280,11 @@ interface PromiseConstructor {
     // [Symbol.species]: Function;
 }
 
-export var Promise: PromiseConstructor;
+declare var Promise: PromiseConstructor;
+
+// TS 1.6 & node_module
+export = vscode;
+
+// declare module 'vscode' {
+//     export = vscode;
+// }
