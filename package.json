@@ -1,6 +1,6 @@
 {
   "name": "vscode",
-  "version": "0.9.5",
+  "version": "0.9.6",
   "typings": "vscode.d.ts",
   "dependencies": {
     "typescript": "^1.6.2"
