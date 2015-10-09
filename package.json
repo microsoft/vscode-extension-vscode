@@ -1,8 +1,11 @@
 {
-  "name": "vscode",
+  "name": "vscode-extension-sdk",
   "version": "0.9.3",
   "typings": "vscode.d.ts",
   "dependencies": {
     "typescript": "^1.6.2"
-  }
+  },
+  "license": "MIT",
+  "author": "Visual Studio Code Team",
+  "repository": "https://github.com/microsoft/vscode-extension-sdk"
 }
