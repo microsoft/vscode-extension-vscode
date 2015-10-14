@@ -15,6 +15,12 @@ declare namespace vscode {
 		<T>(...args:any[]):T | Thenable<T>;
 	}
 
+	export interface CommandReference {
+		command: string;
+		title: string;
+		arguments?: any[]|any;
+	}
+
 	/**
 	 * Namespace for commanding
 	 */
@@ -56,6 +62,26 @@ declare namespace vscode {
 		tabSize: number;
 		insertSpaces: boolean;
 	}
+
+	export class TextLine {
+
+		getText(): string;
+
+		isEmptyOrWhitespace(): boolean;
+
+		getLeadingWhitespaceLength(): number;
+
+		getRange(): Range;
+
+		getRangeIncludingLineBreak(): Range;
+
+		getStart(): Position;
+
+		getEnd(): Position;
+
+		getEndIncludingLineBreak(): Position;
+	}
+
 
 	export class TextDocument {
 
@@ -103,9 +129,21 @@ declare namespace vscode {
 		getTextInRange(range: Range): string;
 
 		/**
-		 * Get the text on a specific line in this document.
+		 * Get the word under a certain position. May return null if position is at whitespace, on empty line, etc.
 		 */
-		getTextOnLine(line:number): string;
+		getWordRangeAtPosition(position:Position): Range;
+
+		/**
+		 * Get the number of lines in this document.
+		 */
+		getLineCount(): number;
+
+		/**
+		 * Returns a text line denoted by the line number.
+		 * @param lineNumber A line number from this interval [0,getLineCount()[
+		 * @return A line.
+		 */
+		getLine(lineNumber: number): TextLine;
 
 		/**
 		 * Ensure a range sticks to the text.
@@ -116,21 +154,6 @@ declare namespace vscode {
 		 * Ensure a position sticks to the text.
 		 */
 		validatePosition(position:Position): Position;
-
-		/**
-		 * Get the number of lines in this document.
-		 */
-		getLineCount(): number;
-
-		/**
-		 * Get the maximum column for line {{line}}.
-		 */
-		getLineMaxColumn(line:number): number;
-
-		/**
-		 * Get the word under a certain position. May return null if position is at whitespace, on empty line, etc.
-		 */
-		getWordRangeAtPosition(position:Position): Range;
 	}
 
 	export class Position {
@@ -183,8 +206,6 @@ declare namespace vscode {
 	export class TextEditor {
 
 		constructor(document: TextDocument, selections: Selection[], options: TextEditorOptions);
-
-		dispose();
 
 		/**
 		 * Get the document associated with this text editor. The document will be the same for the entire lifetime of this text editor.
@@ -449,6 +470,23 @@ declare namespace vscode {
 	 */
 	export type LanguageSelector = string|LanguageFilter|(string|LanguageFilter)[];
 
+
+	export interface CodeActionsProvider {
+		provideCodeActions(document: TextDocument, where: Range, token: CancellationToken): CommandReference[] | Thenable<CommandReference[]>;
+	}
+
+	export type Definition = Location | Location[];
+
+	export interface DefinitionProvider {
+		provideDefinition(document: TextDocument, where: Position, token: CancellationToken): Definition | Thenable<Definition>;
+	}
+
+	export type Hover = string | { range: Range; value: string | IHTMLContentElement; };
+
+	export interface HoverProvider {
+		provideHover(document: TextDocument, position: Position, token: CancellationToken): Hover | Thenable<Hover>;
+	}
+
 	/**
 	 *
 	 */
@@ -487,7 +525,7 @@ declare namespace vscode {
 	 * inside a text file.
 	 */
 	export class Location {
-		constructor(uri: Uri, range: Selection | Range | Position);
+		constructor(uri: Uri, range: Range | Position);
 		uri: Uri;
 		range: Range;
 	}
@@ -555,7 +593,7 @@ declare namespace vscode {
 
 		export function showErrorMessage(message: string, ...commands: { title: string; command: string | CommandCallback; }[]): Thenable<void>;
 
-		export function setStatusBarMessage(message: string, hideAfterSeconds?: number): Disposable;
+		export function setStatusBarMessage(message: string, hideAfterMillis?: number): Disposable;
 
 		export function showQuickPick(items: string[], options?: QuickPickOptions): Thenable<string>;
 
@@ -566,13 +604,7 @@ declare namespace vscode {
 		 */
 		export function showInputBox(options?: InputBoxOptions): Thenable<string>;
 
-		export function getOutputChannel(name: string): OutputChannel;
-
-		/**
-		 * ✂ - don't use. Will be cut soone!
-		TODO@api move into a node_module
-		 */
-		export function runInTerminal(command: string, args: string[], options?: ExecutionOptions): Thenable<any>;
+		export function createOutputChannel(name: string): OutputChannel;
 	}
 
 	/**
@@ -662,6 +694,21 @@ declare namespace vscode {
 		 *
 		 */
 		export function addErrorLanguageStatus(language: LanguageSelector | Uri | Uri[], message: string | { octicon: string; message: string; }, command: string | CommandCallback): Disposable;
+
+		/**
+		 *
+		 */
+		export function registerCodeActionsProvider(language: LanguageSelector, provider: CodeActionsProvider): Disposable;
+
+		/**
+		 *
+		 */
+		export function registerDefinitionProvider(selector: LanguageSelector, provider: DefinitionProvider): Disposable;
+
+		/**
+		 *
+		 */
+		export function registerHoverProvider(selector: LanguageSelector, provider: HoverProvider): Disposable;
 	}
 
 	export namespace extensions {
@@ -792,16 +839,6 @@ declare namespace vscode {
 		}
 		// --- End TokenizationSupport
 
-		// --- Begin IDeclarationSupport
-		export interface IDeclarationSupport {
-			tokens?: string[];
-			findDeclaration(document: TextDocument, position: Position, token: CancellationToken): Thenable<IReference>;
-		}
-		export var DeclarationSupport: {
-			register(modeId: string, declarationSupport: IDeclarationSupport): Disposable;
-		};
-		// --- End IDeclarationSupport
-
 		// --- Begin ICodeLensSupport
 		export interface ICodeLensSupport {
 			findCodeLensSymbols(document: TextDocument, token: CancellationToken): Thenable<ICodeLensSymbol[]>;
@@ -928,21 +965,6 @@ declare namespace vscode {
 			register(modeId: string, parameterHintsSupport:IParameterHintsSupport): Disposable;
 		};
 		// --- End IParameterHintsSupport
-
-		// --- Begin IExtraInfoSupport
-		export interface IComputeExtraInfoResult {
-			range: Range;
-			value?: string;
-			htmlContent?: IHTMLContentElement[];
-			className?: string;
-		}
-		export interface IExtraInfoSupport {
-			computeInfo(document: TextDocument, position: Position, token: CancellationToken): Thenable<IComputeExtraInfoResult>;
-		}
-		export var ExtraInfoSupport: {
-			register(modeId: string, extraInfoSupport:IExtraInfoSupport): Disposable;
-		};
-		// --- End IExtraInfoSupport
 
 		// --- Begin IRenameSupport
 		export interface IRenameResult {
