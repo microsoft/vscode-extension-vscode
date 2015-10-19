@@ -12,13 +12,13 @@ declare namespace vscode {
 		/**
 		 *
 		 */
-		<T>(...args:any[]):T | Thenable<T>;
+		<T>(...args: any[]): T | Thenable<T>;
 	}
 
 	export interface CommandReference {
-		command: string;
 		title: string;
-		arguments?: any[]|any;
+		command: string | CommandCallback;
+		arguments?: any[] | any;
 	}
 
 	/**
@@ -46,7 +46,7 @@ declare namespace vscode {
 		 * @param thisArgs - (optional) The `this` context used when invoking {{callback}}
 		 * @return Disposable which unregisters this command on disposal
 		 */
-		export function registerTextEditorCommand(command: string, callback: (textEditor:TextEditor, edit:TextEditorEdit) => void, thisArg?: any): Disposable;
+		export function registerTextEditorCommand(command: string, callback: (textEditor: TextEditor, edit: TextEditorEdit) => void, thisArg?: any): Disposable;
 
 		/**
 		 * Executes a command
@@ -85,7 +85,7 @@ declare namespace vscode {
 
 	export class TextDocument {
 
-		constructor(uri: Uri, lines: string[], eol: string, languageId: string, versionId: number, isDirty:boolean);
+		constructor(uri: Uri, lines: string[], eol: string, languageId: string, versionId: number, isDirty: boolean);
 
 		/**
 		 * Get the associated URI for this document. Most documents have the file:// scheme, indicating that they represent files on disk.
@@ -131,7 +131,7 @@ declare namespace vscode {
 		/**
 		 * Get the word under a certain position. May return null if position is at whitespace, on empty line, etc.
 		 */
-		getWordRangeAtPosition(position:Position): Range;
+		getWordRangeAtPosition(position: Position): Range;
 
 		/**
 		 * Get the number of lines in this document.
@@ -148,12 +148,12 @@ declare namespace vscode {
 		/**
 		 * Ensure a range sticks to the text.
 		 */
-		validateRange(range:Range): Range;
+		validateRange(range: Range): Range;
 
 		/**
 		 * Ensure a position sticks to the text.
 		 */
-		validatePosition(position:Position): Position;
+		validatePosition(position: Position): Position;
 	}
 
 	export class Position {
@@ -176,7 +176,7 @@ declare namespace vscode {
 		end: Position;
 
 		constructor(start: Position, end: Position);
-		constructor(startLine: number, startColumn: number, endLine:number, endColumn:number);
+		constructor(startLine: number, startColumn: number, endLine: number, endColumn: number);
 
 		contains(positionOrRange: Position | Range): boolean;
 
@@ -198,7 +198,7 @@ declare namespace vscode {
 		active: Position;
 
 		constructor(anchor: Position, active: Position);
-		constructor(anchorLine: number, anchorColumn: number, activeLine:number, activeColumn:number);
+		constructor(anchorLine: number, anchorColumn: number, activeLine: number, activeColumn: number);
 
 		isReversed(): boolean;
 	}
@@ -246,7 +246,7 @@ declare namespace vscode {
 		 * Perform an edit on the document associated with this text editor.
 		 * The passed in {{editBuilder}} is available only for the duration of the callback.
 		 */
-		edit(callback:(editBuilder:TextEditorEdit)=>void): Thenable<boolean>;
+		edit(callback: (editBuilder: TextEditorEdit) => void): Thenable<boolean>;
 
 	}
 
@@ -348,14 +348,6 @@ declare namespace vscode {
 	 * as event listening or a timer.
 	 */
 	export class Disposable {
-
-		/**
-		 * Combine many disposables into one.
-		 *
-		 * @return Returns a new disposable which, upon dispose, will
-		 * dispose all provided disposables
-		 */
-		static of(...disposables: Disposable[]): Disposable;
 
 		/**
 		 * Combine many disposable-likes into one. Use this method
@@ -468,10 +460,10 @@ declare namespace vscode {
 	/**
 	 *
 	 */
-	export type LanguageSelector = string|LanguageFilter|(string|LanguageFilter)[];
+	export type LanguageSelector = string | LanguageFilter | (string | LanguageFilter)[];
 
 
-	export interface CodeActionsProvider {
+	export interface CodeActionProvider {
 		provideCodeActions(document: TextDocument, where: Range, token: CancellationToken): CommandReference[] | Thenable<CommandReference[]>;
 	}
 
@@ -481,10 +473,74 @@ declare namespace vscode {
 		provideDefinition(document: TextDocument, where: Position, token: CancellationToken): Definition | Thenable<Definition>;
 	}
 
-	export type Hover = string | { range: Range; value: string | IHTMLContentElement; };
+	export class Hover {
+
+		content: vscode.IHTMLContentElement;
+
+		range: Range;
+
+		constructor(value: string | vscode.IHTMLContentElement, range?: Range);
+	}
 
 	export interface HoverProvider {
 		provideHover(document: TextDocument, position: Position, token: CancellationToken): Hover | Thenable<Hover>;
+	}
+
+	export enum DocumentHighlightKind {
+		Text,
+		Read,
+		Write
+	}
+
+	export class DocumentHighlight {
+		constructor(range: Range, kind?: DocumentHighlightKind);
+		range: Range;
+		kind: DocumentHighlightKind;
+	}
+
+	export interface DocumentHighlightProvider {
+		provideDocumentHighlights(document: TextDocument, position: Position, token: CancellationToken): DocumentHighlight[] | Thenable<DocumentHighlight[]>;
+	}
+
+	export enum SymbolKind {
+		File,
+		Module,
+		Namespace,
+		Package,
+		Class,
+		Method,
+		Property,
+		Field,
+		Constructor,
+		Enum,
+		Interface,
+		Function,
+		Variable,
+		Constant,
+		String,
+		Number,
+		Boolean,
+		Array,
+	}
+
+	export class SymbolInformation {
+		constructor(label: string, kind: SymbolKind, range: Range, uri?: Uri, containerLabel?: string);
+		label: string;
+		containerLabel: string;
+		kind: SymbolKind;
+		location: Location;
+	}
+
+	export interface DocumentSymbolProvider {
+		provideDocumentSymbols(document: TextDocument, token: CancellationToken): SymbolInformation[] | Thenable<SymbolInformation[]>;
+	}
+
+	export interface WorkspaceSymbolProvider {
+		provideWorkspaceSymbols(query: string, token: CancellationToken): SymbolInformation[] | Thenable<SymbolInformation[]>;
+	}
+
+	export interface ReferenceProvider {
+		provideReferences(document: TextDocument, position: Position, options: { includeDeclaration: boolean; }, token: CancellationToken): Location[] | Thenable<Location[]>;
 	}
 
 	/**
@@ -536,7 +592,7 @@ declare namespace vscode {
 	 */
 	export class Diagnostic {
 
-		constructor(severity: DiagnosticSeverity, location: Location, message: string, source?:string);
+		constructor(severity: DiagnosticSeverity, location: Location, message: string, source?: string);
 
 		severity: DiagnosticSeverity;
 
@@ -649,10 +705,10 @@ declare namespace vscode {
 		// TODO@api - justify this being here
 		export function getPath(): string;
 
-		export function getRelativePath(pathOrUri: string|Uri): string;
+		export function getRelativePath(pathOrUri: string | Uri): string;
 
 		// TODO@api - justify this being here
-		export function findFiles(include: string, exclude: string, maxResults?:number): Thenable<Uri[]>;
+		export function findFiles(include: string, exclude: string, maxResults?: number): Thenable<Uri[]>;
 
 		/**
 		 * save all dirty files
@@ -683,7 +739,7 @@ declare namespace vscode {
 		/**
 		 *
 		 */
-		export function addInformationLanguageStatus(language: LanguageSelector|Uri|Uri[], message: string | { octicon: string; message: string;}, command: string | CommandCallback): Disposable;
+		export function addInformationLanguageStatus(language: LanguageSelector | Uri | Uri[], message: string | { octicon: string; message: string; }, command: string | CommandCallback): Disposable;
 
 		/**
 		 *
@@ -698,7 +754,7 @@ declare namespace vscode {
 		/**
 		 *
 		 */
-		export function registerCodeActionsProvider(language: LanguageSelector, provider: CodeActionsProvider): Disposable;
+		export function registerCodeActionsProvider(language: LanguageSelector, provider: CodeActionProvider): Disposable;
 
 		/**
 		 *
@@ -709,6 +765,26 @@ declare namespace vscode {
 		 *
 		 */
 		export function registerHoverProvider(selector: LanguageSelector, provider: HoverProvider): Disposable;
+
+		/**
+		 *
+		 */
+		export function registerDocumentHighlightProvider(selector: LanguageSelector, provider: DocumentHighlightProvider): Disposable;
+
+		/**
+		 *
+		 */
+		export function registerDocumentSymbolProvider(selector: LanguageSelector, provider: DocumentSymbolProvider): Disposable;
+
+		/**
+		 *
+		 */
+		export function registerWorkspaceSymbolProvider(provider: WorkspaceSymbolProvider): Disposable;
+
+		/**
+		 *
+		 */
+		export function registerReferenceProvider(selector: LanguageSelector, provider: ReferenceProvider): Disposable;
 	}
 
 	export namespace extensions {
@@ -723,7 +799,7 @@ declare namespace vscode {
 	}
 
 	export interface IHTMLContentElement {
-		formattedText?:string;
+		formattedText?: string;
 		text?: string;
 		className?: string;
 		style?: string;
@@ -769,23 +845,23 @@ declare namespace vscode {
 
 		export interface ILanguageAutoComplete {
 			triggers: string;				// characters that trigger auto completion rules
-			match: string|RegExp;			// autocomplete if this matches
+			match: string | RegExp;			// autocomplete if this matches
 			complete: string;				// complete with this string
 		}
 
 		export interface ILanguageAutoIndent {
-			match: string|RegExp; 			// auto indent if this matches on enter
-			matchAfter: string|RegExp;		// and auto-outdent if this matches on the next line
+			match: string | RegExp; 			// auto indent if this matches on enter
+			matchAfter: string | RegExp;		// and auto-outdent if this matches on the next line
 		}
 
 		/**
 		 * Standard brackets used for auto indentation
 		 */
 		export interface IBracketPair {
-			tokenType:string;
-			open:string;
-			close:string;
-			isElectric:boolean;
+			tokenType: string;
+			open: string;
+			close: string;
+			isElectric: boolean;
 		}
 
 		/**
@@ -796,16 +872,16 @@ declare namespace vscode {
 			open: RegExp; // The definition of when an opening brace is detected. This regex is matched against the entire line upto, and including the last typed character (the trigger character).
 			closeComplete?: string; // How to complete a matching open brace. Matches from 'open' will be expanded, e.g. '</$1>'
 			matchCase?: boolean; // If set to true, the case of the string captured in 'open' will be detected an applied also to 'closeComplete'.
-								// This is useful for cases like BEGIN/END or begin/end where the opening and closing phrases are unrelated.
-								// For identical phrases, use the $1 replacement syntax above directly in closeComplete, as it will
-								// include the proper casing from the captured string in 'open'.
-								// Upper/Lower/Camel cases are detected. Camel case dection uses only the first two characters and assumes
-								// that 'closeComplete' contains wors separated by spaces (e.g. 'End Loop')
+			// This is useful for cases like BEGIN/END or begin/end where the opening and closing phrases are unrelated.
+			// For identical phrases, use the $1 replacement syntax above directly in closeComplete, as it will
+			// include the proper casing from the captured string in 'open'.
+			// Upper/Lower/Camel cases are detected. Camel case dection uses only the first two characters and assumes
+			// that 'closeComplete' contains wors separated by spaces (e.g. 'End Loop')
 
 			closeTrigger?: string; // The character that will trigger the evaluation of 'close'.
 			close?: RegExp; // The definition of when a closing brace is detected. This regex is matched against the entire line upto, and including the last typed character (the trigger character).
 			tokenType?: string; // The type of the token. Matches from 'open' or 'close' will be expanded, e.g. 'keyword.$1'.
-							   // Only used to auto-(un)indent a closing bracket.
+			// Only used to auto-(un)indent a closing bracket.
 		}
 
 		/**
@@ -860,90 +936,24 @@ declare namespace vscode {
 		};
 		// --- End ICodeLensSupport
 
-		// --- Begin IOccurrencesSupport
-		export interface IOccurrence {
-			kind?:string;
-			range:Range;
-		}
-		export interface IOccurrencesSupport {
-			findOccurrences(resource: TextDocument, position: Position, token: CancellationToken): Thenable<IOccurrence[]>;
-		}
-		export var OccurrencesSupport: {
-			register(modeId: string, occurrencesSupport:IOccurrencesSupport): Disposable;
-		};
-		// --- End IOccurrencesSupport
-
-		// --- Begin IOutlineSupport
-		export interface IOutlineEntry {
-			label: string;
-			type: string;
-			icon?: string; // icon class or null to use the default images based on the type
-			range: Range;
-			children?: IOutlineEntry[];
-		}
-		export interface IOutlineSupport {
-			getOutline(document: TextDocument, token: CancellationToken): Thenable<IOutlineEntry[]>;
-			outlineGroupLabel?: { [name: string]: string; };
-		}
-		export var OutlineSupport: {
-			register(modeId: string, outlineSupport:IOutlineSupport): Disposable;
-		};
-		// --- End IOutlineSupport
-
-		// --- Begin IOutlineSupport
-		export interface IQuickFix {
-			label: string;
-			id: any;
-			score: number;
-			documentation?: string;
-		}
-
-		export interface IQuickFixResult {
-			edits: IResourceEdit[];
-		}
-
-		 export interface IQuickFixSupport {
-			getQuickFixes(resource: TextDocument, marker: Range, token: CancellationToken): Thenable<IQuickFix[]>;
-			runQuickFixAction(resource: TextDocument, range: Range, id: any, token: CancellationToken): Thenable<IQuickFixResult>;
-		}
-		export var QuickFixSupport: {
-			register(modeId: string, quickFixSupport:IQuickFixSupport): Disposable
-		};
-		// --- End IOutlineSupport
-
-		// --- Begin IReferenceSupport
-		export interface IReferenceSupport {
-			tokens?: string[];
-
-			/**
-			 * @returns a list of reference of the symbol at the position in the
-			 * 	given resource.
-			 */
-			findReferences(document: TextDocument, position: Position, includeDeclaration: boolean, token: CancellationToken): Thenable<IReference[]>;
-		}
-		export var ReferenceSupport: {
-			register(modeId: string, quickFixSupport:IReferenceSupport): Disposable;
-		};
-		// --- End IReferenceSupport
-
 		// --- Begin IParameterHintsSupport
 		export interface IParameter {
-			label:string;
-			documentation?:string;
-			signatureLabelOffset?:number;
-			signatureLabelEnd?:number;
+			label: string;
+			documentation?: string;
+			signatureLabelOffset?: number;
+			signatureLabelEnd?: number;
 		}
 
 		export interface ISignature {
-			label:string;
-			documentation?:string;
-			parameters:IParameter[];
+			label: string;
+			documentation?: string;
+			parameters: IParameter[];
 		}
 
 		export interface IParameterHints {
-			currentSignature:number;
-			currentParameter:number;
-			signatures:ISignature[];
+			currentSignature: number;
+			currentParameter: number;
+			signatures: ISignature[];
 		}
 
 		export interface IParameterHintsSupport {
@@ -962,22 +972,22 @@ declare namespace vscode {
 			getParameterHints(document: TextDocument, position: Position, token: CancellationToken): Thenable<IParameterHints>;
 		}
 		export var ParameterHintsSupport: {
-			register(modeId: string, parameterHintsSupport:IParameterHintsSupport): Disposable;
+			register(modeId: string, parameterHintsSupport: IParameterHintsSupport): Disposable;
 		};
 		// --- End IParameterHintsSupport
 
 		// --- Begin IRenameSupport
 		export interface IRenameResult {
-		    currentName: string;
-		    edits: IResourceEdit[];
-		    rejectReason?: string;
+			currentName: string;
+			edits: IResourceEdit[];
+			rejectReason?: string;
 		}
 		export interface IRenameSupport {
 			filter?: string[];
 			rename(document: TextDocument, position: Position, newName: string, token: CancellationToken): Thenable<IRenameResult>;
 		}
 		export var RenameSupport: {
-			register(modeId: string, renameSupport:IRenameSupport): Disposable;
+			register(modeId: string, renameSupport: IRenameSupport): Disposable;
 		};
 		// --- End IRenameSupport
 
@@ -986,8 +996,8 @@ declare namespace vscode {
 		 * Interface used to format a model
 		 */
 		export interface IFormattingOptions {
-			tabSize:number;
-			insertSpaces:boolean;
+			tabSize: number;
+			insertSpaces: boolean;
 		}
 		/**
 		 * A single edit operation, that acts as a simple replace.
@@ -1017,7 +1027,7 @@ declare namespace vscode {
 			formatAfterKeystroke?: (document: TextDocument, position: Position, ch: string, options: IFormattingOptions, token: CancellationToken) => Thenable<ISingleEditOperation[]>;
 		}
 		export var FormattingSupport: {
-			register(modeId: string, formattingSupport:IFormattingSupport): Disposable;
+			register(modeId: string, formattingSupport: IFormattingSupport): Disposable;
 		};
 		// --- End IRenameSupport
 
@@ -1027,8 +1037,8 @@ declare namespace vscode {
 			partSeparator?: string;
 		}
 		export interface IHighlight {
-			start:number;
-			end:number;
+			start: number;
+			end: number;
 		}
 		export interface ISuggestion {
 			label: string;
@@ -1039,8 +1049,8 @@ declare namespace vscode {
 			documentationLabel?: string;
 		}
 		export interface ISuggestions {
-			currentWord:string;
-			suggestions:ISuggestion[];
+			currentWord: string;
+			suggestions: ISuggestion[];
 			incomplete?: boolean;
 			overwriteBefore?: number;
 			overwriteAfter?: number;
@@ -1052,44 +1062,24 @@ declare namespace vscode {
 			sortBy?: ISortingTypeAndSeparator[];
 
 			suggest: (document: TextDocument, position: Position, token: CancellationToken) => Thenable<ISuggestions[]>;
-			getSuggestionDetails? : (document: TextDocument, position: Position, suggestion:ISuggestion, token: CancellationToken) => Thenable<ISuggestion>;
+			getSuggestionDetails?: (document: TextDocument, position: Position, suggestion: ISuggestion, token: CancellationToken) => Thenable<ISuggestion>;
 		}
 		export var SuggestSupport: {
-			register(modeId:string, suggestSupport:ISuggestSupport): Disposable;
+			register(modeId: string, suggestSupport: ISuggestSupport): Disposable;
 		};
 		// --- End ISuggestSupport
-
-		// --- Start INavigateTypesSupport
-
-		export interface ITypeBearing {
-			containerName: string;
-			name: string;
-			parameters: string;
-			type: string;
-			range: Range;
-			resourceUri: Uri;
-		}
-
-		export interface INavigateTypesSupport {
-			getNavigateToItems:(search: string, token: CancellationToken) => Thenable<ITypeBearing[]>;
-		}
-		export var NavigateTypesSupport: {
-			register(modeId:string, navigateTypeSupport:INavigateTypesSupport): Disposable;
-		};
-
-		// --- End INavigateTypesSupport
 
 		// --- Begin ICommentsSupport
 		export interface ICommentsSupport {
 			commentsConfiguration: ICommentsConfiguration;
 		}
 		export interface ICommentsConfiguration {
-			lineCommentTokens?:string[];
-			blockCommentStartToken?:string;
-			blockCommentEndToken?:string;
+			lineCommentTokens?: string[];
+			blockCommentStartToken?: string;
+			blockCommentEndToken?: string;
 		}
 		export var CommentsSupport: {
-			register(modeId:string, commentsSupport:ICommentsSupport): Disposable;
+			register(modeId: string, commentsSupport: ICommentsSupport): Disposable;
 		};
 		// --- End ICommentsSupport
 
@@ -1098,7 +1088,7 @@ declare namespace vscode {
 			wordDefinition?: RegExp;
 		}
 		export var TokenTypeClassificationSupport: {
-			register(modeId:string, tokenTypeClassificationSupport:ITokenTypeClassificationSupport): Disposable;
+			register(modeId: string, tokenTypeClassificationSupport: ITokenTypeClassificationSupport): Disposable;
 		};
 		// --- End ITokenTypeClassificationSupport
 
@@ -1111,7 +1101,7 @@ declare namespace vscode {
 			embeddedElectricCharacters?: string[];
 		}
 		export var ElectricCharacterSupport: {
-			register(modeId:string, electricCharacterSupport:IElectricCharacterSupport): Disposable;
+			register(modeId: string, electricCharacterSupport: IElectricCharacterSupport): Disposable;
 		};
 		// --- End IElectricCharacterSupport
 
@@ -1124,14 +1114,14 @@ declare namespace vscode {
 		 * Interface used to support insertion of matching characters like brackets and qoutes.
 		 */
 		export interface IAutoClosingPair {
-			open:string;
-			close:string;
+			open: string;
+			close: string;
 		}
 		export interface IAutoClosingPairConditional extends IAutoClosingPair {
 			notIn?: string[];
 		}
 		export var CharacterPairSupport: {
-			register(modeId:string, characterPairSupport:ICharacterPairSupport): Disposable;
+			register(modeId: string, characterPairSupport: ICharacterPairSupport): Disposable;
 		};
 		// --- End ICharacterPairSupport
 
@@ -1153,9 +1143,9 @@ declare namespace vscode {
 			Outdent
 		}
 		export interface IEnterAction {
-			indentAction:IndentAction;
-			appendText?:string;
-			removeText?:number;
+			indentAction: IndentAction;
+			appendText?: string;
+			removeText?: number;
 		}
 		export interface IOnEnterRegExpRules {
 			beforeText: RegExp;
@@ -1168,7 +1158,7 @@ declare namespace vscode {
 			regExpRules?: IOnEnterRegExpRules[];
 		}
 		export var OnEnterSupport: {
-			register(modeId:string, opts:IOnEnterSupportOptions): Disposable;
+			register(modeId: string, opts: IOnEnterSupportOptions): Disposable;
 		};
 		// --- End IOnEnterSupport
 
@@ -1211,14 +1201,14 @@ declare module 'vscode-testing' {
 		line: string;
 		tokens: IRelaxedToken[];
 	}
-	export function testTokenization(name:string, language: vscode.Modes.ILanguage, tests:ITestItem[][]): void;
+	export function testTokenization(name: string, language: vscode.Modes.ILanguage, tests: ITestItem[][]): void;
 	export interface IOnEnterAsserter {
-		nothing(oneLineAboveText:string, beforeText:string, afterText:string): void;
-		indents(oneLineAboveText:string, beforeText:string, afterText:string): void;
-		outdents(oneLineAboveText:string, beforeText:string, afterText:string): void;
-		indentsOutdents(oneLineAboveText:string, beforeText:string, afterText:string): void;
+		nothing(oneLineAboveText: string, beforeText: string, afterText: string): void;
+		indents(oneLineAboveText: string, beforeText: string, afterText: string): void;
+		outdents(oneLineAboveText: string, beforeText: string, afterText: string): void;
+		indentsOutdents(oneLineAboveText: string, beforeText: string, afterText: string): void;
 	}
-	export function testOnEnter(name:string, language: vscode.Modes.ILanguage, callback:(assertOnEnter:IOnEnterAsserter) => void): void;
+	export function testOnEnter(name: string, language: vscode.Modes.ILanguage, callback: (assertOnEnter: IOnEnterAsserter) => void): void;
 }
 
 /**

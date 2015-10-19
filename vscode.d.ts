@@ -16,8 +16,8 @@ declare namespace vscode {
 	}
 
 	export interface CommandReference {
-		command: string;
 		title: string;
+		command: string | CommandCallback;
 		arguments?: any[] | any;
 	}
 
@@ -350,14 +350,6 @@ declare namespace vscode {
 	export class Disposable {
 
 		/**
-		 * Combine many disposables into one.
-		 *
-		 * @return Returns a new disposable which, upon dispose, will
-		 * dispose all provided disposables
-		 */
-		static of(...disposables: Disposable[]): Disposable;
-
-		/**
 		 * Combine many disposable-likes into one. Use this method
 		 * when having objects with a dispose function which are not
 		 * instances of Disposable.
@@ -471,7 +463,7 @@ declare namespace vscode {
 	export type LanguageSelector = string | LanguageFilter | (string | LanguageFilter)[];
 
 
-	export interface CodeActionsProvider {
+	export interface CodeActionProvider {
 		provideCodeActions(document: TextDocument, where: Range, token: CancellationToken): CommandReference[] | Thenable<CommandReference[]>;
 	}
 
@@ -481,10 +473,74 @@ declare namespace vscode {
 		provideDefinition(document: TextDocument, where: Position, token: CancellationToken): Definition | Thenable<Definition>;
 	}
 
-	export type Hover = string | { range: Range; value: string | IHTMLContentElement; };
+	export class Hover {
+
+		content: vscode.IHTMLContentElement;
+
+		range: Range;
+
+		constructor(value: string | vscode.IHTMLContentElement, range?: Range);
+	}
 
 	export interface HoverProvider {
 		provideHover(document: TextDocument, position: Position, token: CancellationToken): Hover | Thenable<Hover>;
+	}
+
+	export enum DocumentHighlightKind {
+		Text,
+		Read,
+		Write
+	}
+
+	export class DocumentHighlight {
+		constructor(range: Range, kind?: DocumentHighlightKind);
+		range: Range;
+		kind: DocumentHighlightKind;
+	}
+
+	export interface DocumentHighlightProvider {
+		provideDocumentHighlights(document: TextDocument, position: Position, token: CancellationToken): DocumentHighlight[] | Thenable<DocumentHighlight[]>;
+	}
+
+	export enum SymbolKind {
+		File,
+		Module,
+		Namespace,
+		Package,
+		Class,
+		Method,
+		Property,
+		Field,
+		Constructor,
+		Enum,
+		Interface,
+		Function,
+		Variable,
+		Constant,
+		String,
+		Number,
+		Boolean,
+		Array,
+	}
+
+	export class SymbolInformation {
+		constructor(label: string, kind: SymbolKind, range: Range, uri?: Uri, containerLabel?: string);
+		label: string;
+		containerLabel: string;
+		kind: SymbolKind;
+		location: Location;
+	}
+
+	export interface DocumentSymbolProvider {
+		provideDocumentSymbols(document: TextDocument, token: CancellationToken): SymbolInformation[] | Thenable<SymbolInformation[]>;
+	}
+
+	export interface WorkspaceSymbolProvider {
+		provideWorkspaceSymbols(query: string, token: CancellationToken): SymbolInformation[] | Thenable<SymbolInformation[]>;
+	}
+
+	export interface ReferenceProvider {
+		provideReferences(document: TextDocument, position: Position, options: { includeDeclaration: boolean; }, token: CancellationToken): Location[] | Thenable<Location[]>;
 	}
 
 	/**
@@ -698,7 +754,7 @@ declare namespace vscode {
 		/**
 		 *
 		 */
-		export function registerCodeActionsProvider(language: LanguageSelector, provider: CodeActionsProvider): Disposable;
+		export function registerCodeActionsProvider(language: LanguageSelector, provider: CodeActionProvider): Disposable;
 
 		/**
 		 *
@@ -709,6 +765,26 @@ declare namespace vscode {
 		 *
 		 */
 		export function registerHoverProvider(selector: LanguageSelector, provider: HoverProvider): Disposable;
+
+		/**
+		 *
+		 */
+		export function registerDocumentHighlightProvider(selector: LanguageSelector, provider: DocumentHighlightProvider): Disposable;
+
+		/**
+		 *
+		 */
+		export function registerDocumentSymbolProvider(selector: LanguageSelector, provider: DocumentSymbolProvider): Disposable;
+
+		/**
+		 *
+		 */
+		export function registerWorkspaceSymbolProvider(provider: WorkspaceSymbolProvider): Disposable;
+
+		/**
+		 *
+		 */
+		export function registerReferenceProvider(selector: LanguageSelector, provider: ReferenceProvider): Disposable;
 	}
 
 	export namespace extensions {
@@ -860,72 +936,6 @@ declare namespace vscode {
 		};
 		// --- End ICodeLensSupport
 
-		// --- Begin IOccurrencesSupport
-		export interface IOccurrence {
-			kind?: string;
-			range: Range;
-		}
-		export interface IOccurrencesSupport {
-			findOccurrences(resource: TextDocument, position: Position, token: CancellationToken): Thenable<IOccurrence[]>;
-		}
-		export var OccurrencesSupport: {
-			register(modeId: string, occurrencesSupport: IOccurrencesSupport): Disposable;
-		};
-		// --- End IOccurrencesSupport
-
-		// --- Begin IOutlineSupport
-		export interface IOutlineEntry {
-			label: string;
-			type: string;
-			icon?: string; // icon class or null to use the default images based on the type
-			range: Range;
-			children?: IOutlineEntry[];
-		}
-		export interface IOutlineSupport {
-			getOutline(document: TextDocument, token: CancellationToken): Thenable<IOutlineEntry[]>;
-			outlineGroupLabel?: { [name: string]: string; };
-		}
-		export var OutlineSupport: {
-			register(modeId: string, outlineSupport: IOutlineSupport): Disposable;
-		};
-		// --- End IOutlineSupport
-
-		// --- Begin IOutlineSupport
-		export interface IQuickFix {
-			label: string;
-			id: any;
-			score: number;
-			documentation?: string;
-		}
-
-		export interface IQuickFixResult {
-			edits: IResourceEdit[];
-		}
-
-		export interface IQuickFixSupport {
-			getQuickFixes(resource: TextDocument, marker: Range, token: CancellationToken): Thenable<IQuickFix[]>;
-			runQuickFixAction(resource: TextDocument, range: Range, id: any, token: CancellationToken): Thenable<IQuickFixResult>;
-		}
-		export var QuickFixSupport: {
-			register(modeId: string, quickFixSupport: IQuickFixSupport): Disposable
-		};
-		// --- End IOutlineSupport
-
-		// --- Begin IReferenceSupport
-		export interface IReferenceSupport {
-			tokens?: string[];
-
-			/**
-			 * @returns a list of reference of the symbol at the position in the
-			 * 	given resource.
-			 */
-			findReferences(document: TextDocument, position: Position, includeDeclaration: boolean, token: CancellationToken): Thenable<IReference[]>;
-		}
-		export var ReferenceSupport: {
-			register(modeId: string, quickFixSupport: IReferenceSupport): Disposable;
-		};
-		// --- End IReferenceSupport
-
 		// --- Begin IParameterHintsSupport
 		export interface IParameter {
 			label: string;
@@ -1058,26 +1068,6 @@ declare namespace vscode {
 			register(modeId: string, suggestSupport: ISuggestSupport): Disposable;
 		};
 		// --- End ISuggestSupport
-
-		// --- Start INavigateTypesSupport
-
-		export interface ITypeBearing {
-			containerName: string;
-			name: string;
-			parameters: string;
-			type: string;
-			range: Range;
-			resourceUri: Uri;
-		}
-
-		export interface INavigateTypesSupport {
-			getNavigateToItems: (search: string, token: CancellationToken) => Thenable<ITypeBearing[]>;
-		}
-		export var NavigateTypesSupport: {
-			register(modeId: string, navigateTypeSupport: INavigateTypesSupport): Disposable;
-		};
-
-		// --- End INavigateTypesSupport
 
 		// --- Begin ICommentsSupport
 		export interface ICommentsSupport {
