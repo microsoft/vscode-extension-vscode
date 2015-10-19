@@ -1,2 +1,4 @@
 #!/usr/bin/env node
-require('../node_modules/typescript/lib/tsc.js')
+var path = require('path');
+
+require(path.join(path.dirname(require.resolve('typescript')), 'tsc.js'));
