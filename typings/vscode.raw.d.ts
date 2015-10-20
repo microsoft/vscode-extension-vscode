@@ -56,6 +56,13 @@ declare namespace vscode {
 		 * @return
 		 */
 		export function executeCommand<T>(command: string, ...rest: any[]): Thenable<T>;
+
+		/**
+		 * Retrieve the list of all avialable commands.
+		 *
+		 * @return Thenable that resolves to a list of command ids.
+		 */
+		export function getCommands(): Thenable<string[]>;
 	}
 
 	export interface TextEditorOptions {
@@ -462,9 +469,16 @@ declare namespace vscode {
 	 */
 	export type LanguageSelector = string | LanguageFilter | (string | LanguageFilter)[];
 
+	export interface CodeActionContext {
+		diagnostics: Diagnostic[];
+	}
 
 	export interface CodeActionProvider {
-		provideCodeActions(document: TextDocument, where: Range, token: CancellationToken): CommandReference[] | Thenable<CommandReference[]>;
+		provideCodeActions(document: TextDocument, range: Range, context: CodeActionContext, token: CancellationToken): CommandReference[] | Thenable<CommandReference[]>;
+	}
+
+	export interface CodeLensProvider {
+		provideCodeLenses(document: TextDocument, where: Range, token: CancellationToken): CommandReference[] | Thenable<CommandReference[]>;
 	}
 
 	export type Definition = Location | Location[];
@@ -572,8 +586,10 @@ declare namespace vscode {
 	 * Represents the severity of diagnostics.
 	 */
 	export enum DiagnosticSeverity {
+		Hint = 3,
+		Information = 2,
 		Warning = 1,
-		Error = 2
+		Error = 0
 	}
 
 	/**
@@ -603,9 +619,8 @@ declare namespace vscode {
 		source: string;
 	}
 
-	// TODO@api, TODO@Joh,Ben
-	// output channels need to be known upfront (contributes in package.json)
-	export interface OutputChannel extends Disposable {
+	export class OutputChannel {
+		constructor(name: string);
 		append(value: string): void;
 		appendLine(value: string): void;
 		clear(): void;
@@ -659,8 +674,6 @@ declare namespace vscode {
 		 * Opens an input box to ask the user for input.
 		 */
 		export function showInputBox(options?: InputBoxOptions): Thenable<string>;
-
-		export function createOutputChannel(name: string): OutputChannel;
 	}
 
 	/**
@@ -755,6 +768,11 @@ declare namespace vscode {
 		 *
 		 */
 		export function registerCodeActionsProvider(language: LanguageSelector, provider: CodeActionProvider): Disposable;
+
+		/**
+		 *
+		 */
+		export function registerCodeLensProvider(language: LanguageSelector, provider: CodeLensProvider): Disposable;
 
 		/**
 		 *

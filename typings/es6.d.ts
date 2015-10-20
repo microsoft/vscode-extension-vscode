@@ -1,5 +1,9 @@
 declare type PropertyKey = string | number | symbol;
 
+// ### VSCode Change Start: We want PromiseLike to be Thenable
+interface Thenable<T> extends PromiseLike<T> {}
+// ### VSCode CHange End
+
 interface Symbol {
     /** Returns a string representation of an object. */
     toString(): string;
