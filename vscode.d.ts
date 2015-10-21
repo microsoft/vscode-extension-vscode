@@ -557,6 +557,57 @@ declare namespace vscode {
 		provideReferences(document: TextDocument, position: Position, options: { includeDeclaration: boolean; }, token: CancellationToken): Location[] | Thenable<Location[]>;
 	}
 
+	export class TextEdit {
+		static replace(range: Range, newText: string): TextEdit;
+		static insert(position: Position, newText: string): TextEdit;
+		static delete(range: Range): TextEdit;
+		constructor(range: Range, newText: string);
+		range: Range;
+		newText: string;
+	}
+
+	export class WorkspaceEdit {
+		size: number;
+		replace(resource: Uri, range: Range, newText: string): void;
+		insert(resource: Uri, range: Position, newText: string): void;
+		delete(resource: Uri, range: Range): void;
+		edits(): [Uri, TextEdit[]][];
+	}
+
+	/**
+	 *
+	 */
+	export interface RenameProvider {
+		provideRenameEdits(document: TextDocument, position: Position, newName: string, token: CancellationToken): WorkspaceEdit | Thenable<WorkspaceEdit>;
+	}
+
+	export interface FormattingOptions {
+		tabSize: number;
+		insertSpaces: boolean;
+		[key: string]: boolean | number | string;
+	}
+
+	/**
+	 *
+	 */
+	export interface DocumentFormattingEditProvider {
+		provideDocumentFormattingEdits(document: TextDocument, options: FormattingOptions, token: CancellationToken): TextEdit[] | Thenable<TextEdit[]>;
+	}
+
+	/**
+	 *
+	 */
+	export interface DocumentRangeFormattingEditProvider {
+		provideDocumentRangeFormattingEdits(document: TextDocument, range: Range, options: FormattingOptions, token: CancellationToken): TextEdit[] | Thenable<TextEdit[]>;
+	}
+
+	/**
+	 *
+	 */
+	export interface OnTypeFormattingEditProvider {
+		provideOnTypeFormattingEdits(document: TextDocument, position: Position, ch: string, options: FormattingOptions, token: CancellationToken): TextEdit[] | Thenable<TextEdit[]>;
+	}
+
 	/**
 	 *
 	 */
@@ -739,6 +790,12 @@ declare namespace vscode {
 	export namespace languages {
 
 		/**
+		 * Return the identifiers of all known languages.
+		 * @return Promise resolving to an array of identifier strings.
+		 */
+		export function getLanguages(): Thenable<string[]>;
+
+		/**
 		 * Add diagnostics, such as compiler errors or warnings. They will be represented as
 		 * squiggles in text editors and in a list of diagnostics.
 		 * To remove the diagnostics again, dispose the `Disposable` which is returned
@@ -803,13 +860,38 @@ declare namespace vscode {
 		 *
 		 */
 		export function registerReferenceProvider(selector: LanguageSelector, provider: ReferenceProvider): Disposable;
+
+		/**
+		 *
+		 */
+		export function registerRenameProvider(selector: LanguageSelector, provider: RenameProvider): Disposable;
+
+		/**
+		 *
+		 */
+		export function registerDocumentFormattingEditProvider(selector: LanguageSelector, provider: DocumentFormattingEditProvider): Disposable;
+
+		/**
+		 *
+		 */
+		export function registerDocumentRangeFormattingEditProvider(selector: LanguageSelector, provider: DocumentRangeFormattingEditProvider): Disposable;
+
+		/**
+		 *
+		 */
+		export function registerOnTypeFormattingEditProvider(selector: LanguageSelector, triggerCharacters: string[], provider: OnTypeFormattingEditProvider): Disposable;
 	}
 
 	export namespace extensions {
 
 		export function getStateMemento(extensionId: string, global?: boolean): Memento;
 
+		// TODO: Remove Memento from method name
+		// TODO: Make method synchronous, stop using ReadOnlyMemento
 		export function getConfigurationMemento(extensionId: string): ReadOnlyMemento;
+
+		// TODO: send out the new config?
+		export const onDidChangeConfiguration: Event<void>;
 
 		export function getExtension(extensionId: string): any;
 
@@ -931,6 +1013,9 @@ declare namespace vscode {
 			Open = 1,
 			Close = -1
 		}
+
+		export var hasTextMateTokenizerSupport: boolean;
+
 		// --- End TokenizationSupport
 
 		// --- Begin ICodeLensSupport
@@ -993,61 +1078,6 @@ declare namespace vscode {
 			register(modeId: string, parameterHintsSupport: IParameterHintsSupport): Disposable;
 		};
 		// --- End IParameterHintsSupport
-
-		// --- Begin IRenameSupport
-		export interface IRenameResult {
-			currentName: string;
-			edits: IResourceEdit[];
-			rejectReason?: string;
-		}
-		export interface IRenameSupport {
-			filter?: string[];
-			rename(document: TextDocument, position: Position, newName: string, token: CancellationToken): Thenable<IRenameResult>;
-		}
-		export var RenameSupport: {
-			register(modeId: string, renameSupport: IRenameSupport): Disposable;
-		};
-		// --- End IRenameSupport
-
-		// --- Begin IFormattingSupport
-		/**
-		 * Interface used to format a model
-		 */
-		export interface IFormattingOptions {
-			tabSize: number;
-			insertSpaces: boolean;
-		}
-		/**
-		 * A single edit operation, that acts as a simple replace.
-		 * i.e. Replace text at `range` with `text` in model.
-		 */
-		export interface ISingleEditOperation {
-			/**
-			 * The range to replace. This can be empty to emulate a simple insert.
-			 */
-			range: Range;
-			/**
-			 * The text to replace with. This can be null to emulate a simple delete.
-			 */
-			text: string;
-		}
-		/**
-		 * Supports to format source code. There are three levels
-		 * on which formatting can be offered:
-		 * (1) format a document
-		 * (2) format a selectin
-		 * (3) format on keystroke
-		 */
-		export interface IFormattingSupport {
-			formatDocument: (document: TextDocument, options: IFormattingOptions, token: CancellationToken) => Thenable<ISingleEditOperation[]>;
-			formatRange?: (document: TextDocument, range: Range, options: IFormattingOptions, token: CancellationToken) => Thenable<ISingleEditOperation[]>;
-			autoFormatTriggerCharacters?: string[];
-			formatAfterKeystroke?: (document: TextDocument, position: Position, ch: string, options: IFormattingOptions, token: CancellationToken) => Thenable<ISingleEditOperation[]>;
-		}
-		export var FormattingSupport: {
-			register(modeId: string, formattingSupport: IFormattingSupport): Disposable;
-		};
-		// --- End IRenameSupport
 
 		// --- Begin ISuggestSupport
 		export interface ISortingTypeAndSeparator {
@@ -1179,12 +1209,6 @@ declare namespace vscode {
 			register(modeId: string, opts: IOnEnterSupportOptions): Disposable;
 		};
 		// --- End IOnEnterSupport
-
-		export interface IResourceEdit {
-			resource: Uri;
-			range?: Range;
-			newText: string;
-		}
 
 		export interface IReference {
 			resource: Uri;
