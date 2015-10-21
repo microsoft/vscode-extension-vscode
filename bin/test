@@ -1,0 +1,4 @@
+#!/usr/bin/env node
+var path = require('path');
+
+require(path.join(path.dirname(__dirname)), 'lib', 'testrunner');

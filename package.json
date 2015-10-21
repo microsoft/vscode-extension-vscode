@@ -1,9 +1,10 @@
 {
   "name": "vscode",
-  "version": "0.10.0-pre.5",
+  "version": "0.10.0-pre.6",
   "typings": "vscode.d.ts",
   "dependencies": {
-    "typescript": "^1.6.2"
+    "typescript": "^1.6.2",
+    "mocha": "^2.3.3"
   },
   "license": "MIT",
   "author": "Visual Studio Code Team",

@@ -3,4 +3,5 @@
 /// <reference path="./es6.d.ts" />
 /// <reference path="./intl.d.ts" />
 /// <reference path="./node.d.ts" />
+/// <reference path="./mocha.d.ts" />
 /// <reference path="./vscode.raw.d.ts" />
