@@ -1,7 +1,10 @@
 {
   "name": "vscode",
-  "version": "0.10.0-pre.13",
+  "version": "0.10.0-pre.14",
   "typings": "vscode.d.ts",
+  "scripts": {
+    "prepublish": "tsc"
+  },
   "dependencies": {
     "typescript": "^1.6.2",
     "mocha": "^2.3.3",
