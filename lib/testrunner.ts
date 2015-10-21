@@ -25,7 +25,7 @@ export function run(testsRoot: string, clb: (error) => void): void {
 		// Fill into Mocha
 		files
 			.filter(f => f.substr(-3) === '.js' && f !== 'index.js')
-			.forEach(f => mocha.addFile(paths.join(__dirname, f)));
+			.forEach(f => mocha.addFile(paths.join(testsRoot, f)));
 
 		// Run the tests.
 		mocha.run()
