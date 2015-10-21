@@ -11,10 +11,14 @@ import * as fs from 'fs';
 import * as paths from 'path';
 import Mocha = require('mocha');
 
-const mocha = new Mocha({
+let mocha = new Mocha({
 	ui: 'tdd',
 	useColors: true
 });
+
+export function configure(opts:MochaSetupOptions): void {
+	mocha = new Mocha(opts);	
+}
 
 export function run(testsRoot: string, clb: (error) => void): void {
 	fs.readdir(testsRoot, (error, files) => {
