@@ -23,15 +23,13 @@ export function configure(opts: MochaSetupOptions): void {
 }
 
 export function run(testsRoot: string, clb: (error) => void): void {
-	glob('**/*.js', { cwd: testsRoot }, (error, files) => {
+	glob('**/**.test.js', { cwd: testsRoot }, (error, files) => {
 		if (error) {
 			return clb(error);
 		}
 
 		// Fill into Mocha
-		files
-			.filter(f => f !== 'index.js') // this is the initial testrunner file leading here, avoid loading it endlessly
-			.forEach(f => mocha.addFile(paths.join(testsRoot, f)));
+		files.forEach(f => mocha.addFile(paths.join(testsRoot, f)));
 
 		// Run the tests.
 		mocha.run()
