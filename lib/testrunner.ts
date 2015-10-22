@@ -23,6 +23,11 @@ export function configure(opts: MochaSetupOptions): void {
 }
 
 export function run(testsRoot: string, clb: (error) => void): void {
+	
+	// Enable source map support
+	require('source-map-support').install();
+	
+	// Glob test files
 	glob('**/**.test.js', { cwd: testsRoot }, (error, files) => {
 		if (error) {
 			return clb(error);

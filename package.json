@@ -1,6 +1,6 @@
 {
   "name": "vscode",
-  "version": "0.10.0-pre.14",
+  "version": "0.10.0-pre.15",
   "typings": "vscode.d.ts",
   "scripts": {
     "prepublish": "tsc"
@@ -8,7 +8,8 @@
   "dependencies": {
     "typescript": "^1.6.2",
     "mocha": "^2.3.3",
-    "glob": "^5.0.15"
+    "glob": "^5.0.15",
+    "source-map-support": "^0.3.2"
   },
   "license": "MIT",
   "author": "Visual Studio Code Team",
