@@ -1248,27 +1248,6 @@ declare namespace vscode {
 
 }
 
-declare module 'vscode-testing' {
-	import vscode = require('vscode');
-	export interface IRelaxedToken {
-		startIndex: number;
-		type: string;
-		bracket?: vscode.Modes.Bracket;
-	}
-	export interface ITestItem {
-		line: string;
-		tokens: IRelaxedToken[];
-	}
-	export function testTokenization(name:string, language: vscode.Modes.ILanguage, tests:ITestItem[][]): void;
-	export interface IOnEnterAsserter {
-		nothing(oneLineAboveText:string, beforeText:string, afterText:string): void;
-		indents(oneLineAboveText:string, beforeText:string, afterText:string): void;
-		outdents(oneLineAboveText:string, beforeText:string, afterText:string): void;
-		indentsOutdents(oneLineAboveText:string, beforeText:string, afterText:string): void;
-	}
-	export function testOnEnter(name:string, language: vscode.Modes.ILanguage, callback:(assertOnEnter:IOnEnterAsserter) => void): void;
-}
-
 /**
  * Thenable is a common denominator between ES6 promises, Q, jquery.Deferred, WinJS.Promise,
  * and others. This API makes no assumption about what promise libary is being used which
