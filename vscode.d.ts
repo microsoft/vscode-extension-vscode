@@ -12,13 +12,28 @@ declare namespace vscode {
 		/**
 		 *
 		 */
-		<T>(...args:any[]):T | Thenable<T>;
+		<T>(...args: any[]): T | Thenable<T>;
 	}
 
+	/**
+	 * Represents a command
+	 */
 	export interface Command {
+		/**
+		 * Title of the command, like _save_
+		 */
 		title: string;
+
+		/**
+		 * The identifier of the actual commend handler
+		 */
 		command: string;
-		arguments?: any[]|any;
+
+		/**
+		 * Arguments that the command-handler should be
+		 * invoked with
+		 */
+		arguments?: any[];
 	}
 
 	export interface TextEditorOptions {
@@ -26,97 +41,153 @@ declare namespace vscode {
 		insertSpaces: boolean;
 	}
 
-	export class TextLine {
-
-		getText(): string;
-
-		isEmptyOrWhitespace(): boolean;
-
-		getLeadingWhitespaceLength(): number;
-
-		getRange(): Range;
-
-		getRangeIncludingLineBreak(): Range;
-
-		getStart(): Position;
-
-		getEnd(): Position;
-
-		getEndIncludingLineBreak(): Position;
-	}
-
-
-	export class TextDocument {
-
-		constructor(uri: Uri, lines: string[], eol: string, languageId: string, versionId: number, isDirty:boolean);
+	/**
+	 * Represents a line of text such as a line of source code
+	 */
+	export interface TextLine {
 
 		/**
-		 * Get the associated URI for this document. Most documents have the file:// scheme, indicating that they represent files on disk.
-		 * However, some documents may have other schemes indicating that they are not available on disk.
+		 * The zero-offset line number
+		 *
+		 * @readonly
 		 */
-		getUri(): Uri;
+		lineNumber: number;
+
+		/**
+		 * The text of this line without the
+		 * newline character
+		 *
+		 * @readonly
+		 */
+		text: string;
+
+		/**
+		 * The range this line covers without the
+		 * newline character
+		 *
+		 * @readonly
+		 */
+		range: Range;
+
+		/**
+		 * The range this line covers with the
+		 * newline character
+		 *
+		 * @readonly
+		 */
+		rangeIncludingLineBreak: Range;
+
+		/**
+		 * The offset of the first character which
+		 * isn't a whitespace character as defined
+		 * by a `\s`-RegExp
+		 *
+		 * @readonly
+		 */
+		firstNonWhitespaceCharacterIndex: number;
+
+		/**
+		 * Whether this line is whitespace only, shorthand
+		 * for `#firstNonWhitespaceCharacterIndex === #text.length`
+		 *
+		 * @readonly
+		 */
+		isEmptyOrWhitespace: boolean;
+	}
+
+	/**
+	 * Represents a text document, such as a source file. Text documents have
+	 * [lines](#TextLine) and knowledge about an underlying resource like a file.
+	 */
+	export interface TextDocument {
+
+		/**
+		 * Get the associated URI for this document. Most documents have the file://-scheme, indicating that they represent files on disk.
+		 * However, some documents may have other schemes indicating that they are not available on disk.
+		 *
+		 * @readonly
+		 */
+		uri: Uri;
 
 		/**
 		 * Returns the file system path of the file associated with this document. Shorthand
-		 * notation for ```TextDocument.getUri().fsPath```
+		 * notation for `#uri.fsPath`
+		 *
+		 * @readonly
 		 */
-		getPath(): string;
+		fileName: string;
 
 		/**
 		 * Is this document representing an untitled file.
+		 *
+		 * @readonly
 		 */
-		isUntitled(): boolean;
-
-		isDirty(): boolean;
-
-		save(): Thenable<boolean>;
+		isUntitled: boolean;
 
 		/**
 		 * The language identifier associated with this document.
+		 *
+		 * @readonly
 		 */
-		getLanguageId(): string;
+		languageId: string;
 
 		/**
-		 * The version number of this document (it will strictly increase after each change).
+		 * The version number of this document (it will strictly increase after each
+		 * change, including undo/redo).
+		 *
+		 * @readonly
 		 */
-		getVersionId(): number;
+		version: number;
 
 		/**
-		 * Get the entire text in this document.
+		 * true if there are unpersisted changes
+		 *
+		 * @readonly
 		 */
-		getText(): string;
+		isDirty: boolean;
 
 		/**
-		 * Get the text in a specific range in this document.
+		 * Save the underlying file.
+		 *
+		 * @retun A promise that will resolve to true when the file
+		 *  has been saved.
 		 */
-		getTextInRange(range: Range): string;
+		save(): Thenable<boolean>;
 
 		/**
-		 * Get the word under a certain position. May return null if position is at whitespace, on empty line, etc.
+		 * The number of lines in this document.
+		 *
+		 * @readonly
 		 */
-		getWordRangeAtPosition(position:Position): Range;
-
-		/**
-		 * Get the number of lines in this document.
-		 */
-		getLineCount(): number;
+		lineCount: number;
 
 		/**
 		 * Returns a text line denoted by the line number.
 		 * @param lineNumber A line number from this interval [0,getLineCount()[
 		 * @return A line.
 		 */
-		getLine(lineNumber: number): TextLine;
+		lineAt(lineOrPosition: number | Position): TextLine;
+
+		/**
+		 * Get the text in this document. If a range is provided the text contained
+		 * by the range is returned.
+		 */
+		getText(range?: Range): string;
+
+		/**
+		 * Get the word under a certain position. May return null if position is at whitespace, on empty line, etc.
+		 */
+		getWordRangeAtPosition(position: Position): Range;
 
 		/**
 		 * Ensure a range sticks to the text.
 		 */
-		validateRange(range:Range): Range;
+		validateRange(range: Range): Range;
 
 		/**
 		 * Ensure a position sticks to the text.
 		 */
-		validatePosition(position:Position): Position;
+		validatePosition(position: Position): Position;
 	}
 
 	export class Position {
@@ -139,7 +210,7 @@ declare namespace vscode {
 		end: Position;
 
 		constructor(start: Position, end: Position);
-		constructor(startLine: number, startColumn: number, endLine:number, endColumn:number);
+		constructor(startLine: number, startColumn: number, endLine: number, endColumn: number);
 
 		contains(positionOrRange: Position | Range): boolean;
 
@@ -161,14 +232,12 @@ declare namespace vscode {
 		active: Position;
 
 		constructor(anchor: Position, active: Position);
-		constructor(anchorLine: number, anchorColumn: number, activeLine:number, activeColumn:number);
+		constructor(anchorLine: number, anchorColumn: number, activeLine: number, activeColumn: number);
 
 		isReversed(): boolean;
 	}
 
-	export class TextEditor {
-
-		constructor(document: TextDocument, selections: Selection[], options: TextEditorOptions);
+	export interface TextEditor {
 
 		/**
 		 * Get the document associated with this text editor. The document will be the same for the entire lifetime of this text editor.
@@ -209,7 +278,7 @@ declare namespace vscode {
 		 * Perform an edit on the document associated with this text editor.
 		 * The passed in {{editBuilder}} is available only for the duration of the callback.
 		 */
-		edit(callback:(editBuilder:TextEditorEdit)=>void): Thenable<boolean>;
+		edit(callback: (editBuilder: TextEditorEdit) => void): Thenable<boolean>;
 
 	}
 
@@ -252,13 +321,11 @@ declare namespace vscode {
 		 */
 		scheme: string;
 
-
 		/**
 		 * authority is the 'www.msft.com' part of 'http://www.msft.com/some/path?query#fragment'.
 		 * The part between the first double slashes and the next slash.
 		 */
 		authority: string;
-
 
 		/**
 		 * path is the '/some/path' part of 'http://www.msft.com/some/path?query#fragment'.
@@ -423,7 +490,7 @@ declare namespace vscode {
 	/**
 	 *
 	 */
-	export type LanguageSelector = string|LanguageFilter|(string|LanguageFilter)[];
+	export type LanguageSelector = string | LanguageFilter | (string | LanguageFilter)[];
 
 	export interface CodeActionContext {
 		diagnostics: Diagnostic[];
@@ -546,7 +613,7 @@ declare namespace vscode {
 	export class WorkspaceEdit {
 		size: number;
 		replace(resource: Uri, range: Range, newText: string): void;
-		insert(resource: Uri, range:Position, newText:string): void;
+		insert(resource: Uri, range: Position, newText: string): void;
 		delete(resource: Uri, range: Range): void;
 		edits(): [Uri, TextEdit[]][];
 	}
@@ -646,11 +713,31 @@ declare namespace vscode {
 		resolveCompletionItem?(item: CompletionItem, token: CancellationToken): CompletionItem | Thenable<CompletionItem>;
 	}
 
+	export interface WorkspaceConfiguration {
+
+		/**
+		 * @param section configuration name, supports _dotted_ names
+		 * @return the value `section` denotes or the default
+		 */
+		get<T>(section: string, defaultValue?: T): T;
+
+		/**
+		 * @param section configuration name, supports _dotted_ names
+		 * @return `true` iff the section doesn't resolve to `undefined`
+		 */
+		has(section: string): boolean;
+
+		/**
+		 * Readable dictionary that backs this configuration.
+		 * @readonly
+		 */
+		[key: string]: any;
+	}
+
 	/**
 	 *
 	 */
-	export interface ReadOnlyMemento {
-
+	export interface Memento {
 		/**
 		 * @param key The name of a property to read.
 		 * @param defaultValue The default value in case the denoted property doesn't exists.
@@ -658,16 +745,6 @@ declare namespace vscode {
 		 */
 		getValue<T>(key: string, defaultValue?: T): Thenable<T>;
 
-		/**
-		 *
-		 */
-		getValues<T>(defaultValue?: T): Thenable<T>;
-	}
-
-	/**
-	 *
-	 */
-	export interface Memento extends ReadOnlyMemento {
 		setValue(key: string, value: any): Thenable<void>;
 	}
 
@@ -701,7 +778,13 @@ declare namespace vscode {
 		/**
 		 * Assign resource for given resource
 		 */
-		set(uri: Uri, diagnostics?: Diagnostic[]): Thenable<void>;
+		set(uri: Uri, diagnostics: Diagnostic[]): Thenable<void>;
+
+		/**
+		 * Remove all diagnostics from this collection that belong
+		 * to the provided `uri`. The same as `#set(uri, undefined)`
+		 */
+		delete(uri: Uri): Thenable<void>;
 
 		/**
 		 * Replace all entries
@@ -709,7 +792,8 @@ declare namespace vscode {
 		set(entries: [Uri, Diagnostic[]][]): Thenable<void>;
 
 		/**
-		 * Remove all diagnostics from this collection
+		 * Remove all diagnostics from this collection. The same
+		 * as calling `#set(undefined)`;
 		 */
 		clear(): Thenable<void>;
 
@@ -737,6 +821,45 @@ declare namespace vscode {
 		reveal(): void;
 	}
 
+	export interface StatusBarEntry {
+		/**
+		* The text to show for the entry. You can embed icons in the text by leveraging the syntax:
+		*
+		* `My text ${icon name} contains icons like ${icon name} this one.`
+		*/
+		text: string;
+
+		/**
+		* An optional tooltip text to show when you hover over the entry
+		*/
+		tooltip?: string;
+
+		/**
+		* An optional color to use for the entry
+		*/
+		color?: string;
+
+		/**
+		* An optional id of a command that is known to the workbench to execute on click
+		*/
+		commandId?: string;
+
+		/**
+		 * Shows the entry in the status bar.
+		 */
+		show(): void;
+
+		/**
+		 * Removes the entry from the status bar.
+		 */
+		hide(): void;
+
+		/**
+		 * Disposes the status bar entry from the status bar
+		 */
+		dispose(): void;
+	}
+
 	export interface ExecutionOptions {
 		cwd?: string;
 		env?: { [name: string]: any };
@@ -758,9 +881,9 @@ declare namespace vscode {
 		instanceId: string;
 	}
 
-		/**
-	 * Namespace for commanding
-	 */
+	/**
+ * Namespace for commanding
+ */
 	export namespace commands {
 
 		/**
@@ -783,7 +906,7 @@ declare namespace vscode {
 		 * @param thisArgs - (optional) The `this` context used when invoking {{callback}}
 		 * @return Disposable which unregisters this command on disposal
 		 */
-		export function registerTextEditorCommand(command: string, callback: (textEditor:TextEditor, edit:TextEditorEdit) => void, thisArg?: any): Disposable;
+		export function registerTextEditorCommand(command: string, callback: (textEditor: TextEditor, edit: TextEditorEdit) => void, thisArg?: any): Disposable;
 
 		/**
 		 * Executes a command
@@ -812,11 +935,11 @@ declare namespace vscode {
 
 		export const onDidChangeTextEditorOptions: Event<TextEditorOptionsChangeEvent>;
 
-		export function showInformationMessage(message: string, ...commands: { title: string; command: string | CommandCallback; }[]): Thenable<void>;
+		export function showInformationMessage(message: string, ...commands: Command[]): Thenable<void>;
 
-		export function showWarningMessage(message: string, ...commands: { title: string; command: string | CommandCallback; }[]): Thenable<void>;
+		export function showWarningMessage(message: string, ...commands: Command[]): Thenable<void>;
 
-		export function showErrorMessage(message: string, ...commands: { title: string; command: string | CommandCallback; }[]): Thenable<void>;
+		export function showErrorMessage(message: string, ...commands: Command[]): Thenable<void>;
 
 		export function setStatusBarMessage(message: string, hideAfterMillis?: number): Disposable;
 
@@ -837,6 +960,14 @@ declare namespace vscode {
 		 * Returns a new output channel with the given name
 		 */
 		export function createOutputChannel(name: string): OutputChannel;
+
+		/**
+		* Creates an entry to the statusbar with the given alignment and priority.
+		*
+		* @param alignLeft set to true to show the entry to the left of the status bar, false otherwise
+		* @param priority the higher the number, the more the entry moves to the left of the status bar
+		*/
+		export function createStatusBarEntry(alignLeft?: boolean, priority?: number): StatusBarEntry;
 	}
 
 	/**
@@ -881,10 +1012,10 @@ declare namespace vscode {
 		// TODO@api - justify this being here
 		export function getPath(): string;
 
-		export function getRelativePath(pathOrUri: string|Uri): string;
+		export function getRelativePath(pathOrUri: string | Uri): string;
 
 		// TODO@api - justify this being here
-		export function findFiles(include: string, exclude: string, maxResults?:number): Thenable<Uri[]>;
+		export function findFiles(include: string, exclude: string, maxResults?: number): Thenable<Uri[]>;
 
 		/**
 		 * save all dirty files
@@ -897,6 +1028,14 @@ declare namespace vscode {
 		export const onDidCloseTextDocument: Event<TextDocument>;
 		export const onDidChangeTextDocument: Event<TextDocumentChangeEvent>;
 		export const onDidSaveTextDocument: Event<TextDocument>;
+
+		/**
+		 *
+		 */
+		export function getConfiguration(section?: string): WorkspaceConfiguration;
+
+		// TODO: send out the new config?
+		export const onDidChangeConfiguration: Event<void>;
 	}
 
 	export namespace languages {
@@ -915,7 +1054,7 @@ declare namespace vscode {
 		/**
 		 *
 		 */
-		export function addInformationLanguageStatus(language: LanguageSelector|Uri|Uri[], message: string | { octicon: string; message: string;}, command: string | CommandCallback): Disposable;
+		export function addInformationLanguageStatus(language: LanguageSelector | Uri | Uri[], message: string | { octicon: string; message: string; }, command: string | CommandCallback): Disposable;
 
 		/**
 		 *
@@ -985,7 +1124,7 @@ declare namespace vscode {
 		/**
 		 *
 		 */
-		export function registerOnTypeFormattingEditProvider(selector: LanguageSelector, provider: OnTypeFormattingEditProvider, firstTriggerCharacter:string, ...moreTriggerCharacter:string[]): Disposable;
+		export function registerOnTypeFormattingEditProvider(selector: LanguageSelector, provider: OnTypeFormattingEditProvider, firstTriggerCharacter: string, ...moreTriggerCharacter: string[]): Disposable;
 
 		/**
 		 *
@@ -1002,21 +1141,15 @@ declare namespace vscode {
 
 		export function getStateMemento(extensionId: string, global?: boolean): Memento;
 
-		// TODO: Remove Memento from method name
-		// TODO: Make method synchronous, stop using ReadOnlyMemento
-		// dirkb: why is that here at all. IMO the configuration belongs to the workspace and not to the extnsion
-		export function getConfigurationMemento(extensionId: string): ReadOnlyMemento;
-
-		// TODO: send out the new config?
-		export const onDidChangeConfiguration: Event<void>;
-
 		export function getExtension(extensionId: string): any;
+
+		export function getExtension<T>(extensionId: string): T;
 
 		export function getTelemetryInfo(): Thenable<ITelemetryInfo>;
 	}
 
 	export interface IHTMLContentElement {
-		formattedText?:string;
+		formattedText?: string;
 		text?: string;
 		className?: string;
 		style?: string;
@@ -1062,23 +1195,23 @@ declare namespace vscode {
 
 		export interface ILanguageAutoComplete {
 			triggers: string;				// characters that trigger auto completion rules
-			match: string|RegExp;			// autocomplete if this matches
+			match: string | RegExp;			// autocomplete if this matches
 			complete: string;				// complete with this string
 		}
 
 		export interface ILanguageAutoIndent {
-			match: string|RegExp; 			// auto indent if this matches on enter
-			matchAfter: string|RegExp;		// and auto-outdent if this matches on the next line
+			match: string | RegExp; 			// auto indent if this matches on enter
+			matchAfter: string | RegExp;		// and auto-outdent if this matches on the next line
 		}
 
 		/**
 		 * Standard brackets used for auto indentation
 		 */
 		export interface IBracketPair {
-			tokenType:string;
-			open:string;
-			close:string;
-			isElectric:boolean;
+			tokenType: string;
+			open: string;
+			close: string;
+			isElectric: boolean;
 		}
 
 		/**
@@ -1089,16 +1222,16 @@ declare namespace vscode {
 			open: RegExp; // The definition of when an opening brace is detected. This regex is matched against the entire line upto, and including the last typed character (the trigger character).
 			closeComplete?: string; // How to complete a matching open brace. Matches from 'open' will be expanded, e.g. '</$1>'
 			matchCase?: boolean; // If set to true, the case of the string captured in 'open' will be detected an applied also to 'closeComplete'.
-								// This is useful for cases like BEGIN/END or begin/end where the opening and closing phrases are unrelated.
-								// For identical phrases, use the $1 replacement syntax above directly in closeComplete, as it will
-								// include the proper casing from the captured string in 'open'.
-								// Upper/Lower/Camel cases are detected. Camel case dection uses only the first two characters and assumes
-								// that 'closeComplete' contains wors separated by spaces (e.g. 'End Loop')
+			// This is useful for cases like BEGIN/END or begin/end where the opening and closing phrases are unrelated.
+			// For identical phrases, use the $1 replacement syntax above directly in closeComplete, as it will
+			// include the proper casing from the captured string in 'open'.
+			// Upper/Lower/Camel cases are detected. Camel case dection uses only the first two characters and assumes
+			// that 'closeComplete' contains wors separated by spaces (e.g. 'End Loop')
 
 			closeTrigger?: string; // The character that will trigger the evaluation of 'close'.
 			close?: RegExp; // The definition of when a closing brace is detected. This regex is matched against the entire line upto, and including the last typed character (the trigger character).
 			tokenType?: string; // The type of the token. Matches from 'open' or 'close' will be expanded, e.g. 'keyword.$1'.
-							   // Only used to auto-(un)indent a closing bracket.
+			// Only used to auto-(un)indent a closing bracket.
 		}
 
 		/**
@@ -1110,19 +1243,6 @@ declare namespace vscode {
 			lineStart: string; // The string that appears at the start of each line, except the first and last (e.g. ' * ').
 			close?: string; // The string that appears on the last line and closes the doc comment (e.g. ' */').
 		}
-
-		// --- Begin InplaceReplaceSupport
-		/**
-		 * Interface used to navigate with a value-set.
-		 */
-		export interface IInplaceReplaceSupport {
-			sets: string[][];
-		}
-		export var InplaceReplaceSupport: {
-			register(modeId: string, inplaceReplaceSupport: Modes.IInplaceReplaceSupport): Disposable;
-		};
-		// --- End InplaceReplaceSupport
-
 
 		// --- Begin TokenizationSupport
 		enum Bracket {
@@ -1138,12 +1258,12 @@ declare namespace vscode {
 			commentsConfiguration: ICommentsConfiguration;
 		}
 		export interface ICommentsConfiguration {
-			lineCommentTokens?:string[];
-			blockCommentStartToken?:string;
-			blockCommentEndToken?:string;
+			lineCommentTokens?: string[];
+			blockCommentStartToken?: string;
+			blockCommentEndToken?: string;
 		}
 		export var CommentsSupport: {
-			register(modeId:string, commentsSupport:ICommentsSupport): Disposable;
+			register(modeId: string, commentsSupport: ICommentsSupport): Disposable;
 		};
 		// --- End ICommentsSupport
 
@@ -1152,7 +1272,7 @@ declare namespace vscode {
 			wordDefinition?: RegExp;
 		}
 		export var TokenTypeClassificationSupport: {
-			register(modeId:string, tokenTypeClassificationSupport:ITokenTypeClassificationSupport): Disposable;
+			register(modeId: string, tokenTypeClassificationSupport: ITokenTypeClassificationSupport): Disposable;
 		};
 		// --- End ITokenTypeClassificationSupport
 
@@ -1165,7 +1285,7 @@ declare namespace vscode {
 			embeddedElectricCharacters?: string[];
 		}
 		export var ElectricCharacterSupport: {
-			register(modeId:string, electricCharacterSupport:IElectricCharacterSupport): Disposable;
+			register(modeId: string, electricCharacterSupport: IElectricCharacterSupport): Disposable;
 		};
 		// --- End IElectricCharacterSupport
 
@@ -1178,14 +1298,14 @@ declare namespace vscode {
 		 * Interface used to support insertion of matching characters like brackets and qoutes.
 		 */
 		export interface IAutoClosingPair {
-			open:string;
-			close:string;
+			open: string;
+			close: string;
 		}
 		export interface IAutoClosingPairConditional extends IAutoClosingPair {
 			notIn?: string[];
 		}
 		export var CharacterPairSupport: {
-			register(modeId:string, characterPairSupport:ICharacterPairSupport): Disposable;
+			register(modeId: string, characterPairSupport: ICharacterPairSupport): Disposable;
 		};
 		// --- End ICharacterPairSupport
 
@@ -1207,9 +1327,9 @@ declare namespace vscode {
 			Outdent
 		}
 		export interface IEnterAction {
-			indentAction:IndentAction;
-			appendText?:string;
-			removeText?:number;
+			indentAction: IndentAction;
+			appendText?: string;
+			removeText?: number;
 		}
 		export interface IOnEnterRegExpRules {
 			beforeText: RegExp;
@@ -1222,7 +1342,7 @@ declare namespace vscode {
 			regExpRules?: IOnEnterRegExpRules[];
 		}
 		export var OnEnterSupport: {
-			register(modeId:string, opts:IOnEnterSupportOptions): Disposable;
+			register(modeId: string, opts: IOnEnterSupportOptions): Disposable;
 		};
 		// --- End IOnEnterSupport
 
@@ -1356,5 +1476,5 @@ declare var Promise: PromiseConstructor;
 export = vscode;
 
 // declare module 'vscode' {
-//    export = vscode;
+//     export = vscode;
 // }
