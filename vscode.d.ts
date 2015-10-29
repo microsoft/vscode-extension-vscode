@@ -468,6 +468,11 @@ declare namespace vscode {
 	 */
 	export interface InputBoxOptions {
 		/**
+		* the value to prefill in the input box
+		*/
+		value?: string;
+
+		/**
 		* The text to display underneath the input box.
 		*/
 		prompt?: string;
