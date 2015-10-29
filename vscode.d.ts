@@ -190,39 +190,86 @@ declare namespace vscode {
 		validatePosition(position: Position): Position;
 	}
 
+	/**
+	 * Represents a line and character position, such as
+	 * the position of the caret.
+	 */
 	export class Position {
 
+		/**
+		 * The zero-offset base line number.
+		 */
 		line: number;
 
+		/**
+		 * The zero-offset base character number
+		 */
 		character: number;
 
+		/**
+		 * @param line
+		 * @param character
+		 */
 		constructor(line: number, character: number);
 
+		/**
+		 * @return `true` if position is on a smaller line
+		 * or smaller character
+		 */
 		isBefore(other: Position): boolean;
 
+		/**
+		 * @return `true` if the postion is before or equal
+		 * to this position.
+		 */
 		isBeforeOrEqual(other: Position): boolean;
 	}
 
+	/**
+	 * A range represents an ordered tuple of two positions
+	 */
 	export class Range {
 
+		/**
+		 * The start position is before or equal to end.
+		 */
 		start: Position;
 
+		/**
+		 * The end position which is after or equal to start.
+		 */
 		end: Position;
 
+		/**
+		 * Create a new range from two position. If `start` is not
+		 * before or equal to `end` the value will be swaped.
+		 *
+		 * @param start
+		 * @param end
+		 */
 		constructor(start: Position, end: Position);
+
+		/**
+		 * Create a new range from two (line,character)-pairs. The parameters
+		 * might be swapped so that start is before or equal to end.
+		 */
 		constructor(startLine: number, startColumn: number, endLine: number, endColumn: number);
 
+		/**
+		 * @return `true` iff the position or range is inside or equal
+		 * to this range.
+		 */
 		contains(positionOrRange: Position | Range): boolean;
 
 		/**
-		 * @return `true` iff `start` and `end` are equal
+		 * `true` iff `start` and `end` are equal.
 		 */
-		isEmpty(): boolean;
+		isEmpty: boolean;
 
 		/**
-		 * @return `true` iff start and end are on the same line
+		 * `true` iff `start` and `end` are on the same line.
 		 */
-		isOneLine(): boolean;
+		isSingleLine: boolean;
 	}
 
 	export class Selection extends Range {
@@ -232,54 +279,49 @@ declare namespace vscode {
 		active: Position;
 
 		constructor(anchor: Position, active: Position);
+
 		constructor(anchorLine: number, anchorColumn: number, activeLine: number, activeColumn: number);
 
-		isReversed(): boolean;
+		isReversed: boolean;
 	}
 
 	export interface TextEditor {
 
 		/**
-		 * Get the document associated with this text editor. The document will be the same for the entire lifetime of this text editor.
+		 * The document associated with this text editor. The document will be the same for the entire lifetime of this text editor.
 		 */
-		getTextDocument(): TextDocument;
+		document: TextDocument;
 
 		/**
-		 * Get the primary selection on this text editor. In case the text editor has multiple selections, the first one will be returned.
+		 * The primary selection on this text editor. In case the text editor has multiple selections, the first one will be returned.
 		 */
-		getSelection(): Selection;
+		selection: Selection;
 
 		/**
-		 * Set the selection on this text editor.
+		 * The selections in this text editor.
 		 */
-		setSelection(value: Position | Range | Selection): Thenable<any>;
+		selections: Selection[];
 
 		/**
-		 * Get the selections in this text editor.
+		 * Update the selection on this text editor.
 		 */
-		getSelections(): Selection[];
+		updateSelection(value: Position | Range | Selection | Selection[]): Thenable<any>;
 
 		/**
-		 * Set the selections in this text editor.
+		 * Text editor options.
 		 */
-		setSelections(value: Selection[]): Thenable<TextEditor>;
+		options: TextEditorOptions;
 
 		/**
-		 * Get text editor options.
+		 * Update text editor options.
 		 */
-		getOptions(): TextEditorOptions;
-
-		/**
-		 * Change text editor options.
-		 */
-		setOptions(options: TextEditorOptions): Thenable<TextEditor>;
+		updateOptions(options: TextEditorOptions): Thenable<TextEditor>;
 
 		/**
 		 * Perform an edit on the document associated with this text editor.
 		 * The passed in {{editBuilder}} is available only for the duration of the callback.
 		 */
 		edit(callback: (editBuilder: TextEditorEdit) => void): Thenable<boolean>;
-
 	}
 
 	/**
@@ -461,6 +503,10 @@ declare namespace vscode {
 	export interface QuickPickItem {
 		label: string;
 		description: string;
+	}
+
+	export interface MessageItem {
+		title: string;
 	}
 
 	/**
@@ -820,34 +866,51 @@ declare namespace vscode {
 	}
 
 	export interface OutputChannel {
-		append(value: string): void;
-		appendLine(value: string): void;
-		clear(): void;
-		reveal(): void;
+
+		/**
+		 *
+		 * @readonly
+		 */
+		name: string;
+
+		append(value: string): Thenable<void>;
+
+		appendLine(value: string): Thenable<void>;
+
+		clear(): Thenable<void>;
+
+		reveal(): Thenable<void>;
+
+		dispose(): void;
 	}
 
 	export interface StatusBarEntry {
+
 		/**
 		* The text to show for the entry. You can embed icons in the text by leveraging the syntax:
 		*
 		* `My text ${icon name} contains icons like ${icon name} this one.`
+		*
+		* Where the icon name is taken from the octicon icon set (https://octicons.github.com/), e.g.
+		* light-bulb, thumbsup or zap.
 		*/
 		text: string;
 
 		/**
 		* An optional tooltip text to show when you hover over the entry
 		*/
-		tooltip?: string;
+		tooltip: string;
 
 		/**
 		* An optional color to use for the entry
 		*/
-		color?: string;
+		color: string;
 
 		/**
-		* An optional id of a command that is known to the workbench to execute on click
+		* An optional id of a command that is known to the workbench to execute on click. This can either
+		* be a built in workbench or editor command or a command contributed by an extension.
 		*/
-		commandId?: string;
+		command: string;
 
 		/**
 		 * Shows the entry in the status bar.
@@ -887,8 +950,8 @@ declare namespace vscode {
 	}
 
 	/**
- * Namespace for commanding
- */
+	 * Namespace for commanding
+	 */
 	export namespace commands {
 
 		/**
@@ -940,17 +1003,37 @@ declare namespace vscode {
 
 		export const onDidChangeTextEditorOptions: Event<TextEditorOptionsChangeEvent>;
 
-		export function showInformationMessage(message: string, ...commands: Command[]): Thenable<void>;
-
-		export function showWarningMessage(message: string, ...commands: Command[]): Thenable<void>;
-
-		export function showErrorMessage(message: string, ...commands: Command[]): Thenable<void>;
-
 		export function setStatusBarMessage(message: string, hideAfterMillis?: number): Disposable;
 
-		export function showQuickPick(items: string[], options?: QuickPickOptions): Thenable<string>;
+		export function showInformationMessage(message: string, ...items: string[]): Thenable<string>;
 
-		export function showQuickPick<T extends QuickPickItem>(items: T[], options?: QuickPickOptions): Thenable<T>;
+		export function showInformationMessage<T extends MessageItem>(message: string, ...items: T[]): Thenable<T>;
+
+		export function showWarningMessage(message: string, ...items: string[]): Thenable<string>;
+
+		export function showWarningMessage<T extends MessageItem>(message: string, ...items: T[]): Thenable<T>;
+
+		export function showErrorMessage(message: string, ...items: string[]): Thenable<string>;
+
+		export function showErrorMessage<T extends MessageItem>(message: string, ...items: T[]): Thenable<T>;
+
+		/**
+		 * Shows a selection list.
+		 *
+		 * @param items an array of strings to pick from.
+		 * @param options configures the behavior of the selection list
+		 * @return a promise that resolves to the selected string or undefined.
+		 */
+		export function showQuickPick(items: string[] | Thenable<string[]>, options?: QuickPickOptions): Thenable<string>;
+
+		/**
+		 * Shows a selection list.
+		 *
+		 * @param items an array of items to pick from.
+		 * @param options configures the behavior of the selection list
+		 * @return a promise that resolves to the selected item or undefined.
+		 */
+		export function showQuickPick<T extends QuickPickItem>(items: T[] | Thenable<T[]>, options?: QuickPickOptions): Thenable<T>;
 
 		/**
 		 * Opens an input box to ask the user for input.
@@ -1014,10 +1097,15 @@ declare namespace vscode {
 		 */
 		export function createFileSystemWatcher(globPattern: string, ignoreCreateEvents?: boolean, ignoreChangeEvents?: boolean, ignoreDeleteEvents?: boolean): FileSystemWatcher;
 
-		// TODO@api - justify this being here
-		export function getPath(): string;
+		/**
+		 * The folder that is open in VS Code if applicable
+		 */
+		export let rootPath: string;
 
-		export function getRelativePath(pathOrUri: string | Uri): string;
+		/**
+		 * @return a path relative to the [root](#rootPath) of the workspace.
+		 */
+		export function asRelativePath(pathOrUri: string | Uri): string;
 
 		// TODO@api - justify this being here
 		export function findFiles(include: string, exclude: string, maxResults?: number): Thenable<Uri[]>;
@@ -1027,8 +1115,20 @@ declare namespace vscode {
 		 */
 		export function saveAll(includeUntitled?: boolean): Thenable<boolean>;
 
-		export function getTextDocuments(): TextDocument[];
-		export function getTextDocument(resource: Uri): TextDocument;
+		/**
+		 * All text documents currently known to the system.
+		 */
+		export let textDocuments: TextDocument[];
+
+		/**
+		 * Opens the denoted document from disk. Will return early if the
+		 * document is already open.
+		 *
+		 * @param uri
+		 * @return A promise that resolves to a [document](#TextDocument)
+		 */
+		export function openTextDocument(uri: Uri): Thenable<TextDocument>;
+
 		export const onDidOpenTextDocument: Event<TextDocument>;
 		export const onDidCloseTextDocument: Event<TextDocument>;
 		export const onDidChangeTextDocument: Event<TextDocumentChangeEvent>;
@@ -1052,24 +1152,15 @@ declare namespace vscode {
 		export function getLanguages(): Thenable<string[]>;
 
 		/**
+		 * Compute the match between a language selector and a document. Value
+		 * greater zero mean the selector matches with to the document.
+		 */
+		export function match(selector: LanguageSelector, document: TextDocument): number;
+
+		/**
 		 *
 		 */
 		export function createDiagnosticCollection(name?: string): DiagnosticCollection;
-
-		/**
-		 *
-		 */
-		export function addInformationLanguageStatus(language: LanguageSelector | Uri | Uri[], message: string | { octicon: string; message: string; }, command: string | CommandCallback): Disposable;
-
-		/**
-		 *
-		 */
-		export function addWarningLanguageStatus(language: LanguageSelector | Uri | Uri[], message: string | { octicon: string; message: string; }, command: string | CommandCallback): Disposable;
-
-		/**
-		 *
-		 */
-		export function addErrorLanguageStatus(language: LanguageSelector | Uri | Uri[], message: string | { octicon: string; message: string; }, command: string | CommandCallback): Disposable;
 
 		/**
 		 *
