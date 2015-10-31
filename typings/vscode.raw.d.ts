@@ -162,11 +162,35 @@ declare namespace vscode {
 		lineCount: number;
 
 		/**
-		 * Returns a text line denoted by the line number.
-		 * @param lineNumber A line number from this interval [0,getLineCount()[
+		 * Returns a text line denoted by the line number. Note
+		 * that the returned object is *not* live and changes to the
+		 * document are not reflected.
+		 *
+		 * @param line A line number in (0, lineCount[
 		 * @return A line.
 		 */
-		lineAt(lineOrPosition: number | Position): TextLine;
+		lineAt(line: number): TextLine;
+
+		/**
+		 * Returns a text line denoted by the position. Note
+		 * that the returned object is *not* live and changes to the
+		 * document are not reflected.
+		 *
+		 * @see ()[#lineAt]
+		 * @param position A position which line is in (0, lineCount[
+		 * @return A line.
+		 */
+		lineAt(position: Position): TextLine;
+
+		/**
+		 * Converts the position to a zero-based offset
+		 */
+		offsetAt(position: Position): number;
+
+		/**
+		 * Converts a zero-based offset to a position
+		 */
+		positionAt(offset: number): Position;
 
 		/**
 		 * Get the text in this document. If a range is provided the text contained
@@ -293,19 +317,25 @@ declare namespace vscode {
 		document: TextDocument;
 
 		/**
-		 * The primary selection on this text editor. In case the text editor has multiple selections, the first one will be returned.
+		 * The primary selection on this text editor. In case the text editor has multiple selections this is the first selection as
+		 * in `TextEditor.selections[0]`.
+		 * @see [updateSelection](#updateSelection)
 		 */
 		selection: Selection;
 
 		/**
 		 * The selections in this text editor.
+		 * @see [updateSelection](#updateSelection)
 		 */
 		selections: Selection[];
 
 		/**
-		 * Update the selection on this text editor.
+		 * Update the selection on this text editor. Changes the selection of the
+		 * editor and allows to observe the result of the operation. Note: despite the
+		 * editor being updated the UI updates with a little delay. This deplay
+		 * can be observed using the promise returned form this operation.
 		 */
-		updateSelection(value: Position | Range | Selection | Selection[]): Thenable<any>;
+		updateSelection(value: Position | Range | Selection | Selection[]): Thenable<TextEditor>;
 
 		/**
 		 * Text editor options.
@@ -313,7 +343,9 @@ declare namespace vscode {
 		options: TextEditorOptions;
 
 		/**
-		 * Update text editor options.
+		 * Update text editor options and allows observe the result of the
+		 * operations. Note: despite the editor being updated the UI updates with a
+		 * little delay. This deplay can be observed using the promise returned form this operation.
 		 */
 		updateOptions(options: TextEditorOptions): Thenable<TextEditor>;
 
@@ -322,6 +354,16 @@ declare namespace vscode {
 		 * The passed in {{editBuilder}} is available only for the duration of the callback.
 		 */
 		edit(callback: (editBuilder: TextEditorEdit) => void): Thenable<boolean>;
+	}
+
+	/**
+	 * Denotes a column in the VS Code window. Columns used to show editors
+	 * side by side.
+	 */
+	export enum ViewColumn {
+		One = 1,
+		Two = 2,
+		Three = 3
 	}
 
 	/**
@@ -483,6 +525,23 @@ declare namespace vscode {
 	}
 
 	/**
+	 * Represents an item that can be selected from
+	 * a list of items
+	 */
+	export interface QuickPickItem {
+
+		/**
+		 * The main label of this item
+		 */
+		label: string;
+
+		/**
+		 * A description
+		 */
+		description: string;
+	}
+
+	/**
 	 *
 	 */
 	export interface QuickPickOptions {
@@ -498,14 +557,18 @@ declare namespace vscode {
 	}
 
 	/**
+	 * Represents an actional item that is shown with an information, warning, or
+	 * error message
 	 *
+	 * @see #window.showInformationMessage
+	 * @see #window.showWarningMessage
+	 * @see #window.showErrorMessage
 	 */
-	export interface QuickPickItem {
-		label: string;
-		description: string;
-	}
-
 	export interface MessageItem {
+
+		/**
+		 * A short title like 'Retry', 'Open Log' etc
+		 */
 		title: string;
 	}
 
@@ -527,21 +590,53 @@ declare namespace vscode {
 		* an optional string to show as place holder in the input box to guide the user what to type
 		*/
 		placeHolder?: string;
+
+		/**
+		* set to true to show a password prompt that will not show the typed value
+		*/
+		password?: boolean;
 	}
 
 	/**
+	 * A language filter denotes a document by different properties like
+	 * the [language](#TextDocument.languageId), the (scheme)[#Uri.scheme] of
+	 * it's resource, or a glob-pattern that is applied to the (path)[#Uri.fsPath]
 	 *
+	 * A language filter that applies to typescript files on disk would be this:
+	 * ```
+	 * { language: 'typescript', scheme: 'file' }
+	 * ```
+	 * a language filter that applies to all package.json files would be this:
+	 * ```
+	 * { language: 'json', pattern: '**\project.json' }
+	 * ```
 	 */
 	export interface LanguageFilter {
+
+		/**
+		 * A language id, like `typescript`.
+		 */
 		language?: string;
+
+		/**
+		 * A Uri scheme, like `file` or `untitled`
+		 */
 		scheme?: string;
+
+		/**
+		 * A glob pattern, like `*.{ts,js}`
+		 */
 		pattern?: string;
 	}
 
 	/**
-	 *
+	 * A language selector is the combination of one or many language identifiers
+	 * and (language filters)[#LanguageFilter]. Samples are
+	 * `let sel:LanguageSelector = 'typescript`, or
+	 * `let sel:LanguageSelector = ['typescript, { language: 'json', pattern: '**\tsconfig.json' }]`
 	 */
 	export type LanguageSelector = string | LanguageFilter | (string | LanguageFilter)[];
+
 
 	export interface CodeActionContext {
 		diagnostics: Diagnostic[];
@@ -584,11 +679,11 @@ declare namespace vscode {
 
 	export class Hover {
 
-		content: vscode.IHTMLContentElement;
+		contents: MarkedString[];
 
 		range: Range;
 
-		constructor(value: string | vscode.IHTMLContentElement, range?: Range);
+		constructor(contents: MarkedString | MarkedString[], range?: Range);
 	}
 
 	export interface HoverProvider {
@@ -661,12 +756,25 @@ declare namespace vscode {
 		newText: string;
 	}
 
+	/**
+	 * A workspace edit reprents text changes to many documents.
+	 */
 	export class WorkspaceEdit {
+
+		/**
+		 * The number of affected resources.
+		 *
+		 * @readonly
+		 */
 		size: number;
+
 		replace(resource: Uri, range: Range, newText: string): void;
+
 		insert(resource: Uri, range: Position, newText: string): void;
+
 		delete(resource: Uri, range: Range): void;
-		edits(): [Uri, TextEdit[]][];
+
+		entries(): [Uri, TextEdit[]][];
 	}
 
 	/**
@@ -762,6 +870,47 @@ declare namespace vscode {
 	export interface CompletionItemProvider {
 		provideCompletionItems(document: TextDocument, position: Position, token: CancellationToken): CompletionItem[] | Thenable<CompletionItem[]>;
 		resolveCompletionItem?(item: CompletionItem, token: CancellationToken): CompletionItem | Thenable<CompletionItem>;
+	}
+
+	export type CharacterPair = [string, string];
+
+	export interface CommentRule {
+		lineComment?: string;
+		blockComment?: CharacterPair;
+	}
+
+	export interface IndentationRule {
+		decreaseIndentPattern: RegExp;
+		increaseIndentPattern: RegExp;
+		indentNextLinePattern?: RegExp;
+		unIndentedLinePattern?: RegExp;
+	}
+
+	export enum IndentAction {
+		None,
+		Indent,
+		IndentOutdent,
+		Outdent
+	}
+
+	export interface EnterAction {
+		indentAction: IndentAction;
+		appendText?: string;
+		removeText?: number;
+	}
+
+	export interface OnEnterRule {
+		beforeText: RegExp;
+		afterText?: RegExp;
+		action: EnterAction;
+	}
+
+	export interface LanguageConfiguration {
+		comments?: CommentRule;
+		brackets?: CharacterPair[];
+		wordPattern?: RegExp;
+		indentationRules?: IndentationRule;
+		onEnterRules?: OnEnterRule[];
 	}
 
 	export interface WorkspaceConfiguration {
@@ -879,12 +1028,30 @@ declare namespace vscode {
 
 		clear(): Thenable<void>;
 
-		reveal(): Thenable<void>;
+		reveal(column?: ViewColumn): Thenable<void>;
 
 		dispose(): void;
 	}
 
-	export interface StatusBarEntry {
+	export enum StatusBarAlignment {
+		Left,
+		Right
+	}
+
+	export interface StatusBarItem {
+
+		/**
+		 * The alignment of this item, either left or right
+		 * @readonly
+		 */
+		alignment: StatusBarAlignment;
+
+		/**
+		 * The priority of this item. It defined the sorting
+		 * when multi items share the same [alignment](#alignment)
+		 * @readonly
+		 */
+		priority: number;
 
 		/**
 		* The text to show for the entry. You can embed icons in the text by leveraging the syntax:
@@ -928,11 +1095,6 @@ declare namespace vscode {
 		dispose(): void;
 	}
 
-	export interface ExecutionOptions {
-		cwd?: string;
-		env?: { [name: string]: any };
-	}
-
 	export interface TextEditorSelectionChangeEvent {
 		textEditor: TextEditor;
 		selections: Selection[];
@@ -941,12 +1103,6 @@ declare namespace vscode {
 	export interface TextEditorOptionsChangeEvent {
 		textEditor: TextEditor;
 		options: TextEditorOptions;
-	}
-
-	export interface ITelemetryInfo {
-		sessionId: string;
-		machineId: string;
-		instanceId: string;
 	}
 
 	/**
@@ -1003,7 +1159,22 @@ declare namespace vscode {
 
 		export const onDidChangeTextEditorOptions: Event<TextEditorOptionsChangeEvent>;
 
-		export function setStatusBarMessage(message: string, hideAfterMillis?: number): Disposable;
+		/**
+		 * Opens a document in an editor. Allows to define a selection and a view column in which
+		 * the editor is opened.
+		 */
+		export function openTextEditor(document: TextDocument, selection?: Selection, column?: ViewColumn): Thenable<TextEditor>;
+
+		/**
+		 * Open a uri as document in an editor. Short-hand for:
+		 * `workspace#openTextDocument(uri).then(doc => window#openTextEditor(doc))`
+		 */
+		export function openTextEditor(uri: Uri, selection?: Selection, column?: ViewColumn): Thenable<TextEditor>;
+
+		/**
+		 * Close a text editor.
+		 */
+		export function closeTextEditor(editor: TextEditor): Thenable<void>;
 
 		export function showInformationMessage(message: string, ...items: string[]): Thenable<string>;
 
@@ -1050,12 +1221,13 @@ declare namespace vscode {
 		export function createOutputChannel(name: string): OutputChannel;
 
 		/**
-		* Creates an entry to the statusbar with the given alignment and priority.
+		* Add a status bar entry. Can be left or right aligned, expresses ordering
+		* via priority.
 		*
-		* @param alignLeft set to true to show the entry to the left of the status bar, false otherwise
+		* @param position either Left or Right
 		* @param priority the higher the number, the more the entry moves to the left of the status bar
 		*/
-		export function createStatusBarEntry(alignLeft?: boolean, priority?: number): StatusBarEntry;
+		export function createStatusBarItem(alignment?: StatusBarAlignment, priority?: number): StatusBarItem;
 	}
 
 	/**
@@ -1111,14 +1283,29 @@ declare namespace vscode {
 		export function findFiles(include: string, exclude: string, maxResults?: number): Thenable<Uri[]>;
 
 		/**
-		 * save all dirty files
+		 * Save all dirty files
 		 */
 		export function saveAll(includeUntitled?: boolean): Thenable<boolean>;
+
+		/**
+		 * Apply the provided (workspace edit)[#WorkspaceEdit].
+		 */
+		export function applyEdit(edit: WorkspaceEdit): Thenable<boolean>;
 
 		/**
 		 * All text documents currently known to the system.
 		 */
 		export let textDocuments: TextDocument[];
+
+		/**
+		 * Creates a new text document from the provided text.
+		 *
+		 * @param text The contents of the document
+		 * @param fileName An actual file name, nothing, or a random value. The resulting document will use the `untitled`-scheme
+		 * @param language Language identifier, if omitted the language is derived from `uri`
+		 * @return A promise that resolves to a [document](#TextDocument)
+		 */
+		export function createTextDocument(text: string, fileName?: string, language?: string): Thenable<TextDocument>;
 
 		/**
 		 * Opens the denoted document from disk. Will return early if the
@@ -1129,9 +1316,17 @@ declare namespace vscode {
 		 */
 		export function openTextDocument(uri: Uri): Thenable<TextDocument>;
 
+		/**
+		 * Like `openTextDocument(Uri.file(fileName))`
+		 */
+		export function openTextDocument(fileName: string): Thenable<TextDocument>;
+
 		export const onDidOpenTextDocument: Event<TextDocument>;
+
 		export const onDidCloseTextDocument: Event<TextDocument>;
+
 		export const onDidChangeTextDocument: Event<TextDocumentChangeEvent>;
+
 		export const onDidSaveTextDocument: Event<TextDocument>;
 
 		/**
@@ -1231,6 +1426,11 @@ declare namespace vscode {
 		 *
 		 */
 		export function registerCompletionItemProvider(selector: LanguageSelector, provider: CompletionItemProvider, ...triggerCharacters: string[]): Disposable;
+
+		/**
+		 *
+		 */
+		export function setLanguageConfiguration(language: string, configuration: LanguageConfiguration): Disposable;
 	}
 
 	export namespace extensions {
@@ -1240,20 +1440,14 @@ declare namespace vscode {
 		export function getExtension(extensionId: string): any;
 
 		export function getExtension<T>(extensionId: string): T;
-
-		export function getTelemetryInfo(): Thenable<ITelemetryInfo>;
 	}
 
-	export interface IHTMLContentElement {
-		formattedText?: string;
-		text?: string;
-		className?: string;
-		style?: string;
-		customStyle?: any;
-		tagName?: string;
-		children?: IHTMLContentElement[];
-		isText?: boolean;
-	}
+	/**
+	 * FormattedString can be used to render a tiny subset of markdown. FormattedString
+	 * is either a string that supports **bold** and __italic__ or a code-block that
+	 * provides a language and a code Snippet.
+	 */
+	export type MarkedString = string | { language: string; value: string };
 
 	// --- Begin Monaco.Modes
 	export namespace Modes {
@@ -1349,29 +1543,6 @@ declare namespace vscode {
 
 		export var hasTextMateTokenizerSupport: boolean;
 
-		// --- Begin ICommentsSupport
-		export interface ICommentsSupport {
-			commentsConfiguration: ICommentsConfiguration;
-		}
-		export interface ICommentsConfiguration {
-			lineCommentTokens?: string[];
-			blockCommentStartToken?: string;
-			blockCommentEndToken?: string;
-		}
-		export var CommentsSupport: {
-			register(modeId: string, commentsSupport: ICommentsSupport): Disposable;
-		};
-		// --- End ICommentsSupport
-
-		// --- Begin ITokenTypeClassificationSupport
-		export interface ITokenTypeClassificationSupport {
-			wordDefinition?: RegExp;
-		}
-		export var TokenTypeClassificationSupport: {
-			register(modeId: string, tokenTypeClassificationSupport: ITokenTypeClassificationSupport): Disposable;
-		};
-		// --- End ITokenTypeClassificationSupport
-
 		// --- Begin IElectricCharacterSupport
 		export interface IElectricCharacterSupport {
 			brackets: IBracketPair[];
@@ -1390,6 +1561,7 @@ declare namespace vscode {
 			autoClosingPairs: IAutoClosingPairConditional[];
 			surroundingPairs?: IAutoClosingPair[];
 		}
+
 		/**
 		 * Interface used to support insertion of matching characters like brackets and qoutes.
 		 */
@@ -1405,52 +1577,6 @@ declare namespace vscode {
 		};
 		// --- End ICharacterPairSupport
 
-		// --- Begin IOnEnterSupport
-		export interface IBracketPair2 {
-			open: string;
-			close: string;
-		}
-		export interface IIndentationRules {
-			decreaseIndentPattern: RegExp;
-			increaseIndentPattern: RegExp;
-			indentNextLinePattern?: RegExp;
-			unIndentedLinePattern?: RegExp;
-		}
-		export enum IndentAction {
-			None,
-			Indent,
-			IndentOutdent,
-			Outdent
-		}
-		export interface IEnterAction {
-			indentAction: IndentAction;
-			appendText?: string;
-			removeText?: number;
-		}
-		export interface IOnEnterRegExpRules {
-			beforeText: RegExp;
-			afterText?: RegExp;
-			action: IEnterAction;
-		}
-		export interface IOnEnterSupportOptions {
-			brackets?: IBracketPair2[];
-			indentationRules?: IIndentationRules;
-			regExpRules?: IOnEnterRegExpRules[];
-		}
-		export var OnEnterSupport: {
-			register(modeId: string, opts: IOnEnterSupportOptions): Disposable;
-		};
-		// --- End IOnEnterSupport
-
-		export interface IReference {
-			resource: Uri;
-			range: Range;
-		}
-
-		export interface IMode {
-			getId(): string;
-		}
-
 		export interface IWorker<T> {
 			disposable: Disposable;
 			load(): Thenable<T>;
@@ -1460,6 +1586,29 @@ declare namespace vscode {
 		function loadInBackgroundWorker<T>(scriptSrc: string): IWorker<T>;
 
 	}
+
+
+}
+
+declare module 'vscode-testing' {
+	import vscode = require('vscode');
+	export interface IRelaxedToken {
+		startIndex: number;
+		type: string;
+		bracket?: vscode.Modes.Bracket;
+	}
+	export interface ITestItem {
+		line: string;
+		tokens: IRelaxedToken[];
+	}
+	export function testTokenization(name: string, language: vscode.Modes.ILanguage, tests: ITestItem[][]): void;
+	export interface IOnEnterAsserter {
+		nothing(oneLineAboveText: string, beforeText: string, afterText: string): void;
+		indents(oneLineAboveText: string, beforeText: string, afterText: string): void;
+		outdents(oneLineAboveText: string, beforeText: string, afterText: string): void;
+		indentsOutdents(oneLineAboveText: string, beforeText: string, afterText: string): void;
+	}
+	export function testOnEnter(name: string, language: vscode.Modes.ILanguage, callback: (assertOnEnter: IOnEnterAsserter) => void): void;
 }
 
 /**
