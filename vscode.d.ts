@@ -17,12 +17,13 @@ declare namespace vscode {
 	 */
 	export interface Command {
 		/**
-		 * Title of the command, like _save_
+		 * Title of the command, like __save__
 		 */
 		title: string;
 
 		/**
 		 * The identifier of the actual command handler
+		 * @see commands.registerCommand
 		 */
 		command: string;
 
@@ -198,12 +199,12 @@ declare namespace vscode {
 		/**
 		 * Ensure a range sticks to the text.
 		 */
-		validateRange(range: Range): Range;
+		validateRange(range:Range): Range;
 
 		/**
 		 * Ensure a position sticks to the text.
 		 */
-		validatePosition(position: Position): Position;
+		validatePosition(position:Position): Position;
 	}
 
 	/**
@@ -269,7 +270,7 @@ declare namespace vscode {
 		 * Create a new range from two (line,character)-pairs. The parameters
 		 * might be swapped so that start is before or equal to end.
 		 */
-		constructor(startLine: number, startColumn: number, endLine: number, endColumn: number);
+		constructor(startLine: number, startColumn: number, endLine:number, endColumn:number);
 
 		/**
 		 * @return `true` iff the position or range is inside or equal
@@ -288,16 +289,36 @@ declare namespace vscode {
 		isSingleLine: boolean;
 	}
 
+	/**
+	 * Represents a text selection in an editor.
+	 */
 	export class Selection extends Range {
 
+		/**
+		 * The position at which the selection starts.
+		 */
 		anchor: Position;
 
+		/**
+		 * The position of the cursor.
+		 */
 		active: Position;
 
+		/**
+		 * Create a selection from two postions.
+		 */
 		constructor(anchor: Position, active: Position);
 
-		constructor(anchorLine: number, anchorColumn: number, activeLine: number, activeColumn: number);
+		/**
+		 * Create a selection from four points.
+		 */
+		constructor(anchorLine: number, anchorColumn: number, activeLine:number, activeColumn:number);
 
+		/**
+		 * A selection is reversed if the [anchor](#Selection.anchor)
+		 * is equal to [start](#Selection.start) and if [active](#Selection.active)
+		 * is equal to [end](#Selection.end)
+		 */
 		isReversed: boolean;
 	}
 
@@ -319,6 +340,9 @@ declare namespace vscode {
 
 	export interface TextEditorDecorationType {
 
+		/**
+		 * @readonly
+		 */
 		key: string;
 
 		dispose(): void;
@@ -329,7 +353,6 @@ declare namespace vscode {
 		InCenter,
 		InCenterIfOutsideViewport
 	}
-
 
 	export enum OverviewRulerLane {
 		Left = 1,
@@ -448,12 +471,12 @@ declare namespace vscode {
 		 * You must create first a `TextEditorDecorationType`.
 		 * If a set of decorations already exists with the given type, they will be overwritten.
 		 */
-		setDecorations(decorationType: TextEditorDecorationType, ranges: Range[]): void;
+		setDecorations(decorationType: TextEditorDecorationType, ranges:Range[]): void;
 
 		/**
 		 * Scroll as necessary in order to reveal a range.
 		 */
-		revealRange(range: Range, revealType?: TextEditorRevealType): void;
+		revealRange(range: Range, revealType?:TextEditorRevealType): void;
 	}
 
 	/**
@@ -781,7 +804,7 @@ declare namespace vscode {
 	 * `let sel:LanguageSelector = 'typescript`, or
 	 * `let sel:LanguageSelector = ['typescript, { language: 'json', pattern: '**\tsconfig.json' }]`
 	 */
-	export type DocumentSelector = string | DocumentFilter | (string | DocumentFilter)[];
+	export type DocumentSelector = string|DocumentFilter|(string|DocumentFilter)[];
 
 	/**
 	 * Contains additional information about the context which
@@ -1181,10 +1204,20 @@ declare namespace vscode {
 	export class Diagnostic {
 
 		range: Range;
+
 		message: string;
+
 		severity: DiagnosticSeverity;
+
 		code: string | number;
 
+		/**
+		 * Creates a new diagnostic object
+		 *
+		 * @param range To what range this diagnostic relates
+		 * @param message Message to show the user
+		 * @param severity Diagnostic severity, by default [error](#DiagnosticSeverity.Error)
+		 */
 		constructor(range: Range, message: string, severity?: DiagnosticSeverity);
 	}
 
@@ -1302,7 +1335,7 @@ declare namespace vscode {
 		/**
 		 * Returns if the extension has been activated.
 		 */
-		isActivated: boolean;
+		isActive: boolean;
 
 		/**
 		 * The parsed contents of the extension's package.json.
@@ -1327,7 +1360,7 @@ declare namespace vscode {
 		 * An array to which disposables can be added. When this
 		 * extension is deactivated the disposables will be invoked.
 		 */
-		subscriptions: { dispose(): any }[];
+		subscriptions: { dispose():any }[];
 
 		/**
 		 * A memento object that store state in the context
@@ -1379,7 +1412,7 @@ declare namespace vscode {
 		 * @param thisArgs - (optional) The this context used when invoking {{callback}}
 		 * @return Disposable which unregisters this command on disposal
 		 */
-		export function registerCommand(command: string, callback: (...args: any[]) => any, thisArg?: any): Disposable;
+		export function registerCommand(command: string, callback: (...args:any[]) => any, thisArg?: any): Disposable;
 
 		/**
 		 * Register a text editor command that will make edits.
@@ -1390,7 +1423,7 @@ declare namespace vscode {
 		 * @param thisArgs - (optional) The `this` context used when invoking {{callback}}
 		 * @return Disposable which unregisters this command on disposal
 		 */
-		export function registerTextEditorCommand(command: string, callback: (textEditor: TextEditor, edit: TextEditorEdit) => void, thisArg?: any): Disposable;
+		export function registerTextEditorCommand(command: string, callback: (textEditor:TextEditor, edit:TextEditorEdit) => void, thisArg?: any): Disposable;
 
 		/**
 		 * Executes a command
@@ -1458,7 +1491,7 @@ declare namespace vscode {
 		/**
 		 * Create a `TextEditorDecorationType` that can be used to add decorations to text editors.
 		 */
-		export function createTextEditorDecorationType(options: TextEditorDecorationOptions): TextEditorDecorationType;
+		export function createTextEditorDecorationType(options:TextEditorDecorationOptions): TextEditorDecorationType;
 
 		/**
 		 * Show an information message to users. Optionally provide an array of items which will be presented as
@@ -1500,7 +1533,7 @@ declare namespace vscode {
 		 * @param options configures the behavior of the selection list
 		 * @return a promise that resolves to the selected string or undefined.
 		 */
-		export function showQuickPick(items: string[] | Thenable<string[]>, options?: QuickPickOptions): Thenable<string>;
+		export function showQuickPick(items: string[]|Thenable<string[]>, options?: QuickPickOptions): Thenable<string>;
 
 		/**
 		 * Shows a selection list.
@@ -1509,7 +1542,7 @@ declare namespace vscode {
 		 * @param options configures the behavior of the selection list
 		 * @return a promise that resolves to the selected item or undefined.
 		 */
-		export function showQuickPick<T extends QuickPickItem>(items: T[] | Thenable<T[]>, options?: QuickPickOptions): Thenable<T>;
+		export function showQuickPick<T extends QuickPickItem>(items: T[]|Thenable<T[]>, options?: QuickPickOptions): Thenable<T>;
 
 		/**
 		 * Opens an input box to ask the user for input.
@@ -1595,10 +1628,10 @@ declare namespace vscode {
 		/**
 		 * @return a path relative to the [root](#rootPath) of the workspace.
 		 */
-		export function asRelativePath(pathOrUri: string | Uri): string;
+		export function asRelativePath(pathOrUri: string|Uri): string;
 
 		// TODO@api - justify this being here
-		export function findFiles(include: string, exclude: string, maxResults?: number): Thenable<Uri[]>;
+		export function findFiles(include: string, exclude: string, maxResults?:number): Thenable<Uri[]>;
 
 		/**
 		 * Save all dirty files
@@ -1650,7 +1683,7 @@ declare namespace vscode {
 		/**
 		 *
 		 */
-		export function getConfiguration(section?: string): WorkspaceConfiguration;
+		export function getConfiguration(section?:string): WorkspaceConfiguration;
 
 		// TODO: send out the new config?
 		export const onDidChangeConfiguration: Event<void>;
@@ -1733,7 +1766,7 @@ declare namespace vscode {
 		/**
 		 *
 		 */
-		export function registerOnTypeFormattingEditProvider(selector: DocumentSelector, provider: OnTypeFormattingEditProvider, firstTriggerCharacter: string, ...moreTriggerCharacter: string[]): Disposable;
+		export function registerOnTypeFormattingEditProvider(selector: DocumentSelector, provider: OnTypeFormattingEditProvider, firstTriggerCharacter:string, ...moreTriggerCharacter:string[]): Disposable;
 
 		/**
 		 *
@@ -1760,7 +1793,7 @@ declare namespace vscode {
 		/**
 		 * All extensions currently known to the system.
 		 */
-		export let list: Extension<any>[];
+		export let all: Extension<any>[];
 	}
 
 	// --- Begin Monaco.Modes
@@ -1799,23 +1832,23 @@ declare namespace vscode {
 
 		export interface ILanguageAutoComplete {
 			triggers: string;				// characters that trigger auto completion rules
-			match: string | RegExp;			// autocomplete if this matches
+			match: string|RegExp;			// autocomplete if this matches
 			complete: string;				// complete with this string
 		}
 
 		export interface ILanguageAutoIndent {
-			match: string | RegExp; 			// auto indent if this matches on enter
-			matchAfter: string | RegExp;		// and auto-outdent if this matches on the next line
+			match: string|RegExp; 			// auto indent if this matches on enter
+			matchAfter: string|RegExp;		// and auto-outdent if this matches on the next line
 		}
 
 		/**
 		 * Standard brackets used for auto indentation
 		 */
 		export interface IBracketPair {
-			tokenType: string;
-			open: string;
-			close: string;
-			isElectric: boolean;
+			tokenType:string;
+			open:string;
+			close:string;
+			isElectric:boolean;
 		}
 
 		/**
@@ -1826,16 +1859,16 @@ declare namespace vscode {
 			open: RegExp; // The definition of when an opening brace is detected. This regex is matched against the entire line upto, and including the last typed character (the trigger character).
 			closeComplete?: string; // How to complete a matching open brace. Matches from 'open' will be expanded, e.g. '</$1>'
 			matchCase?: boolean; // If set to true, the case of the string captured in 'open' will be detected an applied also to 'closeComplete'.
-			// This is useful for cases like BEGIN/END or begin/end where the opening and closing phrases are unrelated.
-			// For identical phrases, use the $1 replacement syntax above directly in closeComplete, as it will
-			// include the proper casing from the captured string in 'open'.
-			// Upper/Lower/Camel cases are detected. Camel case dection uses only the first two characters and assumes
-			// that 'closeComplete' contains wors separated by spaces (e.g. 'End Loop')
+								// This is useful for cases like BEGIN/END or begin/end where the opening and closing phrases are unrelated.
+								// For identical phrases, use the $1 replacement syntax above directly in closeComplete, as it will
+								// include the proper casing from the captured string in 'open'.
+								// Upper/Lower/Camel cases are detected. Camel case dection uses only the first two characters and assumes
+								// that 'closeComplete' contains wors separated by spaces (e.g. 'End Loop')
 
 			closeTrigger?: string; // The character that will trigger the evaluation of 'close'.
 			close?: RegExp; // The definition of when a closing brace is detected. This regex is matched against the entire line upto, and including the last typed character (the trigger character).
 			tokenType?: string; // The type of the token. Matches from 'open' or 'close' will be expanded, e.g. 'keyword.$1'.
-			// Only used to auto-(un)indent a closing bracket.
+							   // Only used to auto-(un)indent a closing bracket.
 		}
 
 		/**
@@ -1866,7 +1899,7 @@ declare namespace vscode {
 			embeddedElectricCharacters?: string[];
 		}
 		export var ElectricCharacterSupport: {
-			register(modeId: string, electricCharacterSupport: IElectricCharacterSupport): Disposable;
+			register(modeId:string, electricCharacterSupport:IElectricCharacterSupport): Disposable;
 		};
 		// --- End IElectricCharacterSupport
 
@@ -1880,14 +1913,14 @@ declare namespace vscode {
 		 * Interface used to support insertion of matching characters like brackets and qoutes.
 		 */
 		export interface IAutoClosingPair {
-			open: string;
-			close: string;
+			open:string;
+			close:string;
 		}
 		export interface IAutoClosingPairConditional extends IAutoClosingPair {
 			notIn?: string[];
 		}
 		export var CharacterPairSupport: {
-			register(modeId: string, characterPairSupport: ICharacterPairSupport): Disposable;
+			register(modeId:string, characterPairSupport:ICharacterPairSupport): Disposable;
 		};
 		// --- End ICharacterPairSupport
 
@@ -1902,113 +1935,4 @@ declare namespace vscode {
 	}
 }
 
-/**
- * Thenable is a common denominator between ES6 promises, Q, jquery.Deferred, WinJS.Promise,
- * and others. This API makes no assumption about what promise libary is being used which
- * enables reusing existing code without migrating to a specific promise implementation. Still,
- * we recommand the use of native promises which are available in VS Code.
- */
-interface Thenable<R> {
-    /**
-    * Attaches callbacks for the resolution and/or rejection of the Promise.
-    * @param onfulfilled The callback to execute when the Promise is resolved.
-    * @param onrejected The callback to execute when the Promise is rejected.
-    * @returns A Promise for the completion of which ever callback is executed.
-    */
-    then<TResult>(onfulfilled?: (value: R) => TResult | Thenable<TResult>, onrejected?: (reason: any) => TResult | Thenable<TResult>): Thenable<TResult>;
-    then<TResult>(onfulfilled?: (value: R) => TResult | Thenable<TResult>, onrejected?: (reason: any) => void): Thenable<TResult>;
-}
-
-// ---- ES6 promise ------------------------------------------------------
-
-/**
- * Represents the completion of an asynchronous operation
- */
-interface Promise<T> extends Thenable<T> {
-    /**
-    * Attaches callbacks for the resolution and/or rejection of the Promise.
-    * @param onfulfilled The callback to execute when the Promise is resolved.
-    * @param onrejected The callback to execute when the Promise is rejected.
-    * @returns A Promise for the completion of which ever callback is executed.
-    */
-    then<TResult>(onfulfilled?: (value: T) => TResult | Thenable<TResult>, onrejected?: (reason: any) => TResult | Thenable<TResult>): Promise<TResult>;
-    then<TResult>(onfulfilled?: (value: T) => TResult | Thenable<TResult>, onrejected?: (reason: any) => void): Promise<TResult>;
-
-    /**
-     * Attaches a callback for only the rejection of the Promise.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of the callback.
-     */
-    catch(onrejected?: (reason: any) => T | Thenable<T>): Promise<T>;
-
-    // [Symbol.toStringTag]: string;
-}
-
-interface PromiseConstructor {
-    // /**
-    //   * A reference to the prototype.
-    //   */
-    // prototype: Promise<any>;
-
-    /**
-     * Creates a new Promise.
-     * @param executor A callback used to initialize the promise. This callback is passed two arguments:
-     * a resolve callback used resolve the promise with a value or the result of another promise,
-     * and a reject callback used to reject the promise with a provided reason or error.
-     */
-    new <T>(executor: (resolve: (value?: T | Thenable<T>) => void, reject: (reason?: any) => void) => void): Promise<T>;
-
-    /**
-     * Creates a Promise that is resolved with an array of results when all of the provided Promises
-     * resolve, or rejected when any Promise is rejected.
-     * @param values An array of Promises.
-     * @returns A new Promise.
-     */
-    all<T>(values: Array<T | Thenable<T>>): Promise<T[]>;
-
-    /**
-     * Creates a Promise that is resolved or rejected when any of the provided Promises are resolved
-     * or rejected.
-     * @param values An array of Promises.
-     * @returns A new Promise.
-     */
-    race<T>(values: Array<T | Thenable<T>>): Promise<T>;
-
-    /**
-     * Creates a new rejected promise for the provided reason.
-     * @param reason The reason the promise was rejected.
-     * @returns A new rejected Promise.
-     */
-    reject(reason: any): Promise<void>;
-
-    /**
-     * Creates a new rejected promise for the provided reason.
-     * @param reason The reason the promise was rejected.
-     * @returns A new rejected Promise.
-     */
-    reject<T>(reason: any): Promise<T>;
-
-    /**
-      * Creates a new resolved promise for the provided value.
-      * @param value A promise.
-      * @returns A promise whose internal state matches the provided promise.
-      */
-    resolve<T>(value: T | Thenable<T>): Promise<T>;
-
-    /**
-     * Creates a new resolved promise .
-     * @returns A resolved promise.
-     */
-    resolve(): Promise<void>;
-
-    // [Symbol.species]: Function;
-}
-
-declare var Promise: PromiseConstructor;
-
-// TS 1.6 & node_module
 export = vscode;
-
-// declare module 'vscode' {
-//     export = vscode;
-// }
