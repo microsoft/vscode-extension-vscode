@@ -1,3 +1,22 @@
+/*
+	- comments are marked like this '<<< comment >>>'
+	- I've fixed typos directly without comments
+
+	some global comments:
+	- I'm missing some structure/grouping in this file:
+		- it is just a big soup of definitions
+		- entrypoints seem to be at the end so you have to read backwards
+		- the interface 'Extension' is on line 1384! (neither at the beginning, nor at the end)
+	- it would be much easier to grasp the gist of the API if:
+		- entrypoints would be at the beginning: start with 'Extension' because that is what devs are interested in.
+		- then continue with the different extensible areas, workspace first, then editors, commands etc.
+		- group the areas by some big separating comment that works like a section header with section overview.
+		- in the section header explain the fundamental concepts of that section in a few sentences with forward links to the types and interfaces.
+		- move auxiliary types/interfaces that are only used in the section towards the end of the section. So Range and Position would be at the end of the text section.
+		- move fundamental (shared) types to the end of the d.ts (but again group related items and use separator comments in between).
+*/
+
+
 /*---------------------------------------------------------
  * Copyright (C) Microsoft Corporation. All rights reserved.
  *--------------------------------------------------------*/
@@ -40,7 +59,7 @@ declare namespace vscode {
     export interface TextLine {
 
 		/**
-		 * The zero-offset line number
+		 * The zero-offset line number   <<<better: 'zero-based' see https://en.wikipedia.org/wiki/Zero-based_numbering >>>
 		 *
 		 * @readonly
 		 */
@@ -48,7 +67,7 @@ declare namespace vscode {
 
 		/**
 		 * The text of this line without the
-		 * newline character
+		 * newline character <<< what's about CR/LF on Windows? better: 'line separator characters' >>>
 		 *
 		 * @readonly
 		 */
@@ -56,7 +75,7 @@ declare namespace vscode {
 
 		/**
 		 * The range this line covers without the
-		 * newline character
+		 * newline character <<< what's about CR/LF on Windows? better: 'line separator characters' >>>
 		 *
 		 * @readonly
 		 */
@@ -64,7 +83,7 @@ declare namespace vscode {
 
 		/**
 		 * The range this line covers with the
-		 * newline character
+		 * newline character <<< dito >>>
 		 *
 		 * @readonly
 		 */
@@ -104,7 +123,7 @@ declare namespace vscode {
 
 		/**
 		 * Returns the file system path of the file associated with this document. Shorthand
-		 * notation for `#uri.fsPath`
+		 * notation for `#uri.fsPath` <<< what if uri is not a file? >>>
 		 *
 		 * @readonly
 		 */
@@ -142,7 +161,7 @@ declare namespace vscode {
 		/**
 		 * Save the underlying file.
 		 *
-		 * @retun A promise that will resolve to true when the file
+		 * @return A promise that will resolve to true when the file
 		 *  has been saved.
 		 */
         save(): Thenable<boolean>;
@@ -176,33 +195,35 @@ declare namespace vscode {
         lineAt(position: Position): TextLine;
 
 		/**
-		 * Converts the position to a zero-based offset
+		 * Converts the position to a zero-based offset.
 		 */
         offsetAt(position: Position): number;
 
 		/**
-		 * Converts a zero-based offset to a position
+		 * Converts a zero-based offset to a position.
 		 */
         positionAt(offset: number): Position;
 
 		/**
 		 * Get the text in this document. If a range is provided the text contained
-		 * by the range is returned.
+		 * by the range is returned. <<< if the range is larger than the TextDocument only the intersection is ... >>>
 		 */
         getText(range?: Range): string;
 
 		/**
 		 * Get the word under a certain position. May return null if position is at whitespace, on empty line, etc.
+		 * <<< what is a 'word'? >>>
 		 */
         getWordRangeAtPosition(position: Position): Range;
 
 		/**
 		 * Ensure a range sticks to the text.
+		 * <<< 'sticks'? better: ensure a range is completely contained in the TextDocument. >>>
 		 */
         validateRange(range: Range): Range;
 
 		/**
-		 * Ensure a position sticks to the text.
+		 * Ensure a position sticks to the text.	// <<< dito >>>
 		 */
         validatePosition(position: Position): Position;
     }
@@ -214,12 +235,12 @@ declare namespace vscode {
     export class Position {
 
 		/**
-		 * The zero-offset base line number.
+		 * The zero-offset base line number.	<<< 'zero-based' >>>
 		 */
         line: number;
 
 		/**
-		 * The zero-offset base character number
+		 * The zero-offset base character number	<<< 'zero-based' >>>
 		 */
         character: number;
 
@@ -236,14 +257,18 @@ declare namespace vscode {
         isBefore(other: Position): boolean;
 
 		/**
-		 * @return `true` if the postion is before or equal
+		 * @return `true` if the position is before or equal	<<< why 'before' and not 'smaller' as above? >>>
 		 * to this position.
 		 */
         isBeforeOrEqual(other: Position): boolean;
+
+        // <<< why no isAfter? isAfterOrEqual? isEqual? >>>
+
+        // <<< why no compare() function that can be used in sort? >>>
     }
 
 	/**
-	 * A range represents an ordered tuple of two positions
+	 * A range represents an ordered tuple of two positions		<<< simpler: 'ordered pair' >>>
 	 */
     export class Range {
 
@@ -259,7 +284,7 @@ declare namespace vscode {
 
 		/**
 		 * Create a new range from two position. If `start` is not
-		 * before or equal to `end` the value will be swaped.
+		 * before or equal to `end` the values will be swapped.
 		 *
 		 * @param start
 		 * @param end
@@ -270,7 +295,7 @@ declare namespace vscode {
 		 * Create a new range from two (line,character)-pairs. The parameters
 		 * might be swapped so that start is before or equal to end.
 		 */
-        constructor(startLine: number, startColumn: number, endLine: number, endColumn: number);
+        constructor(startLine: number, startColumn: number, endLine: number, endColumn: number);  // <<< use 'character' instead of 'column' >>>
 
 		/**
 		 * @return `true` iff the position or range is inside or equal
@@ -287,6 +312,8 @@ declare namespace vscode {
 		 * `true` iff `start` and `end` are on the same line.
 		 */
         isSingleLine: boolean;
+
+        // <<< union()? intersection()? >>>
     }
 
 	/**
@@ -297,12 +324,12 @@ declare namespace vscode {
 		/**
 		 * The position at which the selection starts.
 		 */
-        anchor: Position;
+        anchor: Position;	// <<< is anchor always start or end of the underlying range? if yes, why not just use a boolean 'reversed'? >>>
 
 		/**
 		 * The position of the cursor.
 		 */
-        active: Position;
+        active: Position;	//<<< why is the cursor position called 'active' and not 'cursor'? the comment should explain this >>>
 
 		/**
 		 * Create a selection from two postions.
@@ -312,8 +339,7 @@ declare namespace vscode {
 		/**
 		 * Create a selection from four points.
 		 */
-        constructor(anchorLine: number, anchorColumn: number, activeLine: number, activeColumn: number);
-
+        constructor(anchorLine: number, anchorColumn: number, activeLine: number, activeColumn: number);  // <<< 'column' -> 'character' >>>
 		/**
 		 * A selection is reversed if the [anchor](#Selection.anchor)
 		 * is equal to [start](#Selection.start) and if [active](#Selection.active)
@@ -328,7 +354,7 @@ declare namespace vscode {
     export interface TextEditorOptions {
 
 		/**
-		 * The size in spaces on tab takes
+		 * The size in spaces a tab takes
 		 */
         tabSize: number;
 
@@ -349,7 +375,7 @@ declare namespace vscode {
     }
 
     export enum TextEditorRevealType {
-        Default,
+        Default,	// <<< what is 'Default'? suggest to make 'Default' an alias for a self-describing value >>>
         InCenter,
         InCenterIfOutsideViewport
     }
@@ -429,7 +455,7 @@ declare namespace vscode {
 
 		/**
 		 * The primary selection on this text editor. In case the text editor has multiple selections this is the first selection as
-		 * in `TextEditor.selections[0]`.
+		 * in `TextEditor.selections[0]`.  <<< and in the single selection case this is not true? This should always be true! >>>
 		 * @see [updateSelection](#updateSelection)
 		 */
         selection: Selection;
@@ -454,27 +480,29 @@ declare namespace vscode {
         options: TextEditorOptions;
 
 		/**
-		 * Update text editor options and allows observe the result of the
+		 * Update text editor options and allow to observe the result of the
 		 * operations. Note: despite the editor being updated the UI updates with a
-		 * little delay. This deplay can be observed using the promise returned form this operation.
+		 * little delay. This delay can be observed using the promise returned form this operation.
+		 * <<< I don't understand the 'despite' >>>
 		 */
         updateOptions(options: TextEditorOptions): Thenable<TextEditor>;
 
 		/**
 		 * Perform an edit on the document associated with this text editor.
 		 * The passed in {{editBuilder}} is available only for the duration of the callback.
+		 * <<< waht does 'available' mean? better: 'valid' >>>
 		 */
         edit(callback: (editBuilder: TextEditorEdit) => void): Thenable<boolean>;
 
 		/**
 		 * Adds a set of decorations to the text editor.
-		 * You must create first a `TextEditorDecorationType`.
+		 * You must first create a `TextEditorDecorationType`. <<< to create another object is probably true for 95% of all APIs; nuke this sentence! >>>
 		 * If a set of decorations already exists with the given type, they will be overwritten.
 		 */
         setDecorations(decorationType: TextEditorDecorationType, ranges: Range[]): void;
 
 		/**
-		 * Scroll as necessary in order to reveal a range.
+		 * Scroll as necessary in order to reveal the given range.
 		 */
         revealRange(range: Range, revealType?: TextEditorRevealType): void;
     }
@@ -482,6 +510,8 @@ declare namespace vscode {
 	/**
 	 * Denotes a column in the VS Code window. Columns used to show editors
 	 * side by side.
+	 * <<< another reason not to use the term 'column' for 'character' within a line >>>
+	 * <<< this definition seems to be misplaced: it is not TextEditor related >>>
 	 */
     export enum ViewColumn {
         One = 1,
@@ -495,12 +525,12 @@ declare namespace vscode {
 	 */
     export interface TextEditorEdit {
 		/**
-		 * Replace a certain text region with a new value.
+		 * Replace a certain text region with a new value.	<<< what's about line separators in the replacement string? do I have to care? >>>
 		 */
         replace(location: Position | Range | Selection, value: string): void;
 
 		/**
-		 * Insert text at a location
+		 * Insert text at a location	<<< what's about line separators in the replacement string? do I have to care? >>>
 		 */
         insert(location: Position, value: string): void;
 
@@ -567,12 +597,12 @@ declare namespace vscode {
     }
 
 	/**
-	 * A cancellation token is passed on to asynchronous or long running
-	 * operation to signal to them cancellation, like cancelling a request
+	 * A cancellation token is passed to asynchronous or long running
+	 * operation to request cancellation, like cancelling a request
 	 * for completion items because the user continued to type.
 	 *
-	 * A cancallation token can only the cancelled once. That means it
-	 * signaled cancallation it will do so forever
+	 * A cancallation token can only cancel once. That means it
+	 * signaled cancellation it will do so forever   <<< don't understand this >>>
 	 */
     export interface CancellationToken {
 
@@ -582,13 +612,13 @@ declare namespace vscode {
         isCancellationRequested: boolean;
 
 		/**
-		 * An [event](#Event) which fires upon cancallation
+		 * An [event](#Event) which fires upon cancellation
 		 */
         onCancellationRequested: Event<any>;
     }
 
 	/**
-	 * A cancellation source is there to create [cancellation tokens](#CancellationToken).
+	 * A cancellation source creates [cancellation tokens](#CancellationToken).
 	 */
     export class CancellationTokenSource {
 
@@ -603,7 +633,7 @@ declare namespace vscode {
         cancel(): void;
 
 		/**
-		 * Signal cancellation and free resources
+		 * Signal cancellation and free resources   <<< so this is like 'cancel()'? then the name is a bit harmless (or misleading) ... >>>
 		 */
         dispose(): void;
     }
@@ -620,13 +650,13 @@ declare namespace vscode {
 		 * instances of Disposable.
 		 *
 		 * @return Returns a new disposable which, upon dispose, will
-		 * dispose all provideded disposables.
+		 * dispose all provided disposables.
 		 */
         static from(...disposableLikes: { dispose: () => any }[]): Disposable;
 
 		/**
 		 * Creates a new Disposable calling the provided function
-		 * on dispose
+		 * on dispose.
 		 * @param callOnDispose Function that disposes something
 		 */
         constructor(callOnDispose: Function);
@@ -639,12 +669,13 @@ declare namespace vscode {
 
 	/**
 	 * Represents a typed event.
+	 * <<< an example for how to use? >>>
 	 */
     export interface Event<T> {
 
 		/**
 		 *
-		 * @param listener The listener function will be call when the event happens.
+		 * @param listener The listener function will be called when the event happens.
 		 * @param thisArgs The 'this' which will be used when calling the event listener.
 		 * @param disposables An array to which a {{IDisposable}} will be added. The
 		 * @return
@@ -700,12 +731,12 @@ declare namespace vscode {
     export interface QuickPickItem {
 
 		/**
-		 * The main label of this item
+		 * The main label of this item   <<< is there another 'non-main' label? >>>
 		 */
         label: string;
 
 		/**
-		 * A description
+		 * A description <<< for what is this used? >>>
 		 */
         description: string;
     }
@@ -726,7 +757,7 @@ declare namespace vscode {
     }
 
 	/**
-	 * Represents an actional item that is shown with an information, warning, or
+	 * Represents an actional item that is shown with an information, warning, or  <<< what is an 'actional' item? >>>
 	 * error message
 	 *
 	 * @see #window.showInformationMessage
@@ -742,7 +773,7 @@ declare namespace vscode {
     }
 
 	/**
-	 *
+	 * <<< description? >>>
 	 */
     export interface InputBoxOptions {
 		/**
@@ -807,7 +838,7 @@ declare namespace vscode {
     export type DocumentSelector = string | DocumentFilter | (string | DocumentFilter)[];
 
 	/**
-	 * Contains additional information about the context which
+	 * Contains additional diagnostic information about the context in which
 	 * a [code action](#CodeActionProvider.provideCodeActions) is run
 	 */
     export interface CodeActionContext {
@@ -816,7 +847,7 @@ declare namespace vscode {
 
 	/**
 	 * A code action provider can add [commands](#Command) to a piece of code. The availability of
-	 * commands will be shown as light bulb.
+	 * commands will be shown as a 'light bulb'.
 	 */
     export interface CodeActionProvider {
 
@@ -829,13 +860,13 @@ declare namespace vscode {
     }
 
 	/**
-	 * A code lens reprents a [command](#Command) that should be shown along with
-	 * source text, like the number of references, a way to run tests, etc
+	 * A code lens represents a [command](#Command) that should be shown along with
+	 * source text, like the number of references, a way to run tests, etc.
 	 */
     export class CodeLens {
 
 		/**
-		 * The range in which this code lens is valid. Should only span a single line
+		 * The range in which this code lens is valid. Should only span a single line.
 		 */
         range: Range;
 
@@ -859,8 +890,8 @@ declare namespace vscode {
     export interface CodeLensProvider {
 
 		/**
-		 * Compute a list of [lenses](#CodeLens). This call should returned as fast as possible and if
-		 * computing the command is expensive implementors shoud only returns CodeLens-objects with the
+		 * Compute a list of [lenses](#CodeLens). This call should return as fast as possible and if
+		 * computing the command is expensive implementors should only return CodeLens-objects with the
 		 * range set and implement [resolve](#CodeLensProvider.resolveCodeLens).
 		 */
         provideCodeLenses(document: TextDocument, token: CancellationToken): CodeLens[] | Thenable<CodeLens[]>;
@@ -874,6 +905,7 @@ declare namespace vscode {
 
 	/**
 	 * The definition of a symbol is one or many [locations](#Location)
+	 * <<< I don't understand. What is a 'Definition'? Example? >>>
 	 */
     export type Definition = Location | Location[];
 
@@ -882,7 +914,7 @@ declare namespace vscode {
     }
 
 	/**
-	 * FormattedString can be used to render a tiny subset of markdown. FormattedString
+	 * FormattedString can be used to render test with a tiny subset of markdown. FormattedString
 	 * is either a string that supports **bold** and __italic__ or a code-block that
 	 * provides a language and a code Snippet.
 	 */
@@ -958,6 +990,7 @@ declare namespace vscode {
         provideReferences(document: TextDocument, position: Position, options: { includeDeclaration: boolean; }, token: CancellationToken): Location[] | Thenable<Location[]>;
     }
 
+	// <<< why is TextEdit miles away from TextEditorEdit? >>>
     export class TextEdit {
         static replace(range: Range, newText: string): TextEdit;
         static insert(position: Position, newText: string): TextEdit;
@@ -968,7 +1001,7 @@ declare namespace vscode {
     }
 
 	/**
-	 * A workspace edit reprents text changes to many documents.
+	 * A workspace edit represents text changes for many documents.
 	 */
     export class WorkspaceEdit {
 
@@ -1208,7 +1241,7 @@ declare namespace vscode {
         name: string;
 
 		/**
-		 * Assign resource for given resource
+		 * Assign resource for given resource	<<< "Assign *diagnostic* for given resource", right? >>>
 		 */
         set(uri: Uri, diagnostics: Diagnostic[]): Thenable<void>;
 
@@ -1231,6 +1264,8 @@ declare namespace vscode {
 
         dispose(): void;
     }
+
+//	<<< end of first batch of comments >>>
 
 	/**
 	 * Represents a diagnostic, such as a compiler error or warning, along with the location
