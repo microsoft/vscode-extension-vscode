@@ -33,13 +33,18 @@ export function run(testsRoot: string, clb: (error) => void): void {
 			return clb(error);
 		}
 
-		// Fill into Mocha
-		files.forEach(f => mocha.addFile(paths.join(testsRoot, f)));
-
-		// Run the tests.
-		mocha.run()
-			.on('end', function() {
-				clb(null);
-			});
+		try {
+			
+			// Fill into Mocha
+			files.forEach(f => mocha.addFile(paths.join(testsRoot, f)));
+	
+			// Run the tests.
+			mocha.run()
+				.on('end', function() {
+					clb(null);
+				});
+		} catch (error) {
+			return clb(error);
+		}
 	});
 }
