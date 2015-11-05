@@ -8,12 +8,18 @@
 		- entrypoints seem to be at the end so you have to read backwards
 		- the interface 'Extension' is on line 1384! (neither at the beginning, nor at the end)
 	- it would be much easier to grasp the gist of the API if:
-		- entrypoints would be at the beginning: start with 'Extension' because that is what devs are interested in.
+		- entrypoints would be at the beginning: start with namespaces and functions and 'Extension' because that is what devs are interested in.
 		- then continue with the different extensible areas, workspace first, then editors, commands etc.
 		- group the areas by some big separating comment that works like a section header with section overview.
 		- in the section header explain the fundamental concepts of that section in a few sentences with forward links to the types and interfaces.
 		- move auxiliary types/interfaces that are only used in the section towards the end of the section. So Range and Position would be at the end of the text section.
-		- move fundamental (shared) types to the end of the d.ts (but again group related items and use separator comments in between).
+		- move fundamental (shared) types (e.g. CancellationToken etc.) to the end of the d.ts (but again group related items and use separator comments in between).
+	- it would be helpful if the class or interface comment would explain how the class is used, i.e. how instances are created:
+			the FileSystemWatcher is a good example:
+				"To get an instance of a {{FileSystemWatcher}} use {{workspace.createFileSystemWatcher}}."
+	- lots of class or method comments are still missing. If we cannot create all of them in time, we should focus on comments for non-obvious cases.
+		I have added a "non-obvious" comment.
+
 */
 
 
@@ -364,6 +370,7 @@ declare namespace vscode {
         insertSpaces: boolean;
     }
 
+	// <<< non-obvious >>>
     export interface TextEditorDecorationType {
 
 		/**
@@ -685,7 +692,7 @@ declare namespace vscode {
 
 	/**
 	 * A file system watcher notifies about changes to files and folders
-	 * on disk. To get an instanceof of a {{FileSystemWatcher}} use
+	 * on disk. To get an instance of a {{FileSystemWatcher}} use
 	 * {{workspace.createFileSystemWatcher}}.
 	 */
     export interface FileSystemWatcher extends Disposable {
@@ -773,7 +780,7 @@ declare namespace vscode {
     }
 
 	/**
-	 * <<< description? >>>
+	 *
 	 */
     export interface InputBoxOptions {
 		/**
@@ -1037,7 +1044,7 @@ declare namespace vscode {
     export interface FormattingOptions {
         tabSize: number;
         insertSpaces: boolean;
-        [key: string]: boolean | number | string;
+        [key: string]: boolean | number | string;	// <<< non-obvious >>>
     }
 
 	/**
@@ -1063,13 +1070,13 @@ declare namespace vscode {
 
     export class ParameterInformation {
         label: string;
-        documentation: string;
+        documentation: string;		// <<< non-obvious: what is the supported format? >>>
         constructor(label: string, documentation?: string);
     }
 
     export class SignatureInformation {
         label: string;
-        documentation: string;
+        documentation: string;		// <<< non-obvious: what is the supported format? >>>
         parameters: ParameterInformation[];
         constructor(label: string, documentation?: string);
     }
@@ -1108,12 +1115,12 @@ declare namespace vscode {
     export class CompletionItem {
         label: string;
         kind: CompletionItemKind;
-        detail: string;
-        documentation: string;
-        sortText: string;
-        filterText: string;
+        detail: string;			// <<< non-obvious >>>
+        documentation: string;	// <<< non-obvious: what is the supported format? >>>
+        sortText: string;		// <<< non-obvious: is this the 'sort key'? >>>
+        filterText: string;		// <<< non-obvious: is this the 'filter key'? >>>
         insertText: string;
-        textEdit: TextEdit;
+        textEdit: TextEdit;		// <<< non-obvious: what is the relation between insertText and textEdit? >>>
         constructor(label: string);
     }
 
@@ -1126,7 +1133,7 @@ declare namespace vscode {
 
     export interface CommentRule {
         lineComment?: string;
-        blockComment?: CharacterPair;
+        blockComment?: CharacterPair;	// <<< non-obvious: is this the start/end characters of the comment?
     }
 
     export interface IndentationRule {
@@ -1136,6 +1143,7 @@ declare namespace vscode {
         unIndentedLinePattern?: RegExp;
     }
 
+	// <<< this is not an 'action' but an 'indent type'
     export enum IndentAction {
         None,
         Indent,
@@ -1144,9 +1152,9 @@ declare namespace vscode {
     }
 
     export interface EnterAction {
-        indentAction: IndentAction;
+        indentAction: IndentAction;		// <<< confusing: another reason not to use the name 'IndentAction' >>>
         appendText?: string;
-        removeText?: number;
+        removeText?: number;		// <<< non-obvious: the number of characters to remove? >>>
     }
 
     export interface OnEnterRule {
@@ -1236,7 +1244,7 @@ declare namespace vscode {
     export interface DiagnosticCollection {
 
 		/**
-		 *
+		 * <<< non-obvious: for what is the name used? >>>
 		 */
         name: string;
 
@@ -1265,8 +1273,6 @@ declare namespace vscode {
         dispose(): void;
     }
 
-//	<<< end of first batch of comments >>>
-
 	/**
 	 * Represents a diagnostic, such as a compiler error or warning, along with the location
 	 * in which they occurred.
@@ -1279,7 +1285,7 @@ declare namespace vscode {
 
         severity: DiagnosticSeverity;
 
-        code: string | number;
+        code: string | number;		// <<< is this an ID? It does not appear in the constructor. >>>
 
 		/**
 		 * Creates a new diagnostic object
@@ -1321,19 +1327,19 @@ declare namespace vscode {
 
 	/**
 	 * A status bar item is a status bar contribution that can
-	 * show text and icons and run trigger a command on click.
+	 * show text and icons and run a command on click.
 	 */
     export interface StatusBarItem {
 
 		/**
-		 * The alignment of this item, either left or right
+		 * The alignment of this item, either left or right		// <<< no need to mention left or right here because a specific enum exists. >>>
 		 * @readonly
 		 */
         alignment: StatusBarAlignment;
 
 		/**
 		 * The priority of this item. It defined the sorting
-		 * when multi items share the same [alignment](#alignment)
+		 * when multi items share the same [alignment](#alignment)		// <<< I don't get this ? >>>
 		 * @readonly
 		 */
         priority: number;
@@ -1419,7 +1425,7 @@ declare namespace vscode {
         exports: T;
 
 		/**
-		 * Activates this extension and returns it's public API.
+		 * Activates this extension and returns its public API.
 		 */
         activate(): Thenable<T>;
     }
@@ -1433,7 +1439,7 @@ declare namespace vscode {
         subscriptions: { dispose(): any }[];
 
 		/**
-		 * A memento object that store state in the context
+		 * A memento object that stores state in the context
 		 * of the currently opened [workspace](#workspace.path).
 		 */
         workspaceState: Memento;
@@ -1451,7 +1457,7 @@ declare namespace vscode {
     }
 
 	/**
-	 * A memento reprents a storage utility. It can store and retreive
+	 * A memento represents a storage utility. It can store and retrieve
 	 * values.
 	 */
     export interface Memento {
@@ -1505,7 +1511,7 @@ declare namespace vscode {
         export function executeCommand<T>(command: string, ...rest: any[]): Thenable<T>;
 
 		/**
-		 * Retrieve the list of all avialable commands.
+		 * Retrieve the list of all available commands.
 		 *
 		 * @return Thenable that resolves to a list of command ids.
 		 */
@@ -1657,7 +1663,7 @@ declare namespace vscode {
     }
 
 	/**
-	 * An event describing a document change event
+	 * An event describing a document change event.
 	 */
     export interface TextDocumentChangeEvent {
 
@@ -1667,7 +1673,7 @@ declare namespace vscode {
         document: TextDocument;
 
 		/**
-		 * An array of content changes
+		 * An array of content changes.
 		 */
         contentChanges: TextDocumentContentChangeEvent[];
     }
@@ -1769,7 +1775,7 @@ declare namespace vscode {
 
 		/**
 		 * Compute the match between a document selector and a document. Values
-		 * greater zero mean the selector matches with to the document.
+		 * greater zero mean the selector matches the document.
 		 */
         export function match(selector: DocumentSelector, document: TextDocument): number;
 
