@@ -6,7 +6,6 @@
     "prepublish": "tsc"
   },
   "dependencies": {
-    "typescript": "^1.6.2",
     "mocha": "^2.3.3",
     "glob": "^5.0.15",
     "source-map-support": "^0.3.2"
