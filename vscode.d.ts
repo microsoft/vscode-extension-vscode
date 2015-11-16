@@ -39,7 +39,7 @@ declare namespace vscode {
 	 * Represents a line of text such as a line of source code.
 	 *
 	 * TextLine objects are __immutable__. That means that when a [document](#TextDocument) changes
-	 * previsouly retrieved lines will not represent the latest state.
+	 * previously retrieved lines will not represent the latest state.
 	 */
 	export interface TextLine {
 
@@ -402,7 +402,7 @@ declare namespace vscode {
 		active: Position;	//
 
 		/**
-		 * Create a selection from two postions.
+		 * Create a selection from two positions.
 		 */
 		constructor(anchor: Position, active: Position);
 
@@ -613,7 +613,7 @@ declare namespace vscode {
 		 * Perform an edit on the document associated with this text editor.
 		 *
 		 * The given callback-function is invoked with an [edit-builder](#TextEditorEdit) which must
-		 * be used to make edits. Note that the the edit-builder is only valid while the
+		 * be used to make edits. Note that the edit-builder is only valid while the
 		 * callback executes.
 		 *
 		 * @param callback A function which can make edits using an [edit-builder](#TextEditorEdit).
@@ -637,7 +637,7 @@ declare namespace vscode {
 
 		/**
 		 * **This method is deprecated.** Use [window.showTextDocument](#window.showTextDocument)
-		 * instead. This method shows unexpected bahviour and will be removed in the next major update.
+		 * instead. This method shows unexpected behavior and will be removed in the next major update.
 		 *
 		 * @deprecated
 		 * Show the text editor.
@@ -647,7 +647,7 @@ declare namespace vscode {
 		/**
 		 *
 		 * **This method is deprecated.** Use the command 'workbench.action.closeActiveEditor' instead.
-		 * This method shows unexpected bahviour and will be removed in the next major update.
+		 * This method shows unexpected behavior and will be removed in the next major update.
 		 *
 		 * @deprecated
 		 *
@@ -725,7 +725,7 @@ declare namespace vscode {
 		fragment: string;
 
 		/**
-		 * Retuns a string representing the corresponding file system path of this URI.
+		 * Returns a string representing the corresponding file system path of this URI.
 		 * Will handle UNC paths and normalize windows drive letters to lower-case. Also
 		 * uses the platform specific path separator. Will *not* validate the path for
 		 * invalid characters and semantics. Will *not* look at the scheme of this URI.
@@ -746,7 +746,7 @@ declare namespace vscode {
 	 * operation to request cancellation, like cancelling a request
 	 * for completion items because the user continued to type.
 	 *
-	 * A cancallation token can only cancel once. That means it
+	 * A cancellation token can only cancel once. That means it
 	 * signaled cancellation it will do so forever   
 	 */
 	export interface CancellationToken {
@@ -1786,7 +1786,7 @@ declare namespace vscode {
 
 		/**
 		 * The currently active editor or undefined. The active editor is the one
-		 * that currenty has focus or, when none has focus, the one that has changed
+		 * that currently has focus or, when none has focus, the one that has changed
 		 * input most recently.
 		 */
 		export let activeTextEditor: TextEditor;
