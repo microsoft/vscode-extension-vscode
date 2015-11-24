@@ -31,7 +31,7 @@ export function configure(opts: MochaSetupOptions): void {
 	mocha = new Mocha(opts);
 }
 
-export function run(testsRoot: string, clb: (error) => void): void {
+export function run(testsRoot: string, clb: (error, failures?: number) => void): void {
 	
 	// Enable source map support
 	require('source-map-support').install();
@@ -47,10 +47,14 @@ export function run(testsRoot: string, clb: (error) => void): void {
 			// Fill into Mocha
 			files.forEach(f => mocha.addFile(paths.join(testsRoot, f)));
 	
-			// Run the tests.
+			// Run the tests
+			let failures = 0;
 			mocha.run()
+				.on('fail', function(test, err) {
+					failures++;
+				})
 				.on('end', function() {
-					clb(null);
+					clb(null, failures);
 				});
 		} catch (error) {
 			return clb(error);
