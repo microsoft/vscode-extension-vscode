@@ -1,0 +1,55 @@
+#!/usr/bin/env node
+
+var remote = require('gulp-remote-src');
+var vzip = require('gulp-vinyl-zip');
+var gulp = require('gulp');
+var symdest = require('gulp-symdest');
+var path = require('path');
+var cp = require('child_process');
+
+var darwinZipName = 'VSCode-darwin.zip';
+var linuxZipName = 'VSCode-linux64.zip';
+var baseUrl = 'https://az764295.vo.msecnd.net/public';
+var version = process.env.CODE_VERSION || '0.10.3';
+var downloadUrl = process.env.CODE_DOWNLOAD_URL || [baseUrl, version, process.platform === 'darwin' ? darwinZipName : linuxZipName].join('/');
+
+var testRunFolder = '.vscode-test';
+var darwinExecutable = path.join(process.cwd(), testRunFolder, 'Visual Studio Code.app', 'Contents', 'MacOS', 'Electron');
+var linuxExecutable = path.join(process.cwd(), testRunFolder, 'VSCode-linux-x64', 'Code');
+
+var testsFolder = process.env.CODE_TESTS_PATH || path.join(process.cwd(), 'out', 'test');
+var testsWorkspace = process.env.CODE_TESTS_WORKSPACE || '';
+
+gulp.task('prepare-tests', function () {
+    return remote(downloadUrl, { base: '' })
+        .pipe(vzip.src())
+        .pipe(symdest(testRunFolder));
+});
+
+gulp.start(['prepare-tests'], function () {
+    var cmd = cp.spawn(process.platform === 'darwin' ? darwinExecutable : linuxExecutable, [
+        testsFolder,
+        '--extensionDevelopmentPath=' + process.cwd(),
+        '--extensionTestsPath=' + testsFolder
+    ]);
+
+    cmd.stdout.on('data', function (data) {
+        console.log(data.toString());
+    });
+
+    cmd.stderr.on('data', function (data) {
+        console.error(data.toString());
+    });
+
+    cmd.on('error', function (data) {
+        console.log('Failed to execute tests: ' + data.toString());
+    });
+
+    cmd.on('close', function (code) {
+        console.log('Tests exited with code: ' + code);
+
+        if (code !== 0) {
+            process.exit(code); // propagate exit code to outer runner
+        }
+    });
+});
