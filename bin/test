@@ -10,7 +10,7 @@ var cp = require('child_process');
 var darwinZipName = 'VSCode-darwin.zip';
 var linuxZipName = 'VSCode-linux64.zip';
 var baseUrl = 'https://az764295.vo.msecnd.net/public';
-var version = process.env.CODE_VERSION || '0.10.3';
+var version = process.env.CODE_VERSION || '0.10.4';
 var downloadUrl = process.env.CODE_DOWNLOAD_URL || [baseUrl, version, process.platform === 'darwin' ? darwinZipName : linuxZipName].join('/');
 
 var testRunFolder = '.vscode-test';
