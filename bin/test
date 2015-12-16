@@ -35,7 +35,7 @@ stream.on('end', function () {
         '--extensionTestsPath=' + testsFolder
     ];
 
-    console.log('Running extension tests: ' + [executable, args].join(' '));
+    console.log('Running extension tests: ' + [executable, args.join(' ')].join(' '));
 
     var cmd = cp.spawn(executable, args);
 
