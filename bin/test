@@ -2,7 +2,6 @@
 
 var remote = require('gulp-remote-src');
 var vzip = require('gulp-vinyl-zip');
-var gulp = require('gulp');
 var symdest = require('gulp-symdest');
 var path = require('path');
 var cp = require('child_process');
@@ -20,18 +19,25 @@ var linuxExecutable = path.join(process.cwd(), testRunFolder, 'VSCode-linux-x64'
 var testsFolder = process.env.CODE_TESTS_PATH || path.join(process.cwd(), 'out', 'test');
 var testsWorkspace = process.env.CODE_TESTS_WORKSPACE || '';
 
-gulp.task('prepare-tests', function () {
-    return remote(downloadUrl, { base: '' })
-        .pipe(vzip.src())
-        .pipe(symdest(testRunFolder));
-});
+console.log('### VS Code Extension Test Run ###');
+console.log('Current working directory: ' + process.cwd());
+console.log('Downloading VS Code into "' + path.join(process.cwd(), testRunFolder) + '" from: ' + downloadUrl);
 
-gulp.start(['prepare-tests'], function () {
-    var cmd = cp.spawn(process.platform === 'darwin' ? darwinExecutable : linuxExecutable, [
+var stream = remote(downloadUrl, { base: '' })
+    .pipe(vzip.src())
+    .pipe(symdest(testRunFolder));
+
+stream.on('end', function () {
+    var executable = process.platform === 'darwin' ? darwinExecutable : linuxExecutable;
+    var args = [
         testsFolder,
         '--extensionDevelopmentPath=' + process.cwd(),
         '--extensionTestsPath=' + testsFolder
-    ]);
+    ];
+
+    console.log('Running extension tests: ' + [executable, args].join(' '));
+
+    var cmd = cp.spawn(executable, args);
 
     cmd.stdout.on('data', function (data) {
         console.log(data.toString());

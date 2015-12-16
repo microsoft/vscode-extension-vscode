@@ -1,6 +1,6 @@
 {
   "name": "vscode",
-  "version": "0.10.7-pre.1",
+  "version": "0.10.7-pre.2",
   "typings": "vscode.d.ts",
   "scripts": {
     "prepublish": "tsc"
@@ -9,7 +9,6 @@
     "mocha": "^2.3.3",
     "glob": "^5.0.15",
     "source-map-support": "^0.3.2",
-    "gulp": "^3.9.0",
     "gulp-remote-src": "^0.4.0",
     "gulp-vinyl-zip": "^1.1.2",
     "gulp-symdest": "^1.0.0"
