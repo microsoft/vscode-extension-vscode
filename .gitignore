@@ -1,1 +1,3 @@
 node_modules
+vscode.d.ts
+typings/vscode.raw.d.ts

@@ -3,7 +3,8 @@
   "version": "0.10.7",
   "typings": "vscode.d.ts",
   "scripts": {
-    "prepublish": "tsc"
+    "prepublish": "tsc",
+    "postinstall": "node bin/install"
   },
   "dependencies": {
     "mocha": "^2.3.3",
