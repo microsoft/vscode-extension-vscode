@@ -1,0 +1,77 @@
+#!/usr/bin/env node
+
+var request = require('request');
+var semver = require('semver');
+var fs = require('fs');
+var path = require('path');
+
+var engine = '^0.10.1';
+var next = 'next';
+var vscodeDtsTypescriptPath = path.join(path.dirname(__dirname), 'vscode.d.ts');
+var vscodeDtsJavascriptPath = path.join(path.dirname(__dirname), 'typings', 'vscode.raw.d.ts');
+
+getTagMatchingEngine(engine, function (error, tag) {
+    getContents(toUrl(tag), function (error, contents) {
+        if (error) {
+            exitWithError(error);
+        }
+
+        fs.writeFileSync(vscodeDtsTypescriptPath, vscodeDtsToTypescript(contents));
+        fs.writeFileSync(vscodeDtsJavascriptPath, vscodeDtsToJavaScript(contents));
+    });
+});
+
+function vscodeDtsToTypescript(contents) {
+    return contents; // TODO
+}
+
+function vscodeDtsToJavaScript(contents) {
+    return contents; // TODO
+}
+
+function toUrl(tag) {
+    if (tag === next) {
+        return 'https://raw.githubusercontent.com/Microsoft/vscode/master/src/vs/vscode.d.ts';
+    }
+
+    return 'https://raw.githubusercontent.com/Microsoft/vscode/' + tag + '/src/vs/vscode.d.ts';
+}
+
+function getTagMatchingEngine(engine, callback) {
+    if (engine === next) {
+        return callback(null, next);
+    }
+
+    getContents('https://api.github.com/repos/Microsoft/vscode/tags', function (error, tagsRaw) {
+        if (error) {
+            exitWithError(error);
+        }
+
+        var tags = JSON.parse(tagsRaw).map(function (tag) { return tag.name; });
+        var tag = semver.maxSatisfying(tags, engine);
+
+        if (!tag) {
+            exitWithError('Could not find satifying tag for version ' + engine + ' in: [' + tags.join(', ') + ']');
+        }
+
+        return callback(null, tag);
+    });
+}
+
+function exitWithError(error) {
+    console.error('Error installing vscode.d.ts: ' + error.toString());
+    process.exit(1);
+}
+
+function getContents(url, callback) {
+    var options = {
+        url: url,
+        headers: {
+            'user-agent': 'nodejs'
+        }
+    };
+
+    request.get(options, function (error, response, body) {
+        callback(error, body);
+    });
+}

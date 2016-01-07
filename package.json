@@ -8,6 +8,8 @@
   "dependencies": {
     "mocha": "^2.3.3",
     "glob": "^5.0.15",
+    "request": "^2.67.0",
+    "semver": "^5.1.0",
     "source-map-support": "^0.3.2",
     "gulp-remote-src": "^0.4.0",
     "gulp-vinyl-zip": "^1.1.2",
