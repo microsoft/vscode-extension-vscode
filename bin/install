@@ -5,8 +5,8 @@ var semver = require('semver');
 var fs = require('fs');
 var path = require('path');
 
-var engine = '^0.10.1';
 var next = 'next';
+var engine = next //'^0.10.1';
 var vscodeDtsTypescriptPath = path.join(path.dirname(__dirname), 'vscode.d.ts');
 var vscodeDtsJavascriptPath = path.join(path.dirname(__dirname), 'typings', 'vscode.raw.d.ts');
 
@@ -22,11 +22,22 @@ getTagMatchingEngine(engine, function (error, tag) {
 });
 
 function vscodeDtsToTypescript(contents) {
-    return contents; // TODO
+    var markerHit = false;
+    var lines = contents.split('\n').filter(function(line) {
+        if (line === '// [javascript start marker]') {
+            markerHit = true;
+        }
+        
+        return !markerHit;
+    });
+    
+    lines.push('export = vscode;'); // this is to enable TS module resolution support
+    
+    return lines.join('\n');
 }
 
 function vscodeDtsToJavaScript(contents) {
-    return contents; // TODO
+    return contents; // contents are already compatible with JS
 }
 
 function toUrl(tag) {
