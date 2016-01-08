@@ -27,6 +27,8 @@ getURLMatchingEngine(engine, function (error, url) {
 
         fs.writeFileSync(vscodeDtsTypescriptPath, vscodeDtsToTypescript(contents));
         fs.writeFileSync(vscodeDtsJavascriptPath, vscodeDtsToJavaScript(contents));
+        
+        console.log('vscode.d.ts successfully installed!\n');
     });
 });
 
