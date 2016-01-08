@@ -1,10 +1,9 @@
 {
   "name": "vscode",
-  "version": "0.10.8-pre3",
+  "version": "0.10.8-pre4",
   "typings": "vscode.d.ts",
   "scripts": {
-    "prepublish": "tsc",
-    "postinstall": "node bin/install"
+    "prepublish": "tsc"
   },
   "dependencies": {
     "mocha": "^2.3.3",
