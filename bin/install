@@ -17,9 +17,11 @@ if (!engine) {
 var vscodeDtsTypescriptPath = path.join(path.dirname(__dirname), 'vscode.d.ts');
 var vscodeDtsJavascriptPath = path.join(path.dirname(__dirname), 'typings', 'vscode.raw.d.ts');
 
+console.log('Detected VS Code engine version: ' + engine);
+
 getURLMatchingEngine(engine, function (error, url) {
     console.log('Fetching vscode.d.ts from: ' + url);
-    
+
     getContents(url, function (error, contents) {
         if (error) {
             exitWithError(error);
@@ -27,7 +29,7 @@ getURLMatchingEngine(engine, function (error, url) {
 
         fs.writeFileSync(vscodeDtsTypescriptPath, vscodeDtsToTypescript(contents));
         fs.writeFileSync(vscodeDtsJavascriptPath, vscodeDtsToJavaScript(contents));
-        
+
         console.log('vscode.d.ts successfully installed!\n');
     });
 });
@@ -62,14 +64,24 @@ function getURLMatchingEngine(engine, callback) {
         }
 
         var tags = JSON.parse(tagsRaw).map(function (tag) { return tag.name; });
-        var tag = semver.maxSatisfying(tags, engine);
+        var tag = semver.minSatisfying(tags, engine);
 
         if (!tag) {
             exitWithError('Could not find satifying tag for version ' + engine + ' in: [' + tags.join(', ') + ']');
         }
+        
+        console.log('Found minimal version that qualifies engine range: ' + tag);
 
         return callback(null, 'https://raw.githubusercontent.com/Microsoft/vscode/' + tag + '/src/vs/vscode.d.ts');
     });
+}
+
+function minSatisfying(versions, range, loose) {
+    return versions.filter(function (version) {
+        return semver.satisfies(version, range, loose);
+    }).sort(function (a, b) {
+        return semver.compare(a, b, loose);
+    })[0] || null;
 }
 
 function exitWithError(error) {
