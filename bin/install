@@ -9,13 +9,18 @@ process.on('uncaughtException', function (err) {
     exitWithError(err);
 });
 
-var next = 'next';
-var engine = process.env.npm_package_engines_vscode || '^0.10.1';
+var engine = process.env.npm_package_engines_vscode;
+if (!engine) {
+    exitWithError('Missing VSCode engine declaration in package.json.');
+}
+
 var vscodeDtsTypescriptPath = path.join(path.dirname(__dirname), 'vscode.d.ts');
 var vscodeDtsJavascriptPath = path.join(path.dirname(__dirname), 'typings', 'vscode.raw.d.ts');
 
-getTagMatchingEngine(engine, function (error, tag) {
-    getContents(toUrl(tag), function (error, contents) {
+getURLMatchingEngine(engine, function (error, url) {
+    console.log('Fetching vscode.d.ts from: ' + url);
+    
+    getContents(url, function (error, contents) {
         if (error) {
             exitWithError(error);
         }
@@ -44,17 +49,9 @@ function vscodeDtsToJavaScript(contents) {
     return contents; // contents are already compatible with JS
 }
 
-function toUrl(tag) {
-    if (tag === next) {
-        return 'https://raw.githubusercontent.com/Microsoft/vscode/master/src/vs/vscode.d.ts';
-    }
-
-    return 'https://raw.githubusercontent.com/Microsoft/vscode/' + tag + '/src/vs/vscode.d.ts';
-}
-
-function getTagMatchingEngine(engine, callback) {
-    if (engine === next) {
-        return callback(null, next);
+function getURLMatchingEngine(engine, callback) {
+    if (engine === '*') {
+        return callback(null, 'https://raw.githubusercontent.com/Microsoft/vscode/master/src/vs/vscode.d.ts'); // master
     }
 
     getContents('https://api.github.com/repos/Microsoft/vscode/tags', function (error, tagsRaw) {
@@ -69,7 +66,7 @@ function getTagMatchingEngine(engine, callback) {
             exitWithError('Could not find satifying tag for version ' + engine + ' in: [' + tags.join(', ') + ']');
         }
 
-        return callback(null, tag);
+        return callback(null, 'https://raw.githubusercontent.com/Microsoft/vscode/' + tag + '/src/vs/vscode.d.ts');
     });
 }
 
