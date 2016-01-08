@@ -1,3 +1,5 @@
 .vscode
 tsconfig.json
 lib/*.ts
+vscode.d.ts
+typings/vscode.raw.d.ts

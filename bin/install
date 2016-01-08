@@ -1,0 +1,103 @@
+#!/usr/bin/env node
+
+var request = require('request');
+var semver = require('semver');
+var fs = require('fs');
+var path = require('path');
+
+process.on('uncaughtException', function (err) {
+    exitWithError(err);
+});
+
+var engine = process.env.npm_package_engines_vscode;
+if (!engine) {
+    exitWithError('Missing VSCode engine declaration in package.json.');
+}
+
+var vscodeDtsTypescriptPath = path.join(path.dirname(__dirname), 'vscode.d.ts');
+var vscodeDtsJavascriptPath = path.join(path.dirname(__dirname), 'typings', 'vscode.raw.d.ts');
+
+console.log('Detected VS Code engine version: ' + engine);
+
+getURLMatchingEngine(engine, function (error, url) {
+    console.log('Fetching vscode.d.ts from: ' + url);
+
+    getContents(url, function (error, contents) {
+        if (error) {
+            exitWithError(error);
+        }
+
+        fs.writeFileSync(vscodeDtsTypescriptPath, vscodeDtsToTypescript(contents));
+        fs.writeFileSync(vscodeDtsJavascriptPath, vscodeDtsToJavaScript(contents));
+
+        console.log('vscode.d.ts successfully installed!\n');
+    });
+});
+
+function vscodeDtsToTypescript(contents) {
+    var markerHit = false;
+    var lines = contents.split('\n').filter(function (line) {
+        if (!markerHit && line === '// when used for JS*') {
+            markerHit = true;
+        }
+
+        return !markerHit;
+    });
+
+    lines.push('export = vscode;'); // this is to enable TS module resolution support
+    
+    return lines.join('\n');
+}
+
+function vscodeDtsToJavaScript(contents) {
+    return contents; // contents are already compatible with JS
+}
+
+function getURLMatchingEngine(engine, callback) {
+    if (engine === '*') {
+        return callback(null, 'https://raw.githubusercontent.com/Microsoft/vscode/master/src/vs/vscode.d.ts'); // master
+    }
+
+    getContents('https://api.github.com/repos/Microsoft/vscode/tags', function (error, tagsRaw) {
+        if (error) {
+            exitWithError(error);
+        }
+
+        var tags = JSON.parse(tagsRaw).map(function (tag) { return tag.name; });
+        var tag = minSatisfying(tags, engine);
+
+        if (!tag) {
+            exitWithError('Could not find satifying tag for version ' + engine + ' in: [' + tags.join(', ') + ']');
+        }
+        
+        console.log('Found minimal version that qualifies engine range: ' + tag);
+
+        return callback(null, 'https://raw.githubusercontent.com/Microsoft/vscode/' + tag + '/src/vs/vscode.d.ts');
+    });
+}
+
+function minSatisfying(versions, range, loose) {
+    return versions.filter(function (version) {
+        return semver.satisfies(version, range, loose);
+    }).sort(function (a, b) {
+        return semver.compare(a, b, loose);
+    })[0] || null;
+}
+
+function exitWithError(error) {
+    console.error('Error installing vscode.d.ts: ' + error.toString());
+    process.exit(1);
+}
+
+function getContents(url, callback) {
+    var options = {
+        url: url,
+        headers: {
+            'user-agent': 'nodejs'
+        }
+    };
+
+    request.get(options, function (error, response, body) {
+        callback(error, body);
+    });
+}
