@@ -5,7 +5,7 @@ var semver = require('semver');
 var fs = require('fs');
 var path = require('path');
 
-process.on('uncaughtException', (err) => {
+process.on('uncaughtException', function (err) {
     exitWithError(err);
 });
 
@@ -27,14 +27,14 @@ getTagMatchingEngine(engine, function (error, tag) {
 
 function vscodeDtsToTypescript(contents) {
     var markerHit = false;
-    var lines = contents.split('\n').filter(function(line) {
-        if (!markerHit && line === '// [javascript start marker]') {
+    var lines = contents.split('\n').filter(function (line) {
+        if (!markerHit && line === '// when used for JS*') {
             markerHit = true;
         }
-        
+
         return !markerHit;
     });
-    
+
     lines.push('export = vscode;'); // this is to enable TS module resolution support
     
     return lines.join('\n');
