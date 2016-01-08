@@ -64,7 +64,7 @@ function getURLMatchingEngine(engine, callback) {
         }
 
         var tags = JSON.parse(tagsRaw).map(function (tag) { return tag.name; });
-        var tag = semver.minSatisfying(tags, engine);
+        var tag = minSatisfying(tags, engine);
 
         if (!tag) {
             exitWithError('Could not find satifying tag for version ' + engine + ' in: [' + tags.join(', ') + ']');
