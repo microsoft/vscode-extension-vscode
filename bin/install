@@ -5,8 +5,12 @@ var semver = require('semver');
 var fs = require('fs');
 var path = require('path');
 
+process.on('uncaughtException', (err) => {
+    exitWithError(err);
+});
+
 var next = 'next';
-var engine = next //'^0.10.1';
+var engine = process.env.npm_package_engines_vscode || '^0.10.1';
 var vscodeDtsTypescriptPath = path.join(path.dirname(__dirname), 'vscode.d.ts');
 var vscodeDtsJavascriptPath = path.join(path.dirname(__dirname), 'typings', 'vscode.raw.d.ts');
 
@@ -24,7 +28,7 @@ getTagMatchingEngine(engine, function (error, tag) {
 function vscodeDtsToTypescript(contents) {
     var markerHit = false;
     var lines = contents.split('\n').filter(function(line) {
-        if (line === '// [javascript start marker]') {
+        if (!markerHit && line === '// [javascript start marker]') {
             markerHit = true;
         }
         
