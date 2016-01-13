@@ -74,7 +74,7 @@ function getURLMatchingEngine(engine, callback) {
                 }
                 
                 var version = JSON.parse(packageJson).version;
-                if (version === engine) {
+                if (semver.satisfies(version, engine)) {
                     return callback(null, 'https://raw.githubusercontent.com/Microsoft/vscode/master/src/vs/vscode.d.ts'); // master
                 }
                 
