@@ -45,7 +45,7 @@ function vscodeDtsToTypescript(contents) {
     });
 
     lines.push('export = vscode;'); // this is to enable TS module resolution support
-    
+
     return lines.join('\n');
 }
 
@@ -72,12 +72,12 @@ function getURLMatchingEngine(engine, callback) {
                 if (error) {
                     exitWithError(error);
                 }
-                
+
                 var version = JSON.parse(packageJson).version;
                 if (semver.satisfies(version, engine)) {
                     return callback(null, 'https://raw.githubusercontent.com/Microsoft/vscode/master/src/vs/vscode.d.ts'); // master
                 }
-                
+
                 exitWithError('Could not find satifying VSCode for version ' + engine + ' in the tags: [' + tags.join(', ') + '] or on master: ' + version);
             });
         }
