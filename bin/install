@@ -90,7 +90,11 @@ function getURLMatchingEngine(engine, callback) {
 
 function minSatisfying(versions, range, loose) {
     return versions.filter(function (version) {
-        return semver.satisfies(version, range, loose);
+        try {
+            return semver.satisfies(version, range, loose);
+        } catch (error) {
+            return false; // version might be invalid so we return as not matching
+        };
     }).sort(function (a, b) {
         return semver.compare(a, b, loose);
     })[0] || null;
