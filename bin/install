@@ -63,7 +63,7 @@ function getURLMatchingEngine(engine, callback) {
             exitWithError(error);
         }
 
-        var tags = JSON.parse(tagsRaw).map(function (tag) { return tag.name; });
+        var tags = new Array(JSON.parse(tagsRaw)).map(function (tag) { return tag.name; });
         var tag = minSatisfying(tags, engine);
 
         // check if master is on the version specified
