@@ -30,7 +30,7 @@ var stream = remote(downloadUrl, { base: '' })
 stream.on('end', function () {
     var executable = process.platform === 'darwin' ? darwinExecutable : linuxExecutable;
     var args = [
-        testsFolder,
+        testsWorkspace,
         '--extensionDevelopmentPath=' + process.cwd(),
         '--extensionTestsPath=' + testsFolder
     ];
