@@ -111,11 +111,17 @@ function exitWithError(error) {
 }
 
 function getContents(url, callback) {
+    var headers = {
+       'user-agent': 'nodejs' 
+    }
+    
+    if (process.env.GITHUB_TOKEN) {
+        headers['Authorization'] = 'token ' + process.env.GITHUB_TOKEN;
+    }
+    
     var options = {
         url: url,
-        headers: {
-            'user-agent': 'nodejs'
-        }
+        headers: headers
     };
 
     request.get(options, function (error, response, body) {
