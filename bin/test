@@ -5,6 +5,7 @@ var vzip = require('gulp-vinyl-zip');
 var symdest = require('gulp-symdest');
 var path = require('path');
 var cp = require('child_process');
+var fs = require('fs');
 
 var darwinZipName = 'VSCode-darwin.zip';
 var linuxZipName = 'VSCode-linux64.zip';
@@ -21,13 +22,8 @@ var testsWorkspace = process.env.CODE_TESTS_WORKSPACE || testsFolder;
 
 console.log('### VS Code Extension Test Run ###');
 console.log('Current working directory: ' + process.cwd());
-console.log('Downloading VS Code into "' + path.join(process.cwd(), testRunFolder) + '" from: ' + downloadUrl);
 
-var stream = remote(downloadUrl, { base: '' })
-    .pipe(vzip.src())
-    .pipe(symdest(testRunFolder));
-
-stream.on('end', function () {
+function runTests () {
     var executable = process.platform === 'darwin' ? darwinExecutable : linuxExecutable;
     var args = [
         testsWorkspace,
@@ -58,4 +54,22 @@ stream.on('end', function () {
             process.exit(code); // propagate exit code to outer runner
         }
     });
+}
+
+function downloadExecutableAndRunTests () {
+    console.log('Downloading VS Code into "' + path.join(process.cwd(), testRunFolder) + '" from: ' + downloadUrl);
+
+    var stream = remote(downloadUrl, { base: '' })
+        .pipe(vzip.src())
+        .pipe(symdest(testRunFolder));
+
+    stream.on('end', runTests);
+}
+
+fs.exists(testRunFolder, function (exists) {
+    if (exists) {
+        runTests();
+    } else {
+        downloadExecutableAndRunTests();
+    }
 });
