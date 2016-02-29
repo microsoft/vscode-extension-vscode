@@ -17,7 +17,7 @@ var darwinExecutable = path.join(process.cwd(), testRunFolder, 'Visual Studio Co
 var linuxExecutable = path.join(process.cwd(), testRunFolder, 'VSCode-linux-x64', 'Code');
 
 var testsFolder = process.env.CODE_TESTS_PATH || path.join(process.cwd(), 'out', 'test');
-var testsWorkspace = process.env.CODE_TESTS_WORKSPACE || '';
+var testsWorkspace = process.env.CODE_TESTS_WORKSPACE || testsFolder;
 
 console.log('### VS Code Extension Test Run ###');
 console.log('Current working directory: ' + process.cwd());
@@ -30,7 +30,7 @@ var stream = remote(downloadUrl, { base: '' })
 stream.on('end', function () {
     var executable = process.platform === 'darwin' ? darwinExecutable : linuxExecutable;
     var args = [
-        testsFolder,
+        testsWorkspace,
         '--extensionDevelopmentPath=' + process.cwd(),
         '--extensionTestsPath=' + testsFolder
     ];
