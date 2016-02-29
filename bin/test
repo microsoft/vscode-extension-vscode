@@ -14,8 +14,9 @@ var version = process.env.CODE_VERSION || '0.10.5';
 var downloadUrl = process.env.CODE_DOWNLOAD_URL || [baseUrl, version, process.platform === 'darwin' ? darwinZipName : linuxZipName].join('/');
 
 var testRunFolder = '.vscode-test';
-var darwinExecutable = path.join(process.cwd(), testRunFolder, 'Visual Studio Code.app', 'Contents', 'MacOS', 'Electron');
-var linuxExecutable = path.join(process.cwd(), testRunFolder, 'VSCode-linux-x64', 'Code');
+var testRunFolderAbsolute = path.join(process.cwd(), testRunFolder);
+var darwinExecutable = path.join(testRunFolderAbsolute, 'Visual Studio Code.app', 'Contents', 'MacOS', 'Electron');
+var linuxExecutable = path.join(testRunFolderAbsolute, 'VSCode-linux-x64', 'Code');
 
 var testsFolder = process.env.CODE_TESTS_PATH || path.join(process.cwd(), 'out', 'test');
 var testsWorkspace = process.env.CODE_TESTS_WORKSPACE || testsFolder;
@@ -57,7 +58,7 @@ function runTests () {
 }
 
 function downloadExecutableAndRunTests () {
-    console.log('Downloading VS Code into "' + path.join(process.cwd(), testRunFolder) + '" from: ' + downloadUrl);
+    console.log('Downloading VS Code into "' + testRunFolderAbsolute + '" from: ' + downloadUrl);
 
     var stream = remote(downloadUrl, { base: '' })
         .pipe(vzip.src())
@@ -66,7 +67,7 @@ function downloadExecutableAndRunTests () {
     stream.on('end', runTests);
 }
 
-fs.exists(testRunFolder, function (exists) {
+fs.exists(testRunFolderAbsolute, function (exists) {
     if (exists) {
         runTests();
     } else {
