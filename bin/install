@@ -37,7 +37,7 @@ getURLMatchingEngine(engine, function (error, url) {
 function vscodeDtsToTypescript(contents) {
     var markerHit = false;
     var lines = contents.split('\n').filter(function (line) {
-        if (!markerHit && line === '// when used for JS*') {
+        if (!markerHit && (line === '// when used for JS*' || line === 'declare module \'vscode\' {')) {
             markerHit = true;
         }
 
