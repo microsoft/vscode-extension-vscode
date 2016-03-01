@@ -18,7 +18,15 @@ var testRunFolderAbsolute = path.join(process.cwd(), testRunFolder);
 var darwinExecutable = path.join(testRunFolderAbsolute, 'Visual Studio Code.app', 'Contents', 'MacOS', 'Electron');
 var linuxExecutable = path.join(testRunFolderAbsolute, 'VSCode-linux-x64', 'Code');
 
-var testsFolder = process.env.CODE_TESTS_PATH || path.join(process.cwd(), 'out', 'test');
+var testsFolder;
+if (process.env.CODE_TESTS_PATH) {
+    testsFolder = process.env.CODE_TESTS_PATH;
+} else if (fs.existsSync(path.join(process.cwd(), 'out', 'test'))) {
+    testsFolder = path.join(process.cwd(), 'out', 'test'); // TS extension
+} else {
+   testsFolder = path.join(process.cwd(), 'test'); // JS extension
+}
+
 var testsWorkspace = process.env.CODE_TESTS_WORKSPACE || testsFolder;
 
 console.log('### VS Code Extension Test Run ###');
