@@ -7,11 +7,30 @@ var path = require('path');
 var cp = require('child_process');
 var fs = require('fs');
 
-var darwinZipName = 'VSCode-darwin.zip';
-var linuxZipName = 'VSCode-linux64.zip';
-var baseUrl = 'https://az764295.vo.msecnd.net/public';
-var version = process.env.CODE_VERSION || '0.10.5';
-var downloadUrl = process.env.CODE_DOWNLOAD_URL || [baseUrl, version, process.platform === 'darwin' ? darwinZipName : linuxZipName].join('/');
+var downloadUrl = process.env.CODE_DOWNLOAD_URL;
+if (!downloadUrl) {
+    var filename = process.platform === 'darwin' ? 'VSCode-darwin.zip' : 'VSCode-linux64.zip';
+    var version = process.env.CODE_VERSION || '0.10.11';
+    var commit;
+
+    switch (version) {
+        case '0.10.11': commit = '5b5f4db87c10345b9d5c8d0bed745bcad4533135'; break;
+        case '0.10.10': commit = '5b5f4db87c10345b9d5c8d0bed745bcad4533135'; break;
+        case '0.10.9': commit = '45d69357c9eb068dd8e624f5b0fe461cd2078d88'; break;
+        case '0.10.8': commit = 'db71ac615ddf9f33b133ff2536f5d33a77d4774e'; break;
+        case '0.10.7': commit = 'a39f3c4b27abf74b073940ee3d646beda0413118'; break;
+    }
+
+    // Post 0.10.6
+    if (commit) {
+        downloadUrl = ['https://az764295.vo.msecnd.net/stable', commit, filename].join('/');
+    } 
+    
+    // Pre 0.10.7
+    else {
+        downloadUrl = ['https://az764295.vo.msecnd.net/public', version, filename].join('/');
+    }
+}
 
 var testRunFolder = '.vscode-test';
 var testRunFolderAbsolute = path.join(process.cwd(), testRunFolder);
@@ -24,7 +43,7 @@ if (process.env.CODE_TESTS_PATH) {
 } else if (fs.existsSync(path.join(process.cwd(), 'out', 'test'))) {
     testsFolder = path.join(process.cwd(), 'out', 'test'); // TS extension
 } else {
-   testsFolder = path.join(process.cwd(), 'test'); // JS extension
+    testsFolder = path.join(process.cwd(), 'test'); // JS extension
 }
 
 var testsWorkspace = process.env.CODE_TESTS_WORKSPACE || testsFolder;
@@ -32,7 +51,7 @@ var testsWorkspace = process.env.CODE_TESTS_WORKSPACE || testsFolder;
 console.log('### VS Code Extension Test Run ###');
 console.log('Current working directory: ' + process.cwd());
 
-function runTests () {
+function runTests() {
     var executable = process.platform === 'darwin' ? darwinExecutable : linuxExecutable;
     var args = [
         testsWorkspace,
@@ -44,19 +63,19 @@ function runTests () {
 
     var cmd = cp.spawn(executable, args);
 
-    cmd.stdout.on('data', function (data) {
+    cmd.stdout.on('data', function(data) {
         console.log(data.toString());
     });
 
-    cmd.stderr.on('data', function (data) {
+    cmd.stderr.on('data', function(data) {
         console.error(data.toString());
     });
 
-    cmd.on('error', function (data) {
+    cmd.on('error', function(data) {
         console.log('Failed to execute tests: ' + data.toString());
     });
 
-    cmd.on('close', function (code) {
+    cmd.on('close', function(code) {
         console.log('Tests exited with code: ' + code);
 
         if (code !== 0) {
@@ -65,7 +84,7 @@ function runTests () {
     });
 }
 
-function downloadExecutableAndRunTests () {
+function downloadExecutableAndRunTests() {
     console.log('Downloading VS Code into "' + testRunFolderAbsolute + '" from: ' + downloadUrl);
 
     var stream = remote(downloadUrl, { base: '' })
@@ -75,7 +94,7 @@ function downloadExecutableAndRunTests () {
     stream.on('end', runTests);
 }
 
-fs.exists(testRunFolderAbsolute, function (exists) {
+fs.exists(testRunFolderAbsolute, function(exists) {
     if (exists) {
         runTests();
     } else {
