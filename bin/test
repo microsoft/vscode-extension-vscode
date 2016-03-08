@@ -7,12 +7,18 @@ var path = require('path');
 var cp = require('child_process');
 var fs = require('fs');
 
+var testRunFolder = '.vscode-test';
+var testRunFolderAbsolute = path.join(process.cwd(), testRunFolder);
+var darwinExecutable = path.join(testRunFolderAbsolute, 'Visual Studio Code.app', 'Contents', 'MacOS', 'Electron');
+var linuxExecutable = path.join(testRunFolderAbsolute, 'VSCode-linux-x64', 'code');
+
 var downloadUrl = process.env.CODE_DOWNLOAD_URL;
 if (!downloadUrl) {
     var version = process.env.CODE_VERSION || '0.10.10';
     var filename;
     if (['0.10.1', '0.10.2', '0.10.3', '0.10.4', '0.10.5', '0.10.6', '0.10.7', '0.10.8', '0.10.9'].indexOf(version) >= 0) {
         filename = (process.platform === 'darwin') ? 'VSCode-darwin.zip' : 'VSCode-linux64.zip';
+        linuxExecutable = path.join(testRunFolderAbsolute, 'VSCode-linux-x64', 'Code');
     } else {
         filename = (process.platform === 'darwin') ? 'VSCode-darwin-stable.zip' : 'VSCode-linux-x64-stable.zip';
     }
@@ -37,10 +43,6 @@ if (!downloadUrl) {
     }
 }
 
-var testRunFolder = '.vscode-test';
-var testRunFolderAbsolute = path.join(process.cwd(), testRunFolder);
-var darwinExecutable = path.join(testRunFolderAbsolute, 'Visual Studio Code.app', 'Contents', 'MacOS', 'Electron');
-var linuxExecutable = path.join(testRunFolderAbsolute, 'VSCode-linux-x64', 'Code');
 
 var testsFolder;
 if (process.env.CODE_TESTS_PATH) {
