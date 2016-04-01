@@ -6,43 +6,20 @@ var symdest = require('gulp-symdest');
 var path = require('path');
 var cp = require('child_process');
 var fs = require('fs');
+var shared = require('../lib/shared');
 
 var testRunFolder = '.vscode-test';
 var testRunFolderAbsolute = path.join(process.cwd(), testRunFolder);
+
+var version = process.env.CODE_VERSION || '*';
+
+var platform = (process.platform === 'darwin') ? 'darwin' : 'linux-x64';
+
 var darwinExecutable = path.join(testRunFolderAbsolute, 'Visual Studio Code.app', 'Contents', 'MacOS', 'Electron');
 var linuxExecutable = path.join(testRunFolderAbsolute, 'VSCode-linux-x64', 'code');
-
-var downloadUrl = process.env.CODE_DOWNLOAD_URL;
-if (!downloadUrl) {
-    var version = process.env.CODE_VERSION || '0.10.10';
-    var filename;
-    if (['0.10.1', '0.10.2', '0.10.3', '0.10.4', '0.10.5', '0.10.6', '0.10.7', '0.10.8', '0.10.9'].indexOf(version) >= 0) {
-        filename = (process.platform === 'darwin') ? 'VSCode-darwin.zip' : 'VSCode-linux64.zip';
-        linuxExecutable = path.join(testRunFolderAbsolute, 'VSCode-linux-x64', 'Code');
-    } else {
-        filename = (process.platform === 'darwin') ? 'VSCode-darwin-stable.zip' : 'VSCode-linux-x64-stable.zip';
-    }
-
-    var commit;
-
-    switch (version) {
-        case '0.10.10': commit = '5b5f4db87c10345b9d5c8d0bed745bcad4533135'; break;
-        case '0.10.9': commit = '45d69357c9eb068dd8e624f5b0fe461cd2078d88'; break;
-        case '0.10.8': commit = 'db71ac615ddf9f33b133ff2536f5d33a77d4774e'; break;
-        case '0.10.7': commit = 'a39f3c4b27abf74b073940ee3d646beda0413118'; break;
-    }
-
-    // Post 0.10.6
-    if (commit) {
-        downloadUrl = ['https://az764295.vo.msecnd.net/stable', commit, filename].join('/');
-    }
-
-    // Pre 0.10.7
-    else {
-        downloadUrl = ['https://az764295.vo.msecnd.net/public', version, filename].join('/');
-    }
+if (['0.10.1', '0.10.2', '0.10.3', '0.10.4', '0.10.5', '0.10.6', '0.10.7', '0.10.8', '0.10.9'].indexOf(version) >= 0) {
+    linuxExecutable = path.join(testRunFolderAbsolute, 'VSCode-linux-x64', 'Code');
 }
-
 
 var testsFolder;
 if (process.env.CODE_TESTS_PATH) {
@@ -59,7 +36,7 @@ console.log('### VS Code Extension Test Run ###');
 console.log('Current working directory: ' + process.cwd());
 
 function runTests() {
-    var executable = process.platform === 'darwin' ? darwinExecutable : linuxExecutable;
+    var executable = (process.platform === 'darwin') ? darwinExecutable : linuxExecutable;
     var args = [
         testsWorkspace,
         '--extensionDevelopmentPath=' + process.cwd(),
@@ -70,19 +47,19 @@ function runTests() {
 
     var cmd = cp.spawn(executable, args);
 
-    cmd.stdout.on('data', function(data) {
+    cmd.stdout.on('data', function (data) {
         console.log(data.toString());
     });
 
-    cmd.stderr.on('data', function(data) {
+    cmd.stderr.on('data', function (data) {
         console.error(data.toString());
     });
 
-    cmd.on('error', function(data) {
+    cmd.on('error', function (data) {
         console.log('Failed to execute tests: ' + data.toString());
     });
 
-    cmd.on('close', function(code) {
+    cmd.on('close', function (code) {
         console.log('Tests exited with code: ' + code);
 
         if (code !== 0) {
@@ -92,19 +69,54 @@ function runTests() {
 }
 
 function downloadExecutableAndRunTests() {
-    console.log('Downloading VS Code into "' + testRunFolderAbsolute + '" from: ' + downloadUrl);
+    getDownloadUrl(function (downloadUrl) {
+        console.log('Downloading VS Code into "' + testRunFolderAbsolute + '" from: ' + downloadUrl);
 
-    var stream = remote(downloadUrl, { base: '' })
-        .pipe(vzip.src())
-        .pipe(symdest(testRunFolder));
+        var stream = remote(downloadUrl, { base: '' })
+            .pipe(vzip.src())
+            .pipe(symdest(testRunFolder));
 
-    stream.on('end', runTests);
+        stream.on('end', runTests);
+    });
 }
 
-fs.exists(testRunFolderAbsolute, function(exists) {
+function getDownloadUrl(clb) {
+    if (process.env.CODE_DOWNLOAD_URL) {
+        return clb(process.env.CODE_DOWNLOAD_URL);
+    }
+
+    getTag(function (tag) {
+        return clb(['https://vscode-update.azurewebsites.net', tag, platform, 'stable'].join('/'));
+    });
+}
+
+function getTag(clb) {
+    if (version !== '*') {
+        return clb(version);
+    }
+
+    shared.getContents('https://vscode-update.azurewebsites.net/api/releases/stable/' + platform, function (error, tagsRaw) {
+        if (error) {
+            exitWithError(error);
+        }
+
+        try {
+            clb(JSON.parse(tagsRaw)[0]); // first one is latest
+        } catch (error) {
+            exitWithError(error);
+        }
+    });
+}
+
+fs.exists(testRunFolderAbsolute, function (exists) {
     if (exists) {
         runTests();
     } else {
         downloadExecutableAndRunTests();
     }
 });
+
+function exitWithError(error) {
+    console.error('Error running tests: ' + error.toString());
+    process.exit(1);
+}

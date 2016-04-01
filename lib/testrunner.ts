@@ -8,7 +8,6 @@
 
 'use strict';
 
-import * as fs from 'fs';
 import * as paths from 'path';
 import * as glob from 'glob';
 
@@ -20,7 +19,6 @@ if (!tty.getWindowSize) {
 }
 
 import Mocha = require('mocha');
-
 
 let mocha = new Mocha({
     ui: 'tdd',
