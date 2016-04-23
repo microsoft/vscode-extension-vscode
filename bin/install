@@ -15,7 +15,6 @@ if (!engine) {
 }
 
 var vscodeDtsTypescriptPath = path.join(path.dirname(__dirname), 'vscode.d.ts');
-var vscodeDtsJavascriptPath = path.join(path.dirname(__dirname), 'typings', 'vscode.raw.d.ts');
 
 console.log('Detected VS Code engine version: ' + engine);
 
@@ -28,7 +27,6 @@ getURLMatchingEngine(engine, function (error, url) {
         }
 
         fs.writeFileSync(vscodeDtsTypescriptPath, vscodeDtsToTypescript(contents));
-        fs.writeFileSync(vscodeDtsJavascriptPath, vscodeDtsToJavaScript(contents));
 
         console.log('vscode.d.ts successfully installed!\n');
     });
@@ -47,10 +45,6 @@ function vscodeDtsToTypescript(contents) {
     lines.push('export = vscode;'); // this is to enable TS module resolution support
 
     return lines.join('\n');
-}
-
-function vscodeDtsToJavaScript(contents) {
-    return contents; // contents are already compatible with JS
 }
 
 function getURLMatchingEngine(engine, callback) {
