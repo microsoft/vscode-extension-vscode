@@ -26,6 +26,10 @@ getURLMatchingEngine(engine, function (error, url) {
             exitWithError(error);
         }
 
+        if (contents === 'Not Found') {
+            exitWithError(new Error('Could not find vscode.d.ts at the provided URL. Please report this to https://github.com/Microsoft/vscode/issues'));
+        }
+
         fs.writeFileSync(vscodeDtsTypescriptPath, vscodeDtsToTypescript(contents));
 
         console.log('vscode.d.ts successfully installed!\n');
