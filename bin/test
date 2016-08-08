@@ -95,7 +95,7 @@ function getTag(clb) {
         return clb(version);
     }
 
-    shared.getContents('https://vscode-update.azurewebsites.net/api/releases/stable/' + platform, function (error, tagsRaw) {
+    shared.getContents('https://vscode-update.azurewebsites.net/api/releases/stable/' + platform, null, function (error, tagsRaw) {
         if (error) {
             exitWithError(error);
         }

@@ -21,7 +21,7 @@ console.log('Detected VS Code engine version: ' + engine);
 getURLMatchingEngine(engine, function (error, url) {
     console.log('Fetching vscode.d.ts from: ' + url);
 
-    shared.getContents(url, function (error, contents) {
+    shared.getContents(url, process.env.GITHUB_TOKEN, function (error, contents) {
         if (error) {
             exitWithError(error);
         }
@@ -56,7 +56,7 @@ function getURLMatchingEngine(engine, callback) {
         return callback(null, 'https://raw.githubusercontent.com/Microsoft/vscode/master/src/vs/vscode.d.ts'); // master
     }
 
-    shared.getContents('https://vscode-update.azurewebsites.net/api/releases/stable', function (error, tagsRaw) {
+    shared.getContents('https://vscode-update.azurewebsites.net/api/releases/stable', null, function (error, tagsRaw) {
         if (error) {
             exitWithError(error);
         }
@@ -72,7 +72,7 @@ function getURLMatchingEngine(engine, callback) {
 
         // check if master is on the version specified
         if (!tag) {
-            return shared.getContents('https://raw.githubusercontent.com/Microsoft/vscode/master/package.json', function (error, packageJson) {
+            return shared.getContents('https://raw.githubusercontent.com/Microsoft/vscode/master/package.json', process.env.GITHUB_TOKEN, function (error, packageJson) {
                 if (error) {
                     exitWithError(error);
                 }
