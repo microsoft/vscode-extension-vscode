@@ -8,13 +8,13 @@
 
 var request = require('request');
 
-export function getContents(url, callback) {
+export function getContents(url, token, callback) {
     var headers = {
        'user-agent': 'nodejs'
     };
 
-    if (process.env.GITHUB_TOKEN) {
-        headers['Authorization'] = 'token ' + process.env.GITHUB_TOKEN;
+    if (token) {
+        headers['Authorization'] = 'token ' + token;
     }
 
     var options = {
