@@ -13,8 +13,9 @@ var testRunFolderAbsolute = path.join(process.cwd(), testRunFolder);
 
 var version = process.env.CODE_VERSION || '*';
 
-var platform = (process.platform === 'darwin') ? 'darwin' : 'linux-x64';
+var downloadPlatform = (process.platform === 'darwin') ? 'darwin' : process.platform === 'win32' ? 'win32-archive' : 'linux-x64';
 
+var windowsExecutable = path.join(testRunFolderAbsolute, 'Code');
 var darwinExecutable = path.join(testRunFolderAbsolute, 'Visual Studio Code.app', 'Contents', 'MacOS', 'Electron');
 var linuxExecutable = path.join(testRunFolderAbsolute, 'VSCode-linux-x64', 'code');
 if (['0.10.1', '0.10.2', '0.10.3', '0.10.4', '0.10.5', '0.10.6', '0.10.7', '0.10.8', '0.10.9'].indexOf(version) >= 0) {
@@ -36,7 +37,7 @@ console.log('### VS Code Extension Test Run ###');
 console.log('Current working directory: ' + process.cwd());
 
 function runTests() {
-    var executable = (process.platform === 'darwin') ? darwinExecutable : linuxExecutable;
+    var executable = (process.platform === 'darwin') ? darwinExecutable  : process.platform === 'win32' ? windowsExecutable : linuxExecutable;
     var args = [
         testsWorkspace,
         '--extensionDevelopmentPath=' + process.cwd(),
@@ -86,7 +87,7 @@ function getDownloadUrl(clb) {
     }
 
     getTag(function (tag) {
-        return clb(['https://vscode-update.azurewebsites.net', tag, platform, 'stable'].join('/'));
+        return clb(['https://vscode-update.azurewebsites.net', tag, downloadPlatform, 'stable'].join('/'));
     });
 }
 
@@ -95,7 +96,7 @@ function getTag(clb) {
         return clb(version);
     }
 
-    shared.getContents('https://vscode-update.azurewebsites.net/api/releases/stable/' + platform, null, function (error, tagsRaw) {
+    shared.getContents('https://vscode-update.azurewebsites.net/api/releases/stable/' + downloadPlatform, null, function (error, tagsRaw) {
         if (error) {
             exitWithError(error);
         }
