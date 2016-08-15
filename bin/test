@@ -77,7 +77,7 @@ function downloadExecutableAndRunTests() {
         console.log('Downloading VS Code into "' + testRunFolderAbsolute + '" from: ' + downloadUrl);
 
         var version = downloadUrl.match(/\d\.\d\.\d/)[0].split('\.');
-        var isTarGz = downloadUrl.match(/linux/) && version[0] >= 1 && version[1] >= 4;
+        var isTarGz = downloadUrl.match(/linux/) && version[0] >= 1 && version[1] >= 5;
 
         var stream;
         if (isTarGz) {
