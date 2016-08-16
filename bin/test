@@ -3,10 +3,14 @@
 var remote = require('gulp-remote-src');
 var vzip = require('gulp-vinyl-zip');
 var symdest = require('gulp-symdest');
+var untar = require('gulp-untar');
+var gunzip = require('gulp-gunzip');
 var path = require('path');
 var cp = require('child_process');
 var fs = require('fs');
 var shared = require('../lib/shared');
+var request = require('request');
+var source = require('vinyl-source-stream');
 
 var testRunFolder = '.vscode-test';
 var testRunFolderAbsolute = path.join(process.cwd(), testRunFolder);
@@ -73,9 +77,21 @@ function downloadExecutableAndRunTests() {
     getDownloadUrl(function (downloadUrl) {
         console.log('Downloading VS Code into "' + testRunFolderAbsolute + '" from: ' + downloadUrl);
 
-        var stream = remote(downloadUrl, { base: '' })
-            .pipe(vzip.src())
-            .pipe(symdest(testRunFolder));
+        var version = downloadUrl.match(/\d\.\d\.\d/)[0].split('\.');
+        var isTarGz = downloadUrl.match(/linux/) && version[0] >= 1 && version[1] >= 5;
+
+        var stream;
+        if (isTarGz) {
+            stream = request(downloadUrl)
+                .pipe(source(path.basename(downloadUrl)))
+                .pipe(gunzip())
+                .pipe(untar())
+                .pipe(symdest(testRunFolder));
+        } else {
+            stream = remote(downloadUrl, { base: '' })
+                .pipe(vzip.src())
+                .pipe(symdest(testRunFolder));
+        }
 
         stream.on('end', runTests);
     });
