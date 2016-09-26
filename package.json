@@ -1,6 +1,6 @@
 {
   "name": "vscode",
-  "version": "1.0.0-beta.2",
+  "version": "1.0.0",
   "typings": "vscode.d.ts",
   "scripts": {
     "prepublish": "tsc",
