@@ -2,8 +2,6 @@
  * Copyright (C) Microsoft Corporation. All rights reserved.
  *--------------------------------------------------------*/
 
-/// <reference path="../typings/node.d.ts" />
-
 'use strict';
 
 var request = require('request');

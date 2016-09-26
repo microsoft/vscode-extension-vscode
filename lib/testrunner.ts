@@ -2,10 +2,6 @@
  * Copyright (C) Microsoft Corporation. All rights reserved.
  *--------------------------------------------------------*/
 
-/// <reference path="../typings/node.d.ts" />
-/// <reference path="../typings/mocha.d.ts" />
-/// <reference path="../typings/glob.d.ts" />
-
 'use strict';
 
 import * as paths from 'path';
@@ -20,7 +16,7 @@ if (!tty.getWindowSize) {
 
 import Mocha = require('mocha');
 
-let mocha = new Mocha({
+let mocha = new Mocha(<any>{
     ui: 'tdd',
     useColors: true
 });
@@ -46,14 +42,9 @@ export function run(testsRoot: string, clb: (error, failures?: number) => void):
             files.forEach(f => mocha.addFile(paths.join(testsRoot, f)));
 
             // Run the tests
-            let failures = 0;
-            mocha.run()
-                .on('fail', function(test, err) {
-                    failures++;
-                })
-                .on('end', function() {
-                    clb(null, failures);
-                });
+            mocha.run((failures) => {
+                clb(null, failures);
+            });
         } catch (error) {
             return clb(error);
         }
