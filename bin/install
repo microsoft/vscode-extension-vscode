@@ -46,6 +46,7 @@ function vscodeDtsToTypescript(contents) {
         return !markerHit;
     });
 
+    lines.unshift('/// <reference path="./thenable.d.ts" />')
     lines.push('export = vscode;'); // this is to enable TS module resolution support
 
     return lines.join('\n');
