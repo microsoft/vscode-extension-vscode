@@ -1,7 +1,7 @@
 # vscode-extension-vscode
 The vscode.d.ts node module
 
-# Histroy
+# History
 
 * 1.0.0: Extension developement is based on TypeScript 2.0.3
 
