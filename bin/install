@@ -18,10 +18,10 @@ var vscodeDtsTypescriptPath = path.join(path.dirname(__dirname), 'vscode.d.ts');
 
 console.log('Detected VS Code engine version: ' + engine);
 
-getURLMatchingEngine(engine, function (error, url) {
-    console.log('Fetching vscode.d.ts from: ' + url);
+getURLMatchingEngine(engine, function (error, data) {
+    console.log('Fetching vscode.d.ts from: ' + data.url);
 
-    shared.getContents(url, process.env.GITHUB_TOKEN, function (error, contents) {
+    shared.getContents(data.url, process.env.GITHUB_TOKEN, function (error, contents) {
         if (error) {
             exitWithError(error);
         }
@@ -30,7 +30,12 @@ getURLMatchingEngine(engine, function (error, url) {
             exitWithError(new Error('Could not find vscode.d.ts at the provided URL. Please report this to https://github.com/Microsoft/vscode/issues'));
         }
 
-        fs.writeFileSync(vscodeDtsTypescriptPath, vscodeDtsToTypescript(contents));
+        if (data.version !== '*' && semver.lt(data.version, '1.7.0')) {
+            // Older versions of vscode.d.ts need a massage to play nice.
+            contents = vscodeDtsToTypescript(contents);
+        }
+
+        fs.writeFileSync(vscodeDtsTypescriptPath, contents);
 
         console.log('vscode.d.ts successfully installed!\n');
     });
@@ -54,7 +59,11 @@ function vscodeDtsToTypescript(contents) {
 
 function getURLMatchingEngine(engine, callback) {
     if (engine === '*') {
-        return callback(null, 'https://raw.githubusercontent.com/Microsoft/vscode/master/src/vs/vscode.d.ts'); // master
+        // master
+        return callback(null, {
+            url: 'https://raw.githubusercontent.com/Microsoft/vscode/master/src/vs/vscode.d.ts',
+            version: '*'
+        });
     }
 
     shared.getContents('https://vscode-update.azurewebsites.net/api/releases/stable', null, function (error, tagsRaw) {
@@ -80,7 +89,11 @@ function getURLMatchingEngine(engine, callback) {
 
                 var version = JSON.parse(packageJson).version;
                 if (semver.satisfies(version, engine)) {
-                    return callback(null, 'https://raw.githubusercontent.com/Microsoft/vscode/master/src/vs/vscode.d.ts'); // master
+                    // master
+                    return callback(null, {
+                        url: 'https://raw.githubusercontent.com/Microsoft/vscode/master/src/vs/vscode.d.ts',
+                        version: version
+                    });
                 }
 
                 exitWithError('Could not find satifying VSCode for version ' + engine + ' in the tags: [' + tags.join(', ') + '] or on master: ' + version);
@@ -89,7 +102,10 @@ function getURLMatchingEngine(engine, callback) {
 
         console.log('Found minimal version that qualifies engine range: ' + tag);
 
-        return callback(null, 'https://raw.githubusercontent.com/Microsoft/vscode/' + tag + '/src/vs/vscode.d.ts');
+        return callback(null, {
+            url: 'https://raw.githubusercontent.com/Microsoft/vscode/' + tag + '/src/vs/vscode.d.ts',
+            version: tag
+        });
     });
 }
 
