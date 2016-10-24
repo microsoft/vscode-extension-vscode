@@ -14,7 +14,7 @@
     "gulp-gunzip": "0.0.3",
     "gulp-remote-src": "^0.4.0",
     "gulp-symdest": "^1.0.0",
-    "gulp-untar": "0.0.4",
+    "gulp-untar": "0.0.5",
     "gulp-vinyl-zip": "^1.1.2",
     "mocha": "^2.3.3",
     "request": "^2.67.0",
