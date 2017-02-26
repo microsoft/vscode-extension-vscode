@@ -94,7 +94,7 @@ function downloadExecutableAndRunTests() {
 				.pipe(gulpFilter.restore)
                 .pipe(symdest(testRunFolder));
         } else {
-            stream = remote(downloadUrl, { base: '' })
+            stream = remote('', { base: downloadUrl })
                 .pipe(vzip.src())
                 .pipe(symdest(testRunFolder));
         }
