@@ -18,7 +18,7 @@ var vscodeDtsTypescriptPath = path.join(path.dirname(__dirname), 'vscode.d.ts');
 
 console.log('Detected VS Code engine version: ' + engine);
 
-getURLMatchingEngine(engine, function (error, data) {
+getURLMatchingEngine(engine, function (_, data) {
     console.log('Fetching vscode.d.ts from: ' + data.url);
 
     shared.getContents(data.url, process.env.GITHUB_TOKEN, function (error, contents) {
@@ -51,7 +51,7 @@ function vscodeDtsToTypescript(contents) {
         return !markerHit;
     });
 
-    lines.unshift('/// <reference path="./thenable.d.ts" />')
+    lines.unshift('/// <reference path="./thenable.d.ts" />');
     lines.push('export = vscode;'); // this is to enable TS module resolution support
 
     return lines.join('\n');
@@ -115,7 +115,7 @@ function minSatisfying(versions, range) {
             return semver.satisfies(version, range);
         } catch (error) {
             return false; // version might be invalid so we return as not matching
-        };
+        }
     }).sort(function (a, b) {
         return semver.compare(a, b);
     })[0] || null;
