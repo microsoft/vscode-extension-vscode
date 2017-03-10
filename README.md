@@ -1,5 +1,5 @@
 # vscode-extension-vscode
-The vscode.d.ts node module
+The vscode NPM module provides VS Code extension authors tools to write extensions. It provides the vscode.d.ts node module (all accessible API for extensions) as well as commands for compiling and testing extensions.
 
 # History
 
