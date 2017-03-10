@@ -1,6 +1,6 @@
 {
   "name": "vscode",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "typings": "vscode.d.ts",
   "scripts": {
     "prepublish": "tsc -p ./",
