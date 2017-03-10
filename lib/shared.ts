@@ -8,17 +8,21 @@ var request = require('request');
 
 export function getContents(url, token, callback) {
     var headers = {
-       'user-agent': 'nodejs'
+        'user-agent': 'nodejs'
     };
 
     if (token) {
         headers['Authorization'] = 'token ' + token;
     }
 
-    var options = {
+    var options: any = {
         url: url,
         headers: headers
     };
+
+    if (process.env.npm_config_strict_ssl === 'false') {
+        options.strictSSL = false;
+    }
 
     request.get(options, function (error, response, body) {
         if (!error && response && response.statusCode >= 400) {

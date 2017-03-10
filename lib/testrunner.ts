@@ -11,7 +11,7 @@ import * as glob from 'glob';
 // Since we are not running in a tty environment, we just implementt he method statically
 var tty = require('tty');
 if (!tty.getWindowSize) {
-    tty.getWindowSize = function() { return [80, 75]; };
+    tty.getWindowSize = function () { return [80, 75]; };
 }
 
 import Mocha = require('mocha');
