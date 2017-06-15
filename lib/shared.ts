@@ -24,6 +24,10 @@ export function getContents(url, token, callback) {
         options.strictSSL = false;
     }
 
+    if (process.env.npm_config_proxy) {
+        options.proxy = process.env.npm_config_proxy;
+    }
+
     request.get(options, function (error, response, body) {
         if (!error && response && response.statusCode >= 400) {
             error = new Error('Request returned status code: ' + response.statusCode + '\nDetails: ' + response.body);
