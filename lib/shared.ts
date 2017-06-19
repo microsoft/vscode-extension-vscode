@@ -5,6 +5,7 @@
 'use strict';
 
 var request = require('request');
+var URL = require('url-parse');
 
 export function getContents(url, token, callback) {
     var headers = {
@@ -15,6 +16,8 @@ export function getContents(url, token, callback) {
         headers['Authorization'] = 'token ' + token;
     }
 
+    let parsedUrl = new URL(url);
+
     var options: any = {
         url: url,
         headers: headers
@@ -24,8 +27,12 @@ export function getContents(url, token, callback) {
         options.strictSSL = false;
     }
 
-    if (process.env.npm_config_proxy) {
+    if (process.env.npm_config_proxy && parsedUrl.protocol === 'http:') {
         options.proxy = process.env.npm_config_proxy;
+    }
+
+    if (process.env.npm_config_https_proxy && parsedUrl.protocol === 'https:') {
+        options.proxy = process.env.npm_config_https_proxy;
     }
 
     request.get(options, function (error, response, body) {
