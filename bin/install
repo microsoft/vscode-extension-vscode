@@ -21,7 +21,7 @@ console.log('Detected VS Code engine version: ' + engine);
 getURLMatchingEngine(engine, function (_, data) {
     console.log('Fetching vscode.d.ts from: ' + data.url);
 
-    shared.getContents(data.url, process.env.GITHUB_TOKEN, function (error, contents) {
+    shared.getContents(data.url, process.env.GITHUB_TOKEN, null, function (error, contents) {
         if (error) {
             exitWithError(error);
         }
@@ -66,23 +66,31 @@ function getURLMatchingEngine(engine, callback) {
         });
     }
 
-    shared.getContents('https://vscode-update.azurewebsites.net/api/releases/stable', null, function (error, tagsRaw) {
+    shared.getContents('https://vscode-update.azurewebsites.net/api/releases/stable', null, { "X-API-Version": "2" }, function (error, tagsRaw) {
         if (error) {
             exitWithError(error);
         }
 
-        var tags;
+        var tagsAndCommits;
         try {
-            tags = JSON.parse(tagsRaw);
+            tagsAndCommits = JSON.parse(tagsRaw);
         } catch (error) {
             exitWithError(error);
         }
+
+        var mapTagsToCommits = Object.create(null);
+        for (var i = 0; i < tagsAndCommits.length; i++) {
+            var tagAndCommit = tagsAndCommits[i];
+            mapTagsToCommits[tagAndCommit.version] = tagAndCommit.id;
+        }
+
+        var tags = Object.keys(mapTagsToCommits);
 
         var tag = minSatisfying(tags, engine);
 
         // check if master is on the version specified
         if (!tag) {
-            return shared.getContents('https://raw.githubusercontent.com/Microsoft/vscode/master/package.json', process.env.GITHUB_TOKEN, function (error, packageJson) {
+            return shared.getContents('https://raw.githubusercontent.com/Microsoft/vscode/master/package.json', process.env.GITHUB_TOKEN, null, function (error, packageJson) {
                 if (error) {
                     exitWithError(error);
                 }
@@ -103,7 +111,7 @@ function getURLMatchingEngine(engine, callback) {
         console.log('Found minimal version that qualifies engine range: ' + tag);
 
         return callback(null, {
-            url: 'https://raw.githubusercontent.com/Microsoft/vscode/' + tag + '/src/vs/vscode.d.ts',
+            url: 'https://raw.githubusercontent.com/Microsoft/vscode/' + mapTagsToCommits[tag] + '/src/vs/vscode.d.ts',
             version: tag
         });
     });

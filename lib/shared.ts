@@ -7,8 +7,8 @@
 var request = require('request');
 var URL = require('url-parse');
 
-export function getContents(url, token, callback) {
-    var headers = {
+export function getContents(url, token, headers, callback) {
+    headers = headers || {
         'user-agent': 'nodejs'
     };
 
