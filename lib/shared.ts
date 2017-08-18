@@ -23,7 +23,9 @@ export function getContents(url, token, headers, callback) {
         headers: headers
     };
 
-    if (process.env.npm_config_strict_ssl === 'false') {
+    // We need to test the absence of true here because there is an npm bug that will not set boolean
+    // env variables if they are set to false.
+    if (process.env.npm_config_strict_ssl !== 'true') {
         options.strictSSL = false;
     }
 
