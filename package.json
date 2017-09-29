@@ -7,6 +7,9 @@
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./"
   },
+  "bin": {
+    "vscode-install": "./bin/install"
+  },
   "dependencies": {
     "glob": "^7.1.1",
     "gulp-chmod": "^2.0.0",
