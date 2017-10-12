@@ -1,5 +1,5 @@
 .vscode
-tsconfig.json
+.npmignore
 lib/*.ts
-vscode.d.ts
-typings/vscode.raw.d.ts
+tsconfig.json
+tslint.json
