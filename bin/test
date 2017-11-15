@@ -91,7 +91,7 @@ function downloadExecutableAndRunTests() {
                 .pipe(gunzip())
                 .pipe(untar())
 				.pipe(gulpFilter)
-				.pipe(chmod(755))
+				.pipe(chmod(0o755))
 				.pipe(gulpFilter.restore)
                 .pipe(symdest(testRunFolder));
         } else {
