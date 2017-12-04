@@ -18,14 +18,25 @@ var testRunFolder = '.vscode-test';
 var testRunFolderAbsolute = path.join(process.cwd(), testRunFolder);
 
 var version = process.env.CODE_VERSION || '*';
+var isInsiders = version === 'insiders';
 
 var downloadPlatform = (process.platform === 'darwin') ? 'darwin' : process.platform === 'win32' ? 'win32-archive' : 'linux-x64';
 
-var windowsExecutable = path.join(testRunFolderAbsolute, 'Code');
-var darwinExecutable = path.join(testRunFolderAbsolute, 'Visual Studio Code.app', 'Contents', 'MacOS', 'Electron');
-var linuxExecutable = path.join(testRunFolderAbsolute, 'VSCode-linux-x64', 'code');
-if (['0.10.1', '0.10.2', '0.10.3', '0.10.4', '0.10.5', '0.10.6', '0.10.7', '0.10.8', '0.10.9'].indexOf(version) >= 0) {
-    linuxExecutable = path.join(testRunFolderAbsolute, 'VSCode-linux-x64', 'Code');
+var windowsExecutable;
+var darwinExecutable;
+var linuxExecutable;
+
+if(isInsiders) {
+    windowsExecutable = path.join(testRunFolderAbsolute, 'Code - Insiders');
+    darwinExecutable = path.join(testRunFolderAbsolute, 'Visual Studio Code - Insiders.app', 'Contents', 'MacOS', 'Electron');
+    linuxExecutable = path.join(testRunFolderAbsolute, 'VSCode-linux-x64', 'code-insiders');
+} else {
+    windowsExecutable = path.join(testRunFolderAbsolute, 'Code');
+    darwinExecutable = path.join(testRunFolderAbsolute, 'Visual Studio Code.app', 'Contents', 'MacOS', 'Electron');
+    linuxExecutable = path.join(testRunFolderAbsolute, 'VSCode-linux-x64', 'code');
+    if (['0.10.1', '0.10.2', '0.10.3', '0.10.4', '0.10.5', '0.10.6', '0.10.7', '0.10.8', '0.10.9'].indexOf(version) >= 0) {
+        linuxExecutable = path.join(testRunFolderAbsolute, 'VSCode-linux-x64', 'Code');
+    }
 }
 
 var testsFolder;
@@ -85,7 +96,7 @@ function downloadExecutableAndRunTests() {
 
         var stream;
         if (isTarGz) {
-            var gulpFilter = filter(['VSCode-linux-x64/code', 'VSCode-linux-x64/resources/app/node_modules/vscode-ripgrep/**/rg'], { restore: true });
+            var gulpFilter = filter(['VSCode-linux-x64/code', 'VSCode-linux-x64/code-insiders', 'VSCode-linux-x64/resources/app/node_modules/vscode-ripgrep/**/rg'], { restore: true });
             stream = request(downloadUrl)
                 .pipe(source(path.basename(downloadUrl)))
                 .pipe(gunzip())
@@ -110,16 +121,16 @@ function getDownloadUrl(clb) {
     }
 
     getTag(function (tag) {
-        return clb(['https://vscode-update.azurewebsites.net', tag, downloadPlatform, 'stable'].join('/'));
+        return clb(['https://vscode-update.azurewebsites.net', tag, downloadPlatform, (isInsiders ? 'insider' : 'stable')].join('/'));
     });
 }
 
 function getTag(clb) {
-    if (version !== '*') {
+    if (version !== '*' && version !== 'insiders') {
         return clb(version);
     }
 
-    shared.getContents('https://vscode-update.azurewebsites.net/api/releases/stable/' + downloadPlatform, null, null, function (error, tagsRaw) {
+    shared.getContents('https://vscode-update.azurewebsites.net/api/releases/' + (isInsiders ? 'insider/' : 'stable/') + downloadPlatform, null, null, function (error, tagsRaw) {
         if (error) {
             exitWithError(error);
         }
