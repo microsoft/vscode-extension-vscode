@@ -26,7 +26,7 @@ var windowsExecutable;
 var darwinExecutable;
 var linuxExecutable;
 
-if(isInsiders) {
+if (isInsiders) {
     windowsExecutable = path.join(testRunFolderAbsolute, 'Code - Insiders');
     darwinExecutable = path.join(testRunFolderAbsolute, 'Visual Studio Code - Insiders.app', 'Contents', 'MacOS', 'Electron');
     linuxExecutable = path.join(testRunFolderAbsolute, 'VSCode-linux-x64', 'code-insiders');
@@ -55,7 +55,7 @@ console.log('### VS Code Extension Test Run ###');
 console.log('Current working directory: ' + process.cwd());
 
 function runTests() {
-    var executable = (process.platform === 'darwin') ? darwinExecutable  : process.platform === 'win32' ? windowsExecutable : linuxExecutable;
+    var executable = (process.platform === 'darwin') ? darwinExecutable : process.platform === 'win32' ? windowsExecutable : linuxExecutable;
     var args = [
         testsWorkspace,
         '--extensionDevelopmentPath=' + extensionsFolder,
@@ -101,9 +101,9 @@ function downloadExecutableAndRunTests() {
                 .pipe(source(path.basename(downloadUrl)))
                 .pipe(gunzip())
                 .pipe(untar())
-				.pipe(gulpFilter)
-				.pipe(chmod(0o755))
-				.pipe(gulpFilter.restore)
+                .pipe(gulpFilter)
+                .pipe(chmod(493)) // 0o755
+                .pipe(gulpFilter.restore)
                 .pipe(symdest(testRunFolder));
         } else {
             stream = remote('', { base: downloadUrl })
