@@ -10,6 +10,9 @@
   "bin": {
     "vscode-install": "./bin/install"
   },
+  "engines": {
+    "node": ">=6.4.0"
+  },
   "dependencies": {
     "glob": "^7.1.2",
     "gulp-chmod": "^2.0.0",
