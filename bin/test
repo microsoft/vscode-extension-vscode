@@ -50,12 +50,12 @@ if (process.env.CODE_TESTS_PATH) {
 
 var testsWorkspace = process.env.CODE_TESTS_WORKSPACE || testsFolder;
 var extensionsFolder = process.env.CODE_EXTENSIONS_PATH || process.cwd();
+var executable = (process.platform === 'darwin') ? darwinExecutable : process.platform === 'win32' ? windowsExecutable : linuxExecutable;
 
 console.log('### VS Code Extension Test Run ###');
 console.log('Current working directory: ' + process.cwd());
 
 function runTests() {
-    var executable = (process.platform === 'darwin') ? darwinExecutable : process.platform === 'win32' ? windowsExecutable : linuxExecutable;
     var args = [
         testsWorkspace,
         '--extensionDevelopmentPath=' + extensionsFolder,
@@ -143,7 +143,7 @@ function getTag(clb) {
     });
 }
 
-fs.exists(testRunFolderAbsolute, function (exists) {
+fs.exists(executable, function (exists) {
     if (exists) {
         runTests();
     } else {
