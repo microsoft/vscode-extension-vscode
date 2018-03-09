@@ -96,7 +96,7 @@ function downloadExecutableAndRunTests() {
 
         var stream;
         if (isTarGz) {
-            var gulpFilter = filter(['VSCode-linux-x64/code', 'VSCode-linux-x64/code-insiders', 'VSCode-linux-x64/resources/app/node_modules/vscode-ripgrep/**/rg'], { restore: true });
+            var gulpFilter = filter(['VSCode-linux-x64/code', 'VSCode-linux-x64/code-insiders', 'VSCode-linux-x64/resources/app/node_modules*/vscode-ripgrep/**/rg'], { restore: true });
             stream = request(downloadUrl)
                 .pipe(source(path.basename(downloadUrl)))
                 .pipe(gunzip())
