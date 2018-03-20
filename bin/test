@@ -27,11 +27,11 @@ var darwinExecutable;
 var linuxExecutable;
 
 if (isInsiders) {
-    windowsExecutable = path.join(testRunFolderAbsolute, 'Code - Insiders');
+    windowsExecutable = path.join(testRunFolderAbsolute, 'Code - Insiders.exe');
     darwinExecutable = path.join(testRunFolderAbsolute, 'Visual Studio Code - Insiders.app', 'Contents', 'MacOS', 'Electron');
     linuxExecutable = path.join(testRunFolderAbsolute, 'VSCode-linux-x64', 'code-insiders');
 } else {
-    windowsExecutable = path.join(testRunFolderAbsolute, 'Code');
+    windowsExecutable = path.join(testRunFolderAbsolute, 'Code.exe');
     darwinExecutable = path.join(testRunFolderAbsolute, 'Visual Studio Code.app', 'Contents', 'MacOS', 'Electron');
     linuxExecutable = path.join(testRunFolderAbsolute, 'VSCode-linux-x64', 'code');
     if (['0.10.1', '0.10.2', '0.10.3', '0.10.4', '0.10.5', '0.10.6', '0.10.7', '0.10.8', '0.10.9'].indexOf(version) >= 0) {
