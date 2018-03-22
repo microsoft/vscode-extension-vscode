@@ -29,5 +29,8 @@ declare module 'vscode/lib/testrunner' {
 
         // colored output from test results
         useColors?: boolean;
+
+        // causes test marked with only to fail the suite
+        forbidOnly?: boolean;
     }
 }
