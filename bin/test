@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-var remote = require('gulp-remote-src');
+var remote = require('gulp-remote-src-vscode');
 var vzip = require('gulp-vinyl-zip');
 var symdest = require('gulp-symdest');
 var untar = require('gulp-untar');
