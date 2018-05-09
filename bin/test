@@ -26,14 +26,28 @@ var windowsExecutable;
 var darwinExecutable;
 var linuxExecutable;
 
+var windowsCommand;
+var darwinCommand;
+var linuxCommand;
+
 if (isInsiders) {
     windowsExecutable = path.join(testRunFolderAbsolute, 'Code - Insiders.exe');
     darwinExecutable = path.join(testRunFolderAbsolute, 'Visual Studio Code - Insiders.app', 'Contents', 'MacOS', 'Electron');
     linuxExecutable = path.join(testRunFolderAbsolute, 'VSCode-linux-x64', 'code-insiders');
+
+    windowsCommand = path.join(testRunFolderAbsolute, 'bin', 'code-insiders.cmd');
+    // Command for macOS is code, not code-insiders
+    darwinCommand = path.join(testRunFolderAbsolute, 'Visual Studio Code.app', 'Contents', 'Resources', 'app', 'bin', 'code');
+    linuxCommand = path.join(testRunFolderAbsolute, 'VSCode-linux-x64', 'bin', 'code-insiders');
 } else {
     windowsExecutable = path.join(testRunFolderAbsolute, 'Code.exe');
     darwinExecutable = path.join(testRunFolderAbsolute, 'Visual Studio Code.app', 'Contents', 'MacOS', 'Electron');
     linuxExecutable = path.join(testRunFolderAbsolute, 'VSCode-linux-x64', 'code');
+
+    windowsCommand = path.join(testRunFolderAbsolute, 'bin', 'code.cmd');
+    darwinCommand = path.join(testRunFolderAbsolute, 'Visual Studio Code.app', 'Contents', 'Resources', 'app', 'bin', 'code');
+    linuxCommand = path.join(testRunFolderAbsolute, 'VSCode-linux-x64', 'bin', 'code');
+
     if (['0.10.1', '0.10.2', '0.10.3', '0.10.4', '0.10.5', '0.10.6', '0.10.7', '0.10.8', '0.10.9'].indexOf(version) >= 0) {
         linuxExecutable = path.join(testRunFolderAbsolute, 'VSCode-linux-x64', 'Code');
     }
@@ -51,11 +65,89 @@ if (process.env.CODE_TESTS_PATH) {
 var testsWorkspace = process.env.CODE_TESTS_WORKSPACE || testsFolder;
 var extensionsFolder = process.env.CODE_EXTENSIONS_PATH || process.cwd();
 var executable = (process.platform === 'darwin') ? darwinExecutable : process.platform === 'win32' ? windowsExecutable : linuxExecutable;
+var codeCommand = (process.platform === 'darwin') ? darwinCommand : process.platform === 'win32' ? windowsCommand : linuxCommand;
 
 console.log('### VS Code Extension Test Run ###');
 console.log('Current working directory: ' + process.cwd());
 
-function runTests() {
+function installDependencies(extensionDependencies, extensionDependencyIndex, clb) {
+    if (extensionDependencyIndex >= extensionDependencies.length) {
+        // Load dependencies
+        var cmd = cp.spawn(executable);
+        setTimeout(() => {
+            cmd.kill('SIGKILL');
+            clb();
+        }, 5000);
+        return;
+    }
+
+    var extension = extensionDependencies[extensionDependencyIndex];
+    if (!extension) {
+        installDependencies(extensionDependencies, extensionDependencyIndex + 1, clb);
+    }
+
+    var args = [
+        '--install-extension',
+        extension
+    ];
+
+    console.log('Installing dependent extension: ' + [codeCommand, args.join(' ')].join(' '));
+
+    var cmd = cp.spawn(codeCommand, args);
+
+    cmd.stdout.on('data', function (data) {
+        console.log(data.toString());
+    });
+
+    cmd.stderr.on('data', function (data) {
+        console.error(data.toString());
+    });
+
+    cmd.on('error', function (data) {
+        console.log('Failed to install dependecy: ' + data.toString());
+    });
+
+    cmd.on('close', function (code) {
+        console.log('Installing dependecy exited with code: ' + code);
+
+        if (code !== 0) {
+            process.exit(code); // propagate exit code to outer runner
+        }
+
+        installDependencies(extensionDependencies, extensionDependencyIndex + 1, clb);
+    });
+}
+
+function getDependecies() {
+    var packageFilePath = path.join(extensionsFolder, 'package.json');
+    if (!fs.existsSync(packageFilePath)) {
+        return[];
+    }
+
+    var package = JSON.parse(fs.readFileSync(packageFilePath));
+    var extensionDependencies = package.extensionDependencies;
+
+    if (!extensionDependencies || !Array.isArray(extensionDependencies) || !extensionDependencies.length) {
+        return[];
+    }
+
+    return extensionDependencies;
+}
+
+function preTest(clb) {
+    if (process.env.CODE_INSTALL_DEPENDENCY) {
+        var extensionDependencies = getDependecies();
+
+        if (extensionDependencies.length !== 0 && fs.existsSync(codeCommand)) {
+            installDependencies(extensionDependencies, 0, clb);
+            return;
+        }
+    }
+
+    clb();
+}
+
+function startTest() {
     var args = [
         testsWorkspace,
         '--extensionDevelopmentPath=' + extensionsFolder,
@@ -85,6 +177,10 @@ function runTests() {
             process.exit(code); // propagate exit code to outer runner
         }
     });
+}
+
+function runTests() {
+    preTest(startTest);
 }
 
 function downloadExecutableAndRunTests() {
