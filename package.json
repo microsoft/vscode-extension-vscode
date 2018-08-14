@@ -1,9 +1,9 @@
 {
   "name": "vscode",
-  "version": "1.1.20",
+  "version": "1.1.21",
   "typings": "vscode.d.ts",
   "scripts": {
-    "prepublish": "tsc -p ./",
+    "prepare": "tsc -p ./",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./"
   },
@@ -26,7 +26,7 @@
     "request": "^2.83.0",
     "semver": "^5.4.1",
     "source-map-support": "^0.5.0",
-    "url-parse": "^1.1.9",
+    "url-parse": "^1.4.3",
     "vinyl-source-stream": "^1.1.0"
   },
   "devDependencies": {
