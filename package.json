@@ -1,6 +1,6 @@
 {
   "name": "vscode",
-  "version": "1.1.21",
+  "version": "1.1.22",
   "typings": "vscode.d.ts",
   "scripts": {
     "prepare": "tsc -p ./",
