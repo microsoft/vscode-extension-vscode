@@ -1,6 +1,6 @@
 {
   "name": "vscode",
-  "version": "1.1.24",
+  "version": "1.1.25",
   "typings": "vscode.d.ts",
   "scripts": {
     "prepare": "tsc -p ./",
@@ -27,6 +27,7 @@
     "semver": "^5.4.1",
     "source-map-support": "^0.5.0",
     "url-parse": "^1.4.3",
+    "vinyl-fs": "^3.0.3",
     "vinyl-source-stream": "^1.1.0"
   },
   "devDependencies": {

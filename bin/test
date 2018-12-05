@@ -2,7 +2,7 @@
 
 var remote = require('gulp-remote-src-vscode');
 var vzip = require('gulp-vinyl-zip');
-var symdest = require('gulp-symdest');
+var vfs = require('vinyl-fs');
 var untar = require('gulp-untar');
 var gunzip = require('gulp-gunzip');
 var chmod = require('gulp-chmod');
@@ -104,11 +104,11 @@ function downloadExecutableAndRunTests() {
                 .pipe(gulpFilter)
                 .pipe(chmod(493)) // 0o755
                 .pipe(gulpFilter.restore)
-                .pipe(symdest(testRunFolder));
+                .pipe(vfs.dest(testRunFolder));
         } else {
             stream = remote('', { base: downloadUrl })
                 .pipe(vzip.src())
-                .pipe(symdest(testRunFolder));
+                .pipe(vfs.dest(testRunFolder));
         }
 
         stream.on('end', runTests);
