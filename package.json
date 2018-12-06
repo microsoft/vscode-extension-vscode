@@ -1,6 +1,6 @@
 {
   "name": "vscode",
-  "version": "1.1.25",
+  "version": "1.1.26",
   "typings": "vscode.d.ts",
   "scripts": {
     "prepare": "tsc -p ./",
@@ -19,7 +19,6 @@
     "gulp-filter": "^5.0.1",
     "gulp-gunzip": "1.0.0",
     "gulp-remote-src-vscode": "^0.5.1",
-    "gulp-symdest": "^1.1.1",
     "gulp-untar": "^0.0.7",
     "gulp-vinyl-zip": "^2.1.2",
     "mocha": "^4.0.1",
