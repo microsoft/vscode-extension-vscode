@@ -50,6 +50,7 @@ if (process.env.CODE_TESTS_PATH) {
 
 var testsWorkspace = process.env.CODE_TESTS_WORKSPACE || testsFolder;
 var extensionsFolder = process.env.CODE_EXTENSIONS_PATH || process.cwd();
+var locale = process.env.CODE_LOCALE || 'en';
 var executable = (process.platform === 'darwin') ? darwinExecutable : process.platform === 'win32' ? windowsExecutable : linuxExecutable;
 
 console.log('### VS Code Extension Test Run ###');
@@ -59,7 +60,8 @@ function runTests() {
     var args = [
         testsWorkspace,
         '--extensionDevelopmentPath=' + extensionsFolder,
-        '--extensionTestsPath=' + testsFolder
+        '--extensionTestsPath=' + testsFolder,
+        '--locale=' + locale,
     ];
 
     console.log('Running extension tests: ' + [executable, args.join(' ')].join(' '));
