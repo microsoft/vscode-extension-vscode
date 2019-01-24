@@ -3,55 +3,123 @@ declare module 'vscode/lib/testrunner' {
 
     interface MochaSetupOptions {
 
-        // milliseconds to wait before considering a test slow
+        /**
+         * Milliseconds to wait before considering a test slow
+         *
+         * @type {Number}
+         */
         slow?: number;
 
-        // enable timeouts?
+        /**
+         * Enable timeouts
+         *
+         * @type {Boolean}
+         */
         enableTimeouts?: boolean;
 
-        // timeout in milliseconds
+        /**
+         * Timeout in milliseconds
+         *
+         * @type {Number}
+         */
         timeout?: number;
 
-        // ui name "bdd", "tdd", "exports" etc
+        /**
+         * UI name "bdd", "tdd", "exports" etc
+         *
+         * @type {String}
+         */
         ui?: string;
 
-        // array of accepted globals
+        /**
+         * Array of accepted globals
+         *
+         * @type {Array} globals
+         */
         globals?: any[];
 
-        // reporter instance (function or string), defaults to `mocha.reporters.Dot`
+        /**
+         * Reporter instance (function or string), defaults to `mocha.reporters.spec`
+         *
+         * @type {String | Function}
+         */
         reporter?: any;
 
-        // reporter settings object
+        /**
+         * Reporter settings object
+         *
+         * @type {Object}
+         */
         reporterOptions?: any;
 
-        // bail on the first test failure
+        /**
+         * Bail on the first test failure
+         *
+         * @type {Boolean}
+         */
         bail?: boolean;
 
-        // ignore global leaks
+        /**
+         * Ignore global leaks
+         *
+         * @type {Boolean}
+         */
         ignoreLeaks?: boolean;
 
-        // grep string or regexp to filter tests with
+        /**
+         * grep string or regexp to filter tests with, if a string it is escaped
+         *
+         * @type {RegExp | String}
+         */
         grep?: any;
 
-        // colored output from test results
+        /**
+         * Use colored output from test results
+         *
+         * @type {Boolean}
+         */
         useColors?: boolean;
 
-        // causes test marked with only to fail the suite
+        /**
+         * Tests marked only fail the suite
+         *
+         * @type {Boolean}
+         */
         forbidOnly?: boolean;
 
-        // pending tests and tests marked skip fail the suite
+        /**
+         * Pending tests and tests marked skip fail the suite
+         *
+         * @type {Boolean}
+         */
         forbidPending?: boolean;
 
-        // number of times to retry failed tests
+        /**
+         * Number of times to retry failed tests
+         *
+         * @type {Number}
+         */
         retries?: number;
 
-        // display the full stack-trace on failing
+        /**
+         * Display long stack-trace on failing
+         *
+         * @type {Boolean}
+         */
         fullStackTrace?: boolean;
 
-        // delay root suite execution
+        /**
+         * Delay root suite execution
+         *
+         * @type {Boolean}
+         */
         delay?: boolean;
 
-        // use inline diffs rather than +/-
+        /**
+         * Use inline diffs rather than +/-
+         *
+         * @type {Boolean}
+         */
         useInlineDiffs?: boolean;
     }
 }
