@@ -64,6 +64,10 @@ function runTests() {
         '--locale=' + locale,
     ];
 
+    if (process.env.CODE_DISABLE_EXTENSIONS) {
+        args.push('--disable-extensions');
+    }
+
     console.log('Running extension tests: ' + [executable, args.join(' ')].join(' '));
 
     var cmd = cp.spawn(executable, args);
