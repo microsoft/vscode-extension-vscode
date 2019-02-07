@@ -1,6 +1,6 @@
 {
   "name": "vscode",
-  "version": "1.1.28",
+  "version": "1.1.29",
   "typings": "vscode.d.ts",
   "scripts": {
     "prepare": "tsc -p ./",
@@ -30,7 +30,7 @@
     "vinyl-source-stream": "^1.1.0"
   },
   "devDependencies": {
-    "@types/node": "^8.10.25",
+    "@types/node": "^10.12.21",
     "@types/mocha": "^2.2.43",
     "@types/glob": "^5.0.33"
   },
