@@ -51,6 +51,7 @@ if (process.env.CODE_TESTS_PATH) {
 var testsWorkspace = process.env.CODE_TESTS_WORKSPACE || testsFolder;
 var extensionsFolder = process.env.CODE_EXTENSIONS_PATH || process.cwd();
 var locale = process.env.CODE_LOCALE || 'en';
+var userDataDir = process.env.CODE_TESTS_DATA_DIR;
 var executable = (process.platform === 'darwin') ? darwinExecutable : process.platform === 'win32' ? windowsExecutable : linuxExecutable;
 
 console.log('### VS Code Extension Test Run ###');
@@ -63,6 +64,10 @@ function runTests() {
         '--extensionTestsPath=' + testsFolder,
         '--locale=' + locale,
     ];
+
+    if (userDataDir) {
+        args.push('--user-data-dir=' + userDataDir);
+    }
 
     if (process.env.CODE_DISABLE_EXTENSIONS) {
         args.push('--disable-extensions');
