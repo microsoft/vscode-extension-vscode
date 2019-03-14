@@ -4,7 +4,7 @@ const path = require('path');
 const cp = require('child_process');
 const fs = require('fs');
 
-const downloadAndUnzipVSCode = require('../lib/download').downloadAndUnzipVSCode
+const downloadAndUnzipVSCode = require('vscode-test').downloadAndUnzipVSCode;
 
 const version = process.env.CODE_VERSION || '*';
 const isInsiders = version === 'insiders';
