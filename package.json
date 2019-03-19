@@ -29,7 +29,7 @@
   "author": "Visual Studio Code Team",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Microsoft/vscode-extension-vscode.git"
+    "url": "https://github.com/Microsoft/vscode.git"
   },
   "bugs": {
     "url": "https://github.com/Microsoft/vscode-extension-vscode/issues"
