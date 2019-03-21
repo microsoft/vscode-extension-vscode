@@ -6,10 +6,10 @@ const fs = require('fs');
 
 const downloadAndUnzipVSCode = require('vscode-test').downloadAndUnzipVSCode;
 
-const version = process.env.CODE_VERSION || '*';
+const version = process.env.CODE_VERSION || '<latest>';
 const isInsiders = version === 'insiders';
 
-const testRunFolder = path.join('.vscode-test', isInsiders ? 'insiders' : 'stable');
+const testRunFolder = path.join('.vscode-test', isInsiders ? 'insiders' : `vscode-${version}`);
 const testRunFolderAbsolute = path.join(process.cwd(), testRunFolder);
 
 let windowsExecutable;
@@ -91,7 +91,9 @@ function runTests() {
 function downloadExecutableAndRunTests() {
     console.log('Downloading VS Code into "' + testRunFolderAbsolute);
 
-    downloadAndUnzipVSCode().then(executablePath => {
+    var targetVersion = (version === '<latest>') ? undefined : version;
+
+    downloadAndUnzipVSCode(targetVersion).then(executablePath => {
         executable = executablePath
         runTests()
     })
