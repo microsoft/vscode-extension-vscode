@@ -31,10 +31,10 @@
   resolved "https://registry.yarnpkg.com/@types/node/-/node-11.11.3.tgz#7c6b0f8eaf16ae530795de2ad1b85d34bf2f5c58"
   integrity sha512-wp6IOGu1lxsfnrD+5mX6qwSwWuqsdkKKxTN4aQc4wByHAKZJf9/D4KXPQ1POUjEbnCP5LMggB0OEFNY9OTsMqg==
 
-"@types/node@^10.12.21":
-  version "10.14.1"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-10.14.1.tgz#8701cd760acc20beba5ffe0b7a1b879f39cb8c41"
-  integrity sha512-Rymt08vh1GaW4vYB6QP61/5m/CFLGnFZP++bJpWbiNxceNa6RBipDmb413jvtSf/R1gg5a/jQVl2jY4XVRscEA==
+"@types/node@8":
+  version "8.10.44"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-8.10.44.tgz#b00cf3595c6a3d75740af9768739a8125053a5a9"
+  integrity sha512-HY3SK7egERHGUfY8p6ztXIEQWcIPHouYhCGcLAPQin7gE2G/fALFz+epnMwcxKUS6aKqTVoAFdi+t1llQd3xcw==
 
 agent-base@4, agent-base@^4.1.0:
   version "4.2.1"
@@ -608,10 +608,10 @@ verror@1.10.0:
     core-util-is "1.0.2"
     extsprintf "^1.2.0"
 
-vscode-test@^0.1.1:
-  version "0.1.1"
-  resolved "https://registry.yarnpkg.com/vscode-test/-/vscode-test-0.1.1.tgz#070fb1bb28ba8c94cbf06be27872a2ce23fa6fc5"
-  integrity sha512-D8C12HR6O/3Bl4Bn+1c6n/J4/nSVtRhzZJ5c97GoB4cOwqFv7AOkuqzosd2iV49eZAGpGw3Qz5Vg9vGjKFaKAA==
+vscode-test@^0.1.4:
+  version "0.1.4"
+  resolved "https://registry.yarnpkg.com/vscode-test/-/vscode-test-0.1.4.tgz#c89bdc5b112839417f684379a2cee6749b9a9e3d"
+  integrity sha512-V1z9ZrX4S0DwDOkZiirmPdYtTadBhG//uAUgqvDnTbZNB5COflJpAqfiA2he8SJPmMdizHa7lmNnM68+Q66NdQ==
   dependencies:
     http-proxy-agent "^2.1.0"
     https-proxy-agent "^2.2.1"
