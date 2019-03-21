@@ -6,29 +6,6 @@ const fs = require('fs');
 
 const downloadAndUnzipVSCode = require('vscode-test').downloadAndUnzipVSCode;
 
-const version = process.env.CODE_VERSION || '<latest>';
-const isInsiders = version === 'insiders';
-
-const testRunFolder = path.join('.vscode-test', isInsiders ? 'vscode-insiders' : `vscode-${version}`);
-const testRunFolderAbsolute = path.join(process.cwd(), testRunFolder);
-
-let windowsExecutable;
-let darwinExecutable;
-let linuxExecutable;
-
-if (isInsiders) {
-    windowsExecutable = path.join(testRunFolderAbsolute, 'Code - Insiders.exe');
-    darwinExecutable = path.join(testRunFolderAbsolute, 'Visual Studio Code - Insiders.app', 'Contents', 'MacOS', 'Electron');
-    linuxExecutable = path.join(testRunFolderAbsolute, 'VSCode-linux-x64', 'code-insiders');
-} else {
-    windowsExecutable = path.join(testRunFolderAbsolute, 'Code.exe');
-    darwinExecutable = path.join(testRunFolderAbsolute, 'Visual Studio Code.app', 'Contents', 'MacOS', 'Electron');
-    linuxExecutable = path.join(testRunFolderAbsolute, 'VSCode-linux-x64', 'code');
-    if (['0.10.1', '0.10.2', '0.10.3', '0.10.4', '0.10.5', '0.10.6', '0.10.7', '0.10.8', '0.10.9'].indexOf(version) >= 0) {
-        linuxExecutable = path.join(testRunFolderAbsolute, 'VSCode-linux-x64', 'Code');
-    }
-}
-
 var testsFolder;
 if (process.env.CODE_TESTS_PATH) {
     testsFolder = process.env.CODE_TESTS_PATH;
@@ -42,7 +19,8 @@ var testsWorkspace = process.env.CODE_TESTS_WORKSPACE || testsFolder;
 var extensionsFolder = process.env.CODE_EXTENSIONS_PATH || process.cwd();
 var locale = process.env.CODE_LOCALE || 'en';
 var userDataDir = process.env.CODE_TESTS_DATA_DIR;
-var executable = (process.platform === 'darwin') ? darwinExecutable : process.platform === 'win32' ? windowsExecutable : linuxExecutable;
+
+let executable;
 
 console.log('### VS Code Extension Test Run ###');
 console.log('Current working directory: ' + process.cwd());
@@ -89,11 +67,7 @@ function runTests() {
 }
 
 function downloadExecutableAndRunTests() {
-    console.log('Downloading VS Code into "' + testRunFolderAbsolute);
-
-    var targetVersion = (version === '<latest>') ? undefined : version;
-
-    downloadAndUnzipVSCode(targetVersion).then(executablePath => {
+    downloadAndUnzipVSCode(process.env.CODE_VERSION).then(executablePath => {
         executable = executablePath
         runTests()
     })
