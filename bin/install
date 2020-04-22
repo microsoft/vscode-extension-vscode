@@ -66,7 +66,7 @@ function getURLMatchingEngine(engine, callback) {
         });
     }
 
-    shared.getContents('https://vscode-update.azurewebsites.net/api/releases/stable', null, { "X-API-Version": "2" }, function (error, tagsRaw) {
+    shared.getContents('https://update.code.visualstudio.com/api/releases/stable', null, { "X-API-Version": "2" }, function (error, tagsRaw) {
         if (error) {
             exitWithError(error);
         }
