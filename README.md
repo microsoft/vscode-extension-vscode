@@ -12,6 +12,12 @@ The `vscode` NPM module provides VS Code extension authors tools to write extens
 
 For more information around extension authoring for VS Code, please see http://code.visualstudio.com/docs/extensions/overview
 
-# License
+## Changes
+
+**1.1.37** | 2020-04-22
+
+- Remove `request` and `url-parse` dependencies. [#154](https://github.com/microsoft/vscode-extension-vscode/issues/154).
+
+## License
 
 [MIT](LICENSE)
