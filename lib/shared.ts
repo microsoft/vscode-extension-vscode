@@ -21,8 +21,8 @@ if (process.env.npm_config_https_proxy) {
 	HTTPS_PROXY_AGENT = new HttpsProxyAgent(process.env.npm_config_https_proxy);
 }
 
-export function getContents(url: string, token?: string, headers?: any, callback?: (err: Error, body?: any) => void) {
-    const options = toRequestOptions(url, token, headers);
+export function getUrlContents(url: string, token?: string, headers?: any, callback?: (err: Error, body?: any) => void) {
+    const options = toHttpRequestOptions(url, token, headers);
 
     https.get(options, res => {
         if (res && res.statusCode >= 400) {
@@ -43,7 +43,7 @@ export function getContents(url: string, token?: string, headers?: any, callback
     });
 }
 
-function toRequestOptions(url: string, token: string | null, headers = { 'user-agent': 'nodejs' }): https.RequestOptions {
+function toHttpRequestOptions(url: string, token: string | null, headers = { 'user-agent': 'nodejs' }): https.RequestOptions {
     const options: https.RequestOptions = parseUrl(url);
 	if (PROXY_AGENT && options.protocol.startsWith('http:')) {
 		options.agent = PROXY_AGENT;
